@@ -48,12 +48,13 @@ function PrivacyPage() {
 
                 <h2 className="text-base font-semibold text-foreground pt-4">1. Information We Collect</h2>
                 <p>
-                  When purchasing from us, we collect the following details:
+                  When purchasing from us or interacting with our storefront, we collect the following details:
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li><strong>Customer Email:</strong> To deliver purchase links and send order transaction details.</li>
+                  <li><strong>Customer Email:</strong> To deliver purchase links, send order transaction details, and link your customer support chat sessions.</li>
                   <li><strong>Payment Information:</strong> Processed directly via Stripe. We do not store credit card or raw payment information on our servers; we only store Stripe Session IDs and Payment Intent IDs to verify transactions.</li>
-                  <li><strong>Anonymous Usage Data:</strong> We generate and store a randomized visitor ID inside your browser's local storage to track checkout initiation, cancellation, and completions for analytics.</li>
+                  <li><strong>Support Chat Communications:</strong> When using our live customer support chat, we store chat message transcripts, the associated visitor ID, and optional emails to maintain the two-way conversation history.</li>
+                  <li><strong>Anonymous Usage Data:</strong> We generate and store a randomized visitor ID inside your browser's local storage to track checkout initiation, cancellation, and completions for analytics, as well as to retrieve your chat history.</li>
                   <li><strong>Checkout Feedback:</strong> If you cancel a checkout session, we collect optional feedback details (such as the reason for cancellation and voluntary comments) to help improve our services.</li>
                 </ul>
 
@@ -64,6 +65,7 @@ function PrivacyPage() {
                 <ul className="list-disc pl-5 space-y-2">
                   <li>Process your transactions and deliver purchased digital products.</li>
                   <li>Generate secure, authenticated access links for product download.</li>
+                  <li>Maintain, process, and respond to support chat communications.</li>
                   <li>Analyze conversion metrics, visitor counts, and storefront performance.</li>
                   <li>Improve customer purchase flows and overall user experience.</li>
                 </ul>
@@ -84,7 +86,7 @@ function PrivacyPage() {
 
                 <h2 className="text-base font-semibold text-foreground pt-4">5. Contact Us</h2>
                 <p>
-                  For privacy-related questions or data deletion requests, please contact: <strong>{settings.fromEmail || "our customer support"}</strong>.
+                  For privacy-related questions or data deletion requests, please contact us via our **Customer Support chat** or email: <strong>{settings.fromEmail || "our customer support"}</strong>.
                 </p>
               </div>
             )}

@@ -66,9 +66,9 @@ function TermsPage() {
                   Products are provided on an "as-is" basis without warranties of any kind. <strong>{shopName}</strong> shall not be liable for any direct, indirect, or incidental damages resulting from the use or inability to use the purchased digital assets.
                 </p>
 
-                <h2 className="text-base font-semibold text-foreground pt-4">5. Contact Information</h2>
+                <h2 className="text-base font-semibold text-foreground pt-4">5. Customer Support & Contact</h2>
                 <p>
-                  If you have any questions regarding your order or these terms, please contact the store administrator at: <strong>{settings.fromEmail || "our customer support"}</strong>.
+                  If you have any questions regarding your order, licensing, or these terms, please reach out to us using our **live Customer Support chat** on the website or contact the store administrator directly at: <strong>{settings.fromEmail || "our customer support"}</strong>.
                 </p>
               </div>
             )}
