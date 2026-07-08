@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createProductFn } from '#/lib/products.functions'
 import { BrandLockup } from '#/components/brand'
+import { FileUpload } from '#/components/file-upload'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
@@ -385,23 +386,26 @@ function StepAddProduct() {
               onChange={(e) => setStripeProductId(e.target.value)}
             />
           </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="ob-image">Image URL</Label>
-            <Input
+          <div className="sm:col-span-2">
+            <FileUpload
               id="ob-image"
-              type="url"
-              placeholder="https://..."
+              label="Product image"
+              blobType="image"
+              accept="image/*"
               value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
+              onChange={setImageUrl}
+              hint="PNG, JPG, WebP up to 50 MB"
             />
           </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="ob-file">File path</Label>
-            <Input
+          <div className="sm:col-span-2">
+            <FileUpload
               id="ob-file"
-              placeholder="uploads/product-file.zip"
+              label="Download file"
+              blobType="file"
+              accept="*"
               value={filePath}
-              onChange={(e) => setFilePath(e.target.value)}
+              onChange={setFilePath}
+              hint="ZIP, PDF, or any file type"
             />
           </div>
         </div>

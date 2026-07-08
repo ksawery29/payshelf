@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { db } from '#/db'
 import { purchase, product } from '#/db/schema'
 import { eq } from 'drizzle-orm'
+import { head } from '@vercel/blob'
 import { BrandLockup } from '#/components/brand'
 import { Card, CardContent, CardFooter } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
@@ -57,6 +59,28 @@ const getAccessFn = createServerFn({ method: 'GET' })
       productImageUrl: row.productImageUrl,
       productFilePath: row.productFilePath,
       customerEmail: row.customerEmail,
+    }
+  })
+
+/**
+ * Generates a short-lived signed download URL for a private Vercel Blob.
+ * Returns the blob URL itself if it's already a public URL (non-private blobs)
+ * so the function works regardless of whether the file was uploaded via
+ * the old manual path or the new Vercel Blob flow.
+ */
+const getSignedDownloadUrlFn = createServerFn({ method: 'POST' })
+  .validator((data: { blobUrl: string }) => data)
+  .handler(async ({ data }) => {
+    const token = process.env.PRIVATE_BLOB_READ_WRITE_TOKEN
+    if (!token) throw new Error('PRIVATE_BLOB_READ_WRITE_TOKEN is not set')
+
+    try {
+      const info = await head(data.blobUrl, { token })
+      // info.downloadUrl is the signed URL for private blobs
+      return { url: info.downloadUrl ?? info.url }
+    } catch {
+      // Not a Vercel Blob URL (legacy path) — return as-is
+      return { url: data.blobUrl }
     }
   })
 
@@ -153,16 +177,7 @@ function AccessPage() {
 
         <CardFooter className="border-t border-border/80 bg-muted/30 p-5 sm:p-6">
           {data.productFilePath ? (
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={() => {
-                window.location.href = data.productFilePath!
-              }}
-            >
-              <Download className="size-4" data-icon="inline-start" />
-              Download file
-            </Button>
+            <DownloadButton filePath={data.productFilePath} />
           ) : (
             <Button className="w-full" size="lg" variant="outline" disabled>
               <FileArchive className="size-4" data-icon="inline-start" />
@@ -250,6 +265,52 @@ function DetailRow({
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <p className="truncate text-sm font-medium">{value}</p>
       </div>
+    </div>
+  )
+}
+
+function DownloadButton({ filePath }: { filePath: string }) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleDownload() {
+    setError('')
+    setLoading(true)
+    try {
+      const result = await getSignedDownloadUrlFn({ data: { blobUrl: filePath } })
+      window.location.href = result.url
+    } catch {
+      setError('Could not generate download link. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="w-full space-y-2">
+      <Button
+        className="w-full"
+        size="lg"
+        onClick={() => void handleDownload()}
+        disabled={loading}
+      >
+        {loading ? (
+          <span className="flex items-center gap-2">
+            <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            Preparing download…
+          </span>
+        ) : (
+          <>
+            <Download className="size-4" data-icon="inline-start" />
+            Download file
+          </>
+        )}
+      </Button>
+      {error && (
+        <p className="text-center text-xs font-medium text-destructive" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { updateProductFn, deleteProductFn } from '#/lib/products.mutations'
 import { getAnalyticsFn } from '#/lib/analytics.functions'
 import { getSettingsFn } from '#/lib/settings.functions'
 import { BrandLockup } from '#/components/brand'
+import { FileUpload } from '#/components/file-upload'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
@@ -765,9 +766,9 @@ function ProductFormFields({
   price: string
   setPrice: (value: string) => void
   imageUrl: string
-  setImageUrl: (value: string) => void
+  setImageUrl: (url: string) => void
   filePath: string
-  setFilePath: (value: string) => void
+  setFilePath: (url: string) => void
   stripeProductId: string
   setStripeProductId: (value: string) => void
   prefix: string
@@ -822,23 +823,26 @@ function ProductFormFields({
             onChange={(e) => setStripeProductId(e.target.value)}
           />
         </div>
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor={`${prefix}-image`}>Image URL</Label>
-          <Input
+        <div className="sm:col-span-2">
+          <FileUpload
             id={`${prefix}-image`}
-            type="url"
-            placeholder="https://..."
+            label="Product image"
+            blobType="image"
+            accept="image/*"
             value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
+            onChange={setImageUrl}
+            hint="PNG, JPG, WebP up to 50 MB"
           />
         </div>
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor={`${prefix}-file`}>File path</Label>
-          <Input
+        <div className="sm:col-span-2">
+          <FileUpload
             id={`${prefix}-file`}
-            placeholder="uploads/product-file.zip"
+            label="Download file"
+            blobType="file"
+            accept="*"
             value={filePath}
-            onChange={(e) => setFilePath(e.target.value)}
+            onChange={setFilePath}
+            hint="ZIP, PDF, or any file type"
           />
         </div>
       </div>

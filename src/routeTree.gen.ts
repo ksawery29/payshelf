@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
 import { Route as CheckoutCancelRouteImport } from './routes/checkout/cancel'
+import { Route as ApiBlobUploadRouteImport } from './routes/api/blob-upload'
 import { Route as AccessTokenRouteImport } from './routes/access/$token'
 import { Route as DashboardSettingsRouteImport } from './routes/_dashboard/settings'
 import { Route as DashboardOnboardingRouteImport } from './routes/_dashboard/onboarding'
@@ -45,6 +46,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
 const CheckoutCancelRoute = CheckoutCancelRouteImport.update({
   id: '/checkout/cancel',
   path: '/checkout/cancel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBlobUploadRoute = ApiBlobUploadRouteImport.update({
+  id: '/api/blob-upload',
+  path: '/api/blob-upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccessTokenRoute = AccessTokenRouteImport.update({
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof DashboardOnboardingRoute
   '/settings': typeof DashboardSettingsRoute
   '/access/$token': typeof AccessTokenRoute
+  '/api/blob-upload': typeof ApiBlobUploadRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof DashboardOnboardingRoute
   '/settings': typeof DashboardSettingsRoute
   '/access/$token': typeof AccessTokenRoute
+  '/api/blob-upload': typeof ApiBlobUploadRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/_dashboard/onboarding': typeof DashboardOnboardingRoute
   '/_dashboard/settings': typeof DashboardSettingsRoute
   '/access/$token': typeof AccessTokenRoute
+  '/api/blob-upload': typeof ApiBlobUploadRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/access/$token'
+    | '/api/blob-upload'
     | '/checkout/cancel'
     | '/checkout/success'
     | '/api/auth/$'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/access/$token'
+    | '/api/blob-upload'
     | '/checkout/cancel'
     | '/checkout/success'
     | '/api/auth/$'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/_dashboard/onboarding'
     | '/_dashboard/settings'
     | '/access/$token'
+    | '/api/blob-upload'
     | '/checkout/cancel'
     | '/checkout/success'
     | '/api/auth/$'
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   AccessTokenRoute: typeof AccessTokenRoute
+  ApiBlobUploadRoute: typeof ApiBlobUploadRoute
   CheckoutCancelRoute: typeof CheckoutCancelRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -231,6 +244,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout/cancel'
       fullPath: '/checkout/cancel'
       preLoaderRoute: typeof CheckoutCancelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/blob-upload': {
+      id: '/api/blob-upload'
+      path: '/api/blob-upload'
+      fullPath: '/api/blob-upload'
+      preLoaderRoute: typeof ApiBlobUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/access/$token': {
@@ -334,6 +354,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   AccessTokenRoute: AccessTokenRoute,
+  ApiBlobUploadRoute: ApiBlobUploadRoute,
   CheckoutCancelRoute: CheckoutCancelRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
