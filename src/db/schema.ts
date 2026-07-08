@@ -126,3 +126,46 @@ export const product = sqliteTable("product", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+// ── Purchases ─────────────────────────────────────────────────────────────
+
+export const purchase = sqliteTable(
+  "purchase",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    productId: text("product_id")
+      .notNull()
+      .references(() => product.id, { onDelete: "cascade" }),
+    customerEmail: text("customer_email").notNull(),
+    stripeSessionId: text("stripe_session_id").notNull().unique(),
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
+    accessToken: text("access_token")
+      .notNull()
+      .unique()
+      .$defaultFn(() => crypto.randomUUID()),
+    status: text("status", { enum: ["active", "refunded", "disputed"] })
+      .notNull()
+      .default("active"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
+  (table) => [
+    index("purchase_productId_idx").on(table.productId),
+    index("purchase_accessToken_idx").on(table.accessToken),
+    index("purchase_stripePaymentIntentId_idx").on(table.stripePaymentIntentId),
+  ],
+);
+
+export const purchaseRelations = relations(purchase, ({ one }) => ({
+  product: one(product, {
+    fields: [purchase.productId],
+    references: [product.id],
+  }),
+}));
+
+export const productRelations = relations(product, ({ many }) => ({
+  purchases: many(purchase),
+}));

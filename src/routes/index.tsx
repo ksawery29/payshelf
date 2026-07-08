@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { listProductsFn } from '#/lib/products.functions'
+import { createCheckoutFn } from '#/lib/checkout.functions'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardFooter } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
@@ -56,6 +58,21 @@ type Product = {
 }
 
 function ProductCard({ product }: { product: Product }) {
+  const [loading, setLoading] = useState(false)
+
+  async function handleBuy() {
+    setLoading(true)
+    try {
+      const result = await createCheckoutFn({ data: { productId: product.id } })
+      if (result.url) {
+        window.location.href = result.url
+      }
+    } catch (err) {
+      console.error('Failed to create checkout session:', err)
+      setLoading(false)
+    }
+  }
+
   return (
     <Card className="overflow-hidden py-0 gap-0">
       {product.imageUrl && (
@@ -81,7 +98,15 @@ function ProductCard({ product }: { product: Product }) {
         <Badge variant="secondary" className="font-mono text-sm">
           {formatPrice(product.priceCents)}
         </Badge>
-        <Button size="sm">Buy</Button>
+        <Button size="sm" onClick={handleBuy} disabled={loading}>
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            </span>
+          ) : (
+            'Buy'
+          )}
+        </Button>
       </CardFooter>
     </Card>
   )
