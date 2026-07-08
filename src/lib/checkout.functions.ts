@@ -43,6 +43,9 @@ export const createCheckoutFn = createServerFn({ method: 'POST' })
       customer_email: undefined, // Let Stripe collect it
       success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/checkout/cancel`,
+      managed_payments: {
+        enabled: true,
+      }
     });
 
     // Fire checkout_initiated event (best-effort, don't block checkout)
