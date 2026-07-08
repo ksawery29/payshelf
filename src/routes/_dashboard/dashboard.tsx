@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { authClient } from '#/lib/auth-client'
 import { listProductsFn, createProductFn } from '#/lib/products.functions'
+import { getAnalyticsFn } from '#/lib/analytics.functions'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
-import { Card, CardContent, CardFooter } from '#/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
 import { Separator } from '#/components/ui/separator'
 import {
@@ -17,10 +18,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '#/components/ui/dialog'
-import { PackageOpen, Plus } from 'lucide-react'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '#/components/ui/chart'
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import { PackageOpen, Plus, TrendingUp, ShoppingBag, CalendarDays, Calendar } from 'lucide-react'
 
 export const Route = createFileRoute('/_dashboard/dashboard')({
-  loader: () => listProductsFn(),
+  loader: async () => {
+    const [products, analytics] = await Promise.all([
+      listProductsFn(),
+      getAnalyticsFn(),
+    ])
+    return { products, analytics }
+  },
   component: DashboardPage,
 })
 
@@ -31,13 +45,32 @@ function formatPrice(cents: number) {
   })
 }
 
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr + 'T00:00:00')
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+const chartConfig = {
+  revenue: {
+    label: 'Revenue',
+    color: 'var(--color-primary)',
+  },
+} satisfies ChartConfig
+
 function DashboardPage() {
   const { data: session } = authClient.useSession()
-  const products = Route.useLoaderData()
+  const { products, analytics } = Route.useLoaderData()
   const router = useRouter()
+
+  const chartData = analytics.chartData.map((d) => ({
+    ...d,
+    revenue: d.revenue / 100, // convert to dollars for display
+    label: formatDate(d.date),
+  }))
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
           <h1 className="font-heading text-lg font-semibold tracking-tight">
@@ -55,9 +88,7 @@ function DashboardPage() {
               onClick={() => {
                 void authClient.signOut({
                   fetchOptions: {
-                    onSuccess: () => {
-                      window.location.href = '/login'
-                    },
+                    onSuccess: () => { window.location.href = '/login' },
                   },
                 })
               }}
@@ -67,71 +98,189 @@ function DashboardPage() {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="font-heading text-xl font-semibold tracking-tight">
-            Products
-          </h2>
-          <CreateProductDialog
-            onCreated={() => router.invalidate()}
-          />
-        </div>
 
-        {products.length === 0 ? (
-          <Card className="flex flex-col items-center gap-4 border-dashed bg-transparent py-24 text-center shadow-none">
-            <PackageOpen className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
-            <div>
-              <h3 className="text-xl font-medium">No products yet</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Create your first product to start selling.
-              </p>
-            </div>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
-              <Card key={product.id} className="overflow-hidden py-0 gap-0">
-                {product.imageUrl && (
-                  <div className="aspect-[4/3] overflow-hidden bg-muted">
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                )}
-                <CardContent className="flex flex-1 flex-col gap-1 px-5 pt-5">
-                  <h3 className="font-medium">{product.name}</h3>
-                  {product.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {product.description}
-                    </p>
-                  )}
-                  {product.filePath && (
-                    <p className="mt-1 truncate text-xs text-muted-foreground/60 font-mono">
-                      {product.filePath}
-                    </p>
-                  )}
-                </CardContent>
-                <Separator />
-                <CardFooter className="flex items-center justify-between px-5 py-4">
-                  <Badge variant="secondary" className="font-mono text-sm">
-                    {formatPrice(product.priceCents)}
-                  </Badge>
-                  {product.stripeProductId ? (
-                    <Badge variant="outline" className="text-xs">
-                      Stripe linked
-                    </Badge>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">No Stripe ID</span>
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 space-y-8">
+
+        {/* ── Analytics ──────────────────────────────────────── */}
+        <section>
+          <h2 className="font-heading text-xl font-semibold tracking-tight mb-4">Overview</h2>
+
+          {/* Stat cards */}
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-6">
+            <StatCard
+              title="Total revenue"
+              value={formatPrice(analytics.totalRevenue)}
+              sub={`${analytics.totalSales} sale${analytics.totalSales === 1 ? '' : 's'}`}
+              icon={<TrendingUp className="size-4 text-muted-foreground" />}
+            />
+            <StatCard
+              title="This month"
+              value={formatPrice(analytics.monthRevenue)}
+              sub={`${analytics.monthSales} sale${analytics.monthSales === 1 ? '' : 's'}`}
+              icon={<Calendar className="size-4 text-muted-foreground" />}
+            />
+            <StatCard
+              title="This week"
+              value={formatPrice(analytics.weekRevenue)}
+              sub={`${analytics.weekSales} sale${analytics.weekSales === 1 ? '' : 's'}`}
+              icon={<CalendarDays className="size-4 text-muted-foreground" />}
+            />
+            <StatCard
+              title="Products"
+              value={String(products.length)}
+              sub="in your shelf"
+              icon={<ShoppingBag className="size-4 text-muted-foreground" />}
+            />
           </div>
-        )}
+
+          {/* Revenue chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-medium">Revenue — last 30 days</CardTitle>
+              <CardDescription>
+                Daily active purchase revenue
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-52 w-full">
+                <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/50" />
+                  <XAxis
+                    dataKey="label"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11 }}
+                    interval="preserveStartEnd"
+                    minTickGap={40}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11 }}
+                    tickFormatter={(v: number) => `$${v}`}
+                  />
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(value) => [
+                          `$${(value as number).toFixed(2)}`,
+                          'Revenue',
+                        ]}
+                      />
+                    }
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="var(--color-primary)"
+                    strokeWidth={2}
+                    fill="url(#revenueGradient)"
+                    dot={false}
+                    activeDot={{ r: 4, strokeWidth: 0 }}
+                  />
+                </AreaChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* ── Products ───────────────────────────────────────── */}
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-heading text-xl font-semibold tracking-tight">
+              Products
+            </h2>
+            <CreateProductDialog onCreated={() => router.invalidate()} />
+          </div>
+
+          {products.length === 0 ? (
+            <Card className="flex flex-col items-center gap-4 border-dashed bg-transparent py-24 text-center shadow-none">
+              <PackageOpen className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
+              <div>
+                <h3 className="text-xl font-medium">No products yet</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Create your first product to start selling.
+                </p>
+              </div>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((product) => (
+                <Card key={product.id} className="overflow-hidden py-0 gap-0">
+                  {product.imageUrl && (
+                    <div className="aspect-[4/3] overflow-hidden bg-muted">
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <CardContent className="flex flex-1 flex-col gap-1 px-5 pt-5">
+                    <h3 className="font-medium">{product.name}</h3>
+                    {product.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {product.description}
+                      </p>
+                    )}
+                    {product.filePath && (
+                      <p className="mt-1 truncate text-xs text-muted-foreground/60 font-mono">
+                        {product.filePath}
+                      </p>
+                    )}
+                  </CardContent>
+                  <Separator />
+                  <CardFooter className="flex items-center justify-between px-5 py-4">
+                    <Badge variant="secondary" className="font-mono text-sm">
+                      {formatPrice(product.priceCents)}
+                    </Badge>
+                    {product.stripeProductId ? (
+                      <Badge variant="outline" className="text-xs">
+                        Stripe linked
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">No Stripe ID</span>
+                    )}
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+
       </main>
     </div>
+  )
+}
+
+function StatCard({
+  title,
+  value,
+  sub,
+  icon,
+}: {
+  title: string
+  value: string
+  sub: string
+  icon: React.ReactNode
+}) {
+  return (
+    <Card>
+      <CardContent className="pt-5 pb-5">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm text-muted-foreground">{title}</p>
+          {icon}
+        </div>
+        <p className="font-heading text-2xl font-semibold tracking-tight">{value}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -148,42 +297,21 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
   const [stripeProductId, setStripeProductId] = useState('')
 
   function resetForm() {
-    setName('')
-    setDescription('')
-    setPrice('')
-    setImageUrl('')
-    setFilePath('')
-    setStripeProductId('')
-    setError('')
+    setName(''); setDescription(''); setPrice('')
+    setImageUrl(''); setFilePath(''); setStripeProductId(''); setError('')
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-
     const priceCents = Math.round(parseFloat(price) * 100)
-    if (isNaN(priceCents) || priceCents <= 0) {
-      setError('Enter a valid price')
-      return
-    }
-
+    if (isNaN(priceCents) || priceCents <= 0) { setError('Enter a valid price'); return }
     setLoading(true)
-
     try {
       await createProductFn({
-        data: {
-          name,
-          description,
-          priceCents,
-          imageUrl: imageUrl || undefined,
-          filePath: filePath || undefined,
-          stripeProductId: stripeProductId || undefined,
-        },
+        data: { name, description, priceCents, imageUrl: imageUrl || undefined, filePath: filePath || undefined, stripeProductId: stripeProductId || undefined },
       })
-
-      resetForm()
-      setOpen(false)
-      onCreated()
+      resetForm(); setOpen(false); onCreated()
     } catch {
       setError('Failed to create product. Please try again.')
     } finally {
@@ -200,9 +328,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>New product</DialogTitle>
-          <DialogDescription>
-            Add a digital product to your shelf.
-          </DialogDescription>
+          <DialogDescription>Add a digital product to your shelf.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
@@ -213,79 +339,37 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
             )}
             <div className="space-y-2">
               <Label htmlFor="product-name">Name *</Label>
-              <Input
-                id="product-name"
-                placeholder="e.g. Notion Template Pack"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                autoFocus
-              />
+              <Input id="product-name" placeholder="e.g. Notion Template Pack" value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
             </div>
             <div className="space-y-2">
               <Label htmlFor="product-description">Description</Label>
-              <Input
-                id="product-description"
-                placeholder="A short description of the product"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
+              <Input id="product-description" placeholder="A short description of the product" value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="product-price">Price (USD) *</Label>
-              <Input
-                id="product-price"
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="19.00"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-              />
+              <Input id="product-price" type="number" step="0.01" min="0.01" placeholder="19.00" value={price} onChange={(e) => setPrice(e.target.value)} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="product-image">Image URL</Label>
-              <Input
-                id="product-image"
-                type="url"
-                placeholder="https://..."
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
+              <Input id="product-image" type="url" placeholder="https://..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="product-file">File path</Label>
-              <Input
-                id="product-file"
-                placeholder="uploads/my-file.zip"
-                value={filePath}
-                onChange={(e) => setFilePath(e.target.value)}
-              />
+              <Input id="product-file" placeholder="uploads/my-file.zip" value={filePath} onChange={(e) => setFilePath(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="product-stripe">Stripe Product ID</Label>
-              <Input
-                id="product-stripe"
-                placeholder="prod_..."
-                value={stripeProductId}
-                onChange={(e) => setStripeProductId(e.target.value)}
-              />
+              <Input id="product-stripe" placeholder="prod_..." value={stripeProductId} onChange={(e) => setStripeProductId(e.target.value)} />
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="submit"
-              disabled={loading}
-            >
+            <Button type="submit" disabled={loading}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   Creating…
                 </span>
-              ) : (
-                'Create product'
-              )}
+              ) : 'Create product'}
             </Button>
           </DialogFooter>
         </form>
