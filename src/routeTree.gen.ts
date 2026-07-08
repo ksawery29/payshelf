@@ -18,6 +18,7 @@ import { Route as AccessTokenRouteImport } from './routes/access/$token'
 import { Route as DashboardSettingsRouteImport } from './routes/_dashboard/settings'
 import { Route as DashboardOnboardingRouteImport } from './routes/_dashboard/onboarding'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard/dashboard'
+import { Route as DashboardAnalyticsRouteImport } from './routes/_dashboard/analytics'
 import { Route as AuthSetupRouteImport } from './routes/_auth/setup'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
@@ -66,6 +67,11 @@ const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const AuthSetupRoute = AuthSetupRouteImport.update({
   id: '/setup',
   path: '/setup',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/setup': typeof AuthSetupRoute
+  '/analytics': typeof DashboardAnalyticsRoute
   '/dashboard': typeof DashboardDashboardRoute
   '/onboarding': typeof DashboardOnboardingRoute
   '/settings': typeof DashboardSettingsRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
   '/setup': typeof AuthSetupRoute
+  '/analytics': typeof DashboardAnalyticsRoute
   '/dashboard': typeof DashboardDashboardRoute
   '/onboarding': typeof DashboardOnboardingRoute
   '/settings': typeof DashboardSettingsRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/_dashboard': typeof DashboardRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/setup': typeof AuthSetupRoute
+  '/_dashboard/analytics': typeof DashboardAnalyticsRoute
   '/_dashboard/dashboard': typeof DashboardDashboardRoute
   '/_dashboard/onboarding': typeof DashboardOnboardingRoute
   '/_dashboard/settings': typeof DashboardSettingsRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/setup'
+    | '/analytics'
     | '/dashboard'
     | '/onboarding'
     | '/settings'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/setup'
+    | '/analytics'
     | '/dashboard'
     | '/onboarding'
     | '/settings'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/_dashboard'
     | '/_auth/login'
     | '/_auth/setup'
+    | '/_dashboard/analytics'
     | '/_dashboard/dashboard'
     | '/_dashboard/onboarding'
     | '/_dashboard/settings'
@@ -249,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/analytics': {
+      id: '/_dashboard/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof DashboardAnalyticsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_auth/setup': {
       id: '/_auth/setup'
       path: '/setup'
@@ -293,12 +312,14 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface DashboardRouteChildren {
+  DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
   DashboardDashboardRoute: typeof DashboardDashboardRoute
   DashboardOnboardingRoute: typeof DashboardOnboardingRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAnalyticsRoute: DashboardAnalyticsRoute,
   DashboardDashboardRoute: DashboardDashboardRoute,
   DashboardOnboardingRoute: DashboardOnboardingRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,

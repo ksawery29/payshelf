@@ -168,6 +168,8 @@ export const purchaseRelations = relations(purchase, ({ one }) => ({
 
 export const productRelations = relations(product, ({ many }) => ({
   purchases: many(purchase),
+  analyticsEvents: many(analyticsEvent),
+  cancelFeedbacks: many(cancelFeedback),
 }));
 
 // ── Shop Settings ──────────────────────────────────────────────────────────
@@ -184,3 +186,80 @@ export const shopSettings = sqliteTable("shop_settings", {
     .notNull(),
 });
 
+// ── Analytics Events ───────────────────────────────────────────────────────
+
+export const analyticsEvent = sqliteTable(
+  "analytics_event",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    event: text("event", {
+      enum: [
+        "page_view",
+        "checkout_initiated",
+        "checkout_completed",
+        "checkout_cancelled",
+      ],
+    }).notNull(),
+    productId: text("product_id").references(() => product.id, {
+      onDelete: "set null",
+    }),
+    visitorId: text("visitor_id"), // anonymous localStorage UUID
+    metadata: text("metadata"), // JSON blob for any extra fields
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
+  (table) => [
+    index("analytics_event_event_createdAt_idx").on(table.event, table.createdAt),
+    index("analytics_event_productId_event_idx").on(table.productId, table.event),
+    index("analytics_event_visitorId_idx").on(table.visitorId),
+  ],
+);
+
+export const analyticsEventRelations = relations(analyticsEvent, ({ one }) => ({
+  product: one(product, {
+    fields: [analyticsEvent.productId],
+    references: [product.id],
+  }),
+}));
+
+// ── Cancel Feedback ────────────────────────────────────────────────────────
+
+export const cancelFeedback = sqliteTable(
+  "cancel_feedback",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    visitorId: text("visitor_id"),
+    productId: text("product_id").references(() => product.id, {
+      onDelete: "set null",
+    }),
+    reason: text("reason", {
+      enum: [
+        "too_expensive",
+        "just_browsing",
+        "found_alternative",
+        "trust",
+        "other",
+      ],
+    }).notNull(),
+    comment: text("comment"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
+  (table) => [
+    index("cancel_feedback_productId_idx").on(table.productId),
+    index("cancel_feedback_reason_idx").on(table.reason),
+  ],
+);
+
+export const cancelFeedbackRelations = relations(cancelFeedback, ({ one }) => ({
+  product: one(product, {
+    fields: [cancelFeedback.productId],
+    references: [product.id],
+  }),
+}));

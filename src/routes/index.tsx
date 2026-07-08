@@ -1,52 +1,60 @@
-import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { listProductsFn } from '#/lib/products.functions'
-import { getSettingsFn } from '#/lib/settings.functions'
-import { createCheckoutFn } from '#/lib/checkout.functions'
-import { BrandLockup } from '#/components/brand'
-import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardFooter } from '#/components/ui/card'
-import { Badge } from '#/components/ui/badge'
-import {
-  ArrowRight,
-  LockKeyhole,
-  PackageOpen,
-  ShieldCheck,
-  ShoppingBag,
-} from 'lucide-react'
+import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { listProductsFn } from "#/lib/products.functions";
+import { getSettingsFn } from "#/lib/settings.functions";
+import { createCheckoutFn } from "#/lib/checkout.functions";
+import { trackEventFn, getOrCreateVisitorId } from "#/lib/events.functions";
+import { BrandLockup } from "#/components/brand";
+import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardFooter } from "#/components/ui/card";
+import { Badge } from "#/components/ui/badge";
+import { ArrowRight, PackageOpen } from "lucide-react";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   loader: async () => {
-    const [products, settings] = await Promise.all([listProductsFn(), getSettingsFn()])
-    return { products, settings }
+    const [products, settings] = await Promise.all([
+      listProductsFn(),
+      getSettingsFn(),
+    ]);
+    return { products, settings };
   },
   component: Home,
-})
+});
 
 function formatPrice(cents: number) {
-  return (cents / 100).toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  })
+  return (cents / 100).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
 }
 
 type Product = {
-  id: string
-  name: string
-  description: string
-  priceCents: number
-  imageUrl: string | null
-}
+  id: string;
+  name: string;
+  description: string;
+  priceCents: number;
+  imageUrl: string | null;
+};
 
 function Home() {
-  const { products, settings } = Route.useLoaderData()
+  const { products, settings } = Route.useLoaderData();
+
+  // Fire a page_view event once on mount (anonymous, best-effort)
+  useEffect(() => {
+    const visitorId = getOrCreateVisitorId();
+    void trackEventFn({ data: { event: "page_view", visitorId } });
+  }, []);
 
   return (
     <div className="min-h-[100dvh] bg-background">
       <header className="border-b border-border/80 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <BrandLockup shopName={settings.shopName} />
-          <Button variant="outline" size="sm" onClick={() => (window.location.href = '/login')}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => (window.location.href = "/login")}
+          >
             Seller login
           </Button>
         </div>
@@ -70,25 +78,28 @@ function Home() {
         )}
       </main>
     </div>
-  )
+  );
 }
 
 function ProductCard({ product }: { product: Product }) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleBuy() {
-    setError('')
-    setLoading(true)
+    setError("");
+    setLoading(true);
     try {
-      const result = await createCheckoutFn({ data: { productId: product.id } })
+      const visitorId = getOrCreateVisitorId();
+      const result = await createCheckoutFn({
+        data: { productId: product.id, visitorId },
+      });
       if (result.url) {
-        window.location.href = result.url
+        window.location.href = result.url;
       }
     } catch (err) {
-      console.error('Failed to create checkout session:', err)
-      setError('Checkout could not be started. Please try again.')
-      setLoading(false)
+      console.error("Failed to create checkout session:", err);
+      setError("Checkout could not be started. Please try again.");
+      setLoading(false);
     }
   }
 
@@ -147,13 +158,16 @@ function ProductCard({ product }: { product: Product }) {
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }
 
 function EmptyShelf() {
   return (
     <Card className="items-center border-dashed bg-card/70 py-16 text-center">
-      <PackageOpen className="size-10 text-muted-foreground" strokeWidth={1.5} />
+      <PackageOpen
+        className="size-10 text-muted-foreground"
+        strokeWidth={1.5}
+      />
       <CardContent className="max-w-md">
         <h2 className="font-heading text-2xl font-semibold tracking-tight">
           The shelf is empty
@@ -163,9 +177,12 @@ function EmptyShelf() {
           checkout.
         </p>
       </CardContent>
-      <Button variant="outline" onClick={() => (window.location.href = '/login')}>
+      <Button
+        variant="outline"
+        onClick={() => (window.location.href = "/login")}
+      >
         Go to dashboard
       </Button>
     </Card>
-  )
+  );
 }

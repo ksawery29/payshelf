@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { stripe } from '#/lib/stripe'
 import { db } from '#/db'
-import { purchase, product } from '#/db/schema'
+import { purchase, product, analyticsEvent } from '#/db/schema'
 import { eq } from 'drizzle-orm'
 import { sendPurchaseEmail } from '#/lib/email'
 
@@ -86,6 +86,17 @@ export const Route = createFileRoute('/api/stripe/webhook')({
                 prod.name,
                 newPurchase.accessToken,
               )
+
+              // Fire checkout_completed event (best-effort)
+              try {
+                await db.insert(analyticsEvent).values({
+                  event: 'checkout_completed',
+                  productId: productId,
+                  visitorId: null,
+                })
+              } catch (err) {
+                console.warn('[Payshelf] Failed to record checkout_completed event:', err)
+              }
 
               console.log('[Payshelf] Purchase created:', newPurchase.id)
               break
