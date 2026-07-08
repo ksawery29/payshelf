@@ -265,3 +265,47 @@ export const cancelFeedbackRelations = relations(cancelFeedback, ({ one }) => ({
     references: [product.id],
   }),
 }));
+
+// ── Support Chats ─────────────────────────────────────────────────────────
+
+export const supportChat = sqliteTable("support_chat", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  visitorId: text("visitor_id").notNull(),
+  customerEmail: text("customer_email"),
+  status: text("status", { enum: ["open", "closed"] }).notNull().default("open"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const supportMessage = sqliteTable("support_message", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  chatId: text("chat_id")
+    .notNull()
+    .references(() => supportChat.id, { onDelete: "cascade" }),
+  sender: text("sender", { enum: ["customer", "agent"] }).notNull(),
+  content: text("content").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
+});
+
+export const supportChatRelations = relations(supportChat, ({ many }) => ({
+  messages: many(supportMessage),
+}));
+
+export const supportMessageRelations = relations(supportMessage, ({ one }) => ({
+  chat: one(supportChat, {
+    fields: [supportMessage.chatId],
+    references: [supportChat.id],
+  }),
+}));
+

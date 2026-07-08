@@ -52,7 +52,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-export const Route = createFileRoute("/_dashboard/dashboard")({
+export const Route = createFileRoute("/_dashboard/dashboard/")({
   loader: async () => {
     const [products, analytics, settings] = await Promise.all([
       listProductsFn(),
@@ -135,6 +135,12 @@ function DashboardPage() {
                 className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 Analytics
+              </a>
+              <a
+                href="/dashboard/support"
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                Support
               </a>
               <a
                 href="/settings"

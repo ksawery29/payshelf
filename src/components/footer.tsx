@@ -17,6 +17,9 @@ export function Footer({ shopName }: { shopName?: string | null }) {
           <Link to="/privacy" className="hover:text-foreground transition-colors">
             Privacy Policy
           </Link>
+          <Link to="/support" className="hover:text-foreground transition-colors">
+            Customer Support
+          </Link>
         </div>
       </div>
     </footer>

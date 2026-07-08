@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as AuthRouteImport } from './routes/_auth'
@@ -20,16 +21,22 @@ import { Route as ApiBlobUploadRouteImport } from './routes/api/blob-upload'
 import { Route as AccessTokenRouteImport } from './routes/access/$token'
 import { Route as DashboardSettingsRouteImport } from './routes/_dashboard/settings'
 import { Route as DashboardOnboardingRouteImport } from './routes/_dashboard/onboarding'
-import { Route as DashboardDashboardRouteImport } from './routes/_dashboard/dashboard'
 import { Route as DashboardAnalyticsRouteImport } from './routes/_dashboard/analytics'
 import { Route as AuthSetupRouteImport } from './routes/_auth/setup'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard/dashboard/index'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as DashboardDashboardSupportRouteImport } from './routes/_dashboard/dashboard/support'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -80,11 +87,6 @@ const DashboardOnboardingRoute = DashboardOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -100,6 +102,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const DashboardDashboardIndexRoute = DashboardDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   id: '/api/stripe/webhook',
   path: '/api/stripe/webhook',
@@ -110,40 +117,50 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardDashboardSupportRoute =
+  DashboardDashboardSupportRouteImport.update({
+    id: '/dashboard/support',
+    path: '/dashboard/support',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/login': typeof AuthLoginRoute
   '/setup': typeof AuthSetupRoute
   '/analytics': typeof DashboardAnalyticsRoute
-  '/dashboard': typeof DashboardDashboardRoute
   '/onboarding': typeof DashboardOnboardingRoute
   '/settings': typeof DashboardSettingsRoute
   '/access/$token': typeof AccessTokenRoute
   '/api/blob-upload': typeof ApiBlobUploadRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/dashboard/': typeof DashboardDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/login': typeof AuthLoginRoute
   '/setup': typeof AuthSetupRoute
   '/analytics': typeof DashboardAnalyticsRoute
-  '/dashboard': typeof DashboardDashboardRoute
   '/onboarding': typeof DashboardOnboardingRoute
   '/settings': typeof DashboardSettingsRoute
   '/access/$token': typeof AccessTokenRoute
   '/api/blob-upload': typeof ApiBlobUploadRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/dashboard': typeof DashboardDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -151,74 +168,82 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_dashboard': typeof DashboardRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/setup': typeof AuthSetupRoute
   '/_dashboard/analytics': typeof DashboardAnalyticsRoute
-  '/_dashboard/dashboard': typeof DashboardDashboardRoute
   '/_dashboard/onboarding': typeof DashboardOnboardingRoute
   '/_dashboard/settings': typeof DashboardSettingsRoute
   '/access/$token': typeof AccessTokenRoute
   '/api/blob-upload': typeof ApiBlobUploadRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/_dashboard/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/privacy'
+    | '/support'
     | '/terms'
     | '/login'
     | '/setup'
     | '/analytics'
-    | '/dashboard'
     | '/onboarding'
     | '/settings'
     | '/access/$token'
     | '/api/blob-upload'
     | '/checkout/cancel'
     | '/checkout/success'
+    | '/dashboard/support'
     | '/api/auth/$'
     | '/api/stripe/webhook'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/privacy'
+    | '/support'
     | '/terms'
     | '/login'
     | '/setup'
     | '/analytics'
-    | '/dashboard'
     | '/onboarding'
     | '/settings'
     | '/access/$token'
     | '/api/blob-upload'
     | '/checkout/cancel'
     | '/checkout/success'
+    | '/dashboard/support'
     | '/api/auth/$'
     | '/api/stripe/webhook'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_auth'
     | '/_dashboard'
     | '/privacy'
+    | '/support'
     | '/terms'
     | '/_auth/login'
     | '/_auth/setup'
     | '/_dashboard/analytics'
-    | '/_dashboard/dashboard'
     | '/_dashboard/onboarding'
     | '/_dashboard/settings'
     | '/access/$token'
     | '/api/blob-upload'
     | '/checkout/cancel'
     | '/checkout/success'
+    | '/_dashboard/dashboard/support'
     | '/api/auth/$'
     | '/api/stripe/webhook'
+    | '/_dashboard/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -226,6 +251,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
+  SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   AccessTokenRoute: typeof AccessTokenRoute
   ApiBlobUploadRoute: typeof ApiBlobUploadRoute
@@ -242,6 +268,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -314,13 +347,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardOnboardingRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/_dashboard/dashboard': {
-      id: '/_dashboard/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardDashboardRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/_dashboard/analytics': {
       id: '/_dashboard/analytics'
       path: '/analytics'
@@ -342,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_dashboard/dashboard/': {
+      id: '/_dashboard/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardDashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
       path: '/api/stripe/webhook'
@@ -355,6 +388,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_dashboard/dashboard/support': {
+      id: '/_dashboard/dashboard/support'
+      path: '/dashboard/support'
+      fullPath: '/dashboard/support'
+      preLoaderRoute: typeof DashboardDashboardSupportRouteImport
+      parentRoute: typeof DashboardRoute
     }
   }
 }
@@ -373,16 +413,18 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface DashboardRouteChildren {
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
-  DashboardDashboardRoute: typeof DashboardDashboardRoute
   DashboardOnboardingRoute: typeof DashboardOnboardingRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
+  DashboardDashboardSupportRoute: typeof DashboardDashboardSupportRoute
+  DashboardDashboardIndexRoute: typeof DashboardDashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
-  DashboardDashboardRoute: DashboardDashboardRoute,
   DashboardOnboardingRoute: DashboardOnboardingRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
+  DashboardDashboardSupportRoute: DashboardDashboardSupportRoute,
+  DashboardDashboardIndexRoute: DashboardDashboardIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
@@ -394,6 +436,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
+  SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   AccessTokenRoute: AccessTokenRoute,
   ApiBlobUploadRoute: ApiBlobUploadRoute,

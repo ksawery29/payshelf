@@ -169,6 +169,14 @@ function CheckoutCancelPage() {
                   >
                     Skip — back to store
                   </Button>
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => (window.location.href = '/support')}
+                    className="text-muted-foreground/80 text-xs h-auto py-1"
+                  >
+                    Need help? Contact customer support
+                  </Button>
                 </div>
               </form>
             </CardContent>
@@ -187,9 +195,14 @@ function CheckoutCancelPage() {
                   It helps improve the store. Come back whenever you're ready.
                 </p>
               </div>
-              <Button variant="outline" onClick={() => (window.location.href = '/')}>
-                Back to store
-              </Button>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button variant="outline" onClick={() => (window.location.href = '/')}>
+                  Back to store
+                </Button>
+                <Button variant="ghost" onClick={() => (window.location.href = '/support')}>
+                  Contact support
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}

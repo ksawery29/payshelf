@@ -52,9 +52,14 @@ function CheckoutSuccessPage() {
                 Delivery can take a minute if your inbox is filtering new mail.
               </p>
             </div>
-            <Button variant="outline" onClick={() => (window.location.href = '/')}>
-              Back to store
-            </Button>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button variant="outline" onClick={() => (window.location.href = '/')}>
+                Back to store
+              </Button>
+              <Button variant="ghost" onClick={() => (window.location.href = '/support')}>
+                Customer support
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </main>
