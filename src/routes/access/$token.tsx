@@ -1,14 +1,14 @@
-import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import { db } from '#/db'
-import { purchase, product } from '#/db/schema'
-import { eq } from 'drizzle-orm'
-import { issueSignedToken, presignUrl } from '@vercel/blob'
-import { BrandLockup } from '#/components/brand'
-import { Card, CardContent, CardFooter } from '#/components/ui/card'
-import { Badge } from '#/components/ui/badge'
-import { Button } from '#/components/ui/button'
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import { db } from "#/db";
+import { purchase, product } from "#/db/schema";
+import { eq } from "drizzle-orm";
+import { issueSignedToken, presignUrl } from "@vercel/blob";
+import { BrandLockup } from "#/components/brand";
+import { Card, CardContent, CardFooter } from "#/components/ui/card";
+import { Badge } from "#/components/ui/badge";
+import { Button } from "#/components/ui/button";
 import {
   AlertTriangle,
   Download,
@@ -16,9 +16,9 @@ import {
   Mail,
   ShieldCheck,
   ShieldX,
-} from 'lucide-react'
+} from "lucide-react";
 
-const getAccessFn = createServerFn({ method: 'GET' })
+const getAccessFn = createServerFn({ method: "GET" })
   .validator((data: { token: string }) => data)
   .handler(async ({ data }) => {
     const results = await db
@@ -34,21 +34,21 @@ const getAccessFn = createServerFn({ method: 'GET' })
       .from(purchase)
       .innerJoin(product, eq(purchase.productId, product.id))
       .where(eq(purchase.accessToken, data.token))
-      .limit(1)
+      .limit(1);
 
     if (results.length === 0) {
-      return { found: false as const }
+      return { found: false as const };
     }
 
-    const row = results[0]
+    const row = results[0];
 
-    if (row.status !== 'active') {
+    if (row.status !== "active") {
       return {
         found: true as const,
         revoked: true as const,
-        reason: row.status as 'refunded' | 'disputed',
+        reason: row.status as "refunded" | "disputed",
         productName: row.productName,
-      }
+      };
     }
 
     return {
@@ -59,8 +59,8 @@ const getAccessFn = createServerFn({ method: 'GET' })
       productImageUrl: row.productImageUrl,
       productFilePath: row.productFilePath,
       customerEmail: row.customerEmail,
-    }
-  })
+    };
+  });
 
 /**
  * Generates a short-lived presigned download URL for a private Vercel Blob.
@@ -68,45 +68,46 @@ const getAccessFn = createServerFn({ method: 'GET' })
  * download directly from Vercel's CDN with a time-limited signed URL.
  * Falls back to returning the URL as-is for legacy (non-blob) paths.
  */
-const getSignedDownloadUrlFn = createServerFn({ method: 'POST' })
+const getSignedDownloadUrlFn = createServerFn({ method: "POST" })
   .validator((data: { blobUrl: string }) => data)
   .handler(async ({ data }) => {
-    const rwToken = process.env.PRIVATE_BLOB_READ_WRITE_TOKEN
-    if (!rwToken) throw new Error('PRIVATE_BLOB_READ_WRITE_TOKEN is not set')
+    const rwToken = process.env.PRIVATE_BLOB_READ_WRITE_TOKEN;
+    if (!rwToken) throw new Error("PRIVATE_BLOB_READ_WRITE_TOKEN is not set");
 
     // Only attempt presigning for Vercel Blob private URLs
-    if (!data.blobUrl.includes('.private.blob.vercel-storage.com')) {
-      return { url: data.blobUrl }
+    if (!data.blobUrl.includes(".private.blob.vercel-storage.com")) {
+      return { url: data.blobUrl };
     }
 
     // Extract the pathname from the blob URL (strip the host)
-    const { pathname } = new URL(data.blobUrl)
+    const { pathname } = new URL(data.blobUrl);
 
     // Step 1: issue a short-lived signed token scoped to this file
     const signedToken = await issueSignedToken({
       pathname,
-      operations: ['get'],
+      operations: ["get"],
       validUntil: Date.now() + 5 * 60 * 1000, // 5 minutes
       token: rwToken,
-    })
+    });
 
     // Step 2: generate the presigned URL the browser will redirect to
     const { presignedUrl } = await presignUrl(signedToken, {
       pathname,
       operation: 'get',
       validUntil: Date.now() + 5 * 60 * 1000,
-    })
+      access: 'private',
+    } as any);
 
-    return { url: presignedUrl }
-  })
+    return { url: presignedUrl };
+  });
 
-export const Route = createFileRoute('/access/$token')({
+export const Route = createFileRoute("/access/$token")({
   loader: ({ params }) => getAccessFn({ data: { token: params.token } }),
   component: AccessPage,
-})
+});
 
 function AccessPage() {
-  const data = Route.useLoaderData()
+  const data = Route.useLoaderData();
 
   if (!data.found) {
     return (
@@ -117,7 +118,7 @@ function AccessPage() {
           description="This access link is invalid or has expired."
         />
       </AccessShell>
-    )
+    );
   }
 
   if (data.revoked) {
@@ -127,10 +128,10 @@ function AccessPage() {
           icon={<ShieldX className="size-7" strokeWidth={1.8} />}
           tone="destructive"
           title="Access revoked"
-          description={`Your access to ${data.productName} was revoked because of a ${data.reason === 'refunded' ? 'refund' : 'payment dispute'}.`}
+          description={`Your access to ${data.productName} was revoked because of a ${data.reason === "refunded" ? "refund" : "payment dispute"}.`}
         />
       </AccessShell>
-    )
+    );
   }
 
   return (
@@ -203,7 +204,7 @@ function AccessPage() {
         </CardFooter>
       </Card>
     </AccessShell>
-  )
+  );
 }
 
 function AccessShell({ children }: { children: React.ReactNode }) {
@@ -221,28 +222,28 @@ function AccessShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
     </div>
-  )
+  );
 }
 
 function AccessState({
   icon,
   title,
   description,
-  tone = 'muted',
+  tone = "muted",
 }: {
-  icon: React.ReactNode
-  title: string
-  description: string
-  tone?: 'muted' | 'destructive'
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  tone?: "muted" | "destructive";
 }) {
   return (
     <Card className="w-full max-w-lg bg-card/95 text-center">
       <CardContent className="flex flex-col items-center gap-5 py-12">
         <span
           className={
-            tone === 'destructive'
-              ? 'flex size-14 items-center justify-center rounded-lg bg-destructive/10 text-destructive'
-              : 'flex size-14 items-center justify-center rounded-lg bg-muted text-muted-foreground'
+            tone === "destructive"
+              ? "flex size-14 items-center justify-center rounded-lg bg-destructive/10 text-destructive"
+              : "flex size-14 items-center justify-center rounded-lg bg-muted text-muted-foreground"
           }
         >
           {icon}
@@ -255,12 +256,12 @@ function AccessState({
             {description}
           </p>
         </div>
-        <Button variant="outline" onClick={() => (window.location.href = '/')}>
+        <Button variant="outline" onClick={() => (window.location.href = "/")}>
           Back to store
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function DetailRow({
@@ -268,9 +269,9 @@ function DetailRow({
   label,
   value,
 }: {
-  icon: React.ReactNode
-  label: string
-  value: string
+  icon: React.ReactNode;
+  label: string;
+  value: string;
 }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-border/80 bg-background/70 p-3">
@@ -282,23 +283,25 @@ function DetailRow({
         <p className="truncate text-sm font-medium">{value}</p>
       </div>
     </div>
-  )
+  );
 }
 
 function DownloadButton({ filePath }: { filePath: string }) {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleDownload() {
-    setError('')
-    setLoading(true)
+    setError("");
+    setLoading(true);
     try {
-      const result = await getSignedDownloadUrlFn({ data: { blobUrl: filePath } })
-      window.location.href = result.url
+      const result = await getSignedDownloadUrlFn({
+        data: { blobUrl: filePath },
+      });
+      window.location.href = result.url;
     } catch {
-      setError('Could not generate download link. Please try again.')
+      setError("Could not generate download link. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -323,10 +326,13 @@ function DownloadButton({ filePath }: { filePath: string }) {
         )}
       </Button>
       {error && (
-        <p className="text-center text-xs font-medium text-destructive" role="alert">
+        <p
+          className="text-center text-xs font-medium text-destructive"
+          role="alert"
+        >
           {error}
         </p>
       )}
     </div>
-  )
+  );
 }
