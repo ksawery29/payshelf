@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { getSessionFn } from '#/lib/auth.server'
+import { getSessionFn } from '#/lib/auth.functions'
 
 export const Route = createFileRoute('/_dashboard')({
   beforeLoad: async () => {
