@@ -25,15 +25,7 @@ export const createCheckoutFn = createServerFn({ method: 'POST' })
       mode: 'payment',
       line_items: [
         {
-          price_data: {
-            currency: 'usd',
-            unit_amount: prod.priceCents,
-            product_data: {
-              name: prod.name,
-              description: prod.description || undefined,
-              images: prod.imageUrl ? [prod.imageUrl] : undefined,
-            },
-          },
+          price: prod.stripeProductId!,
           quantity: 1,
         },
       ],
