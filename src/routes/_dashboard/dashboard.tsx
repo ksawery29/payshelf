@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { authClient } from '#/lib/auth-client'
 import { listProductsFn, createProductFn } from '#/lib/products.functions'
+import { updateProductFn, deleteProductFn } from '#/lib/products.mutations'
 import { getAnalyticsFn } from '#/lib/analytics.functions'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -223,7 +224,13 @@ function DashboardPage() {
                     </div>
                   )}
                   <CardContent className="flex flex-1 flex-col gap-1 px-5 pt-5">
-                    <h3 className="font-medium">{product.name}</h3>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-medium">{product.name}</h3>
+                      <div className="flex gap-1 shrink-0">
+                        <EditProductDialog product={product} onUpdated={() => router.invalidate()} />
+                        <DeleteProductButton id={product.id} onDeleted={() => router.invalidate()} />
+                      </div>
+                    </div>
                     {product.description && (
                       <p className="text-sm text-muted-foreground">
                         {product.description}
@@ -377,3 +384,134 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
     </Dialog>
   )
 }
+
+interface ProductType {
+  id: string
+  name: string
+  description: string
+  priceCents: number
+  imageUrl: string | null
+  filePath: string | null
+  stripeProductId: string | null
+}
+
+function EditProductDialog({ product, onUpdated }: { product: ProductType; onUpdated: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const [name, setName] = useState(product.name)
+  const [description, setDescription] = useState(product.description || '')
+  const [price, setPrice] = useState((product.priceCents / 100).toString())
+  const [imageUrl, setImageUrl] = useState(product.imageUrl || '')
+  const [filePath, setFilePath] = useState(product.filePath || '')
+  const [stripeProductId, setStripeProductId] = useState(product.stripeProductId || '')
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    const priceCents = Math.round(parseFloat(price) * 100)
+    if (isNaN(priceCents) || priceCents <= 0) { setError('Enter a valid price'); return }
+    setLoading(true)
+    try {
+      await updateProductFn({
+        data: {
+          id: product.id,
+          name,
+          description,
+          priceCents,
+          imageUrl: imageUrl || undefined,
+          filePath: filePath || undefined,
+          stripeProductId: stripeProductId || undefined
+        },
+      })
+      setOpen(false)
+      onUpdated()
+    } catch {
+      setError('Failed to update product. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button variant="ghost" size="xs" />}>
+        Edit
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Edit product</DialogTitle>
+          <DialogDescription>Modify your product's details.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4 py-4">
+            {error && (
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Name *</Label>
+              <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Input id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-price">Price (USD) *</Label>
+              <Input id="edit-price" type="number" step="0.01" min="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-image">Image URL</Label>
+              <Input id="edit-image" type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-file">File path</Label>
+              <Input id="edit-file" value={filePath} onChange={(e) => setFilePath(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-stripe">Stripe Product ID</Label>
+              <Input id="edit-stripe" value={stripeProductId} onChange={(e) => setStripeProductId(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Saving…' : 'Save changes'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function DeleteProductButton({ id, onDeleted }: { id: string; onDeleted: () => void }) {
+  const [loading, setLoading] = useState(false)
+
+  async function handleDelete() {
+    if (!confirm('Are you sure you want to delete this product?')) return
+    setLoading(true)
+    try {
+      await deleteProductFn({ data: { id } })
+      onDeleted()
+    } catch {
+      alert('Failed to delete product.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Button
+      variant="destructive"
+      size="xs"
+      onClick={handleDelete}
+      disabled={loading}
+    >
+      {loading ? 'Deleting…' : 'Delete'}
+    </Button>
+  )
+}
+
