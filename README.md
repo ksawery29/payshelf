@@ -46,86 +46,97 @@ bun install
 
 ### 2. Create a Turso database
 
-```bash
-# Install the Turso CLI
-curl -sSfL https://get.tur.so/install.sh | bash
+<details>
+<summary><strong>Option A — CLI</strong></summary>
 
-turso auth login
-turso db create payshelf
-turso db show payshelf           # note the URL
-turso db tokens create payshelf  # note the auth token
+Install the [Turso CLI](https://docs.turso.tech/cli/introduction):
+
+```bash
+curl -sSfL https://get.tur.so/install.sh | bash
 ```
 
-### 3. Configure environment variables
+Log in and create a database:
 
-Copy and fill in the values:
+```bash
+turso auth login
+turso db create payshelf
+```
+
+Get your connection details:
+
+```bash
+turso db show payshelf           # copy the URL (libsql://...)
+turso db tokens create payshelf  # copy the auth token
+```
+
+</details>
+
+<details>
+<summary><strong>Option B — Dashboard</strong></summary>
+
+1. Go to [turso.tech](https://turso.tech/) and sign up (free tier is fine)
+2. Click **Create Database** → name it `payshelf` → pick the closest region → **Create**
+3. On the database page, click **Connect** or **Get connection string** — copy the `libsql://...` URL
+4. Under **Tokens** (or in the connect modal), click **Generate Token** — copy it
+
+You now have `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`.
+
+</details>
+
+### 3. Get a Stripe API key
+
+<details>
+<summary><strong>Option A — CLI</strong></summary>
+
+If you have the [Stripe CLI](https://stripe.com/docs/stripe-cli) installed:
+
+```bash
+stripe login
+```
+
+Then find your secret key:
+
+```bash
+stripe config --list   # look for "test_mode_api_key"
+```
+
+Or just grab it from the dashboard (see Option B).
+
+</details>
+
+<details>
+<summary><strong>Option B — Dashboard</strong></summary>
+
+1. Go to [dashboard.stripe.com](https://dashboard.stripe.com/) and sign in (or create a free account)
+2. Make sure **Test mode** is toggled on (top-right switch)
+3. Go to **Developers → API keys**
+4. Copy the **Secret key** (starts with `sk_test_...`)
+
+That's your `STRIPE_SECRET_KEY`.
+
+</details>
+
+### 4. Get a Resend API key
+
+<details>
+<summary><strong>Dashboard setup</strong></summary>
+
+1. Go to [resend.com](https://resend.com/) and sign up
+2. Go to **API Keys** → **Create API Key** → name it `payshelf` → **Create**
+3. Copy the key (starts with `re_...`) — that's your `RESEND_API_KEY`
+4. *(Optional)* Go to **Domains** → **Add Domain** → follow the DNS steps to send from your own address. Until then, use the default `onboarding@resend.dev`
+
+</details>
+
+### 5. Configure environment variables
+
+Create your `.env.local`:
 
 ```bash
 cp .env.example .env.local
 ```
 
-| Variable | Description |
-|---|---|
-| `TURSO_DATABASE_URL` | Your Turso database URL (`libsql://...`) |
-| `TURSO_AUTH_TOKEN` | Turso database auth token |
-| `BETTER_AUTH_SECRET` | Long random secret — run `openssl rand -base64 32` |
-| `BETTER_AUTH_URL` | Your app's public URL (e.g. `https://payshelf.vercel.app`) |
-| `STRIPE_SECRET_KEY` | Stripe secret key from the Stripe Dashboard |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret (see step 6) |
-| `RESEND_API_KEY` | Resend API key |
-| `RESEND_FROM_EMAIL` | Verified sender address (e.g. `Store <hello@yourdomain.com>`) |
-| `APP_URL` | Your app's public URL — used in magic-link emails |
-
-### 4. Push the database schema
-
-```bash
-bunx drizzle-kit push
-```
-
-This creates all tables in your Turso database.
-
-### 5. Run locally
-
-```bash
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000). Navigate to `/setup` to create your admin account, then follow the onboarding flow.
-
-### 6. Set up the Stripe webhook
-
-**Locally (for testing)** — install the [Stripe CLI](https://stripe.com/docs/stripe-cli) and forward events:
-
-```bash
-stripe login
-stripe listen --forward-to localhost:3000/api/stripe/webhook
-```
-
-Copy the signing secret printed by the CLI and set it as `STRIPE_WEBHOOK_SECRET`.
-
-**In production:**
-
-1. Go to **Stripe Dashboard → Developers → Webhooks → Add endpoint**
-2. Set the URL to `https://your-app.vercel.app/api/stripe/webhook`
-3. Select these events:
-   - `checkout.session.completed`
-   - `charge.refunded`
-   - `charge.dispute.created`
-4. Copy the **Signing secret** → set as `STRIPE_WEBHOOK_SECRET`
-
-### 7. Deploy to Vercel
-
-Connect your GitHub repo at [vercel.com/new](https://vercel.com/new) and add all environment variables in **Settings → Environment Variables**.
-
-Or via CLI:
-
-```bash
-npx vercel
-```
-
----
-
-## Environment variables reference
+Fill it in with the values from the previous steps:
 
 ```env
 # Database (Turso)
@@ -134,19 +145,107 @@ TURSO_AUTH_TOKEN=your-turso-auth-token
 
 # Auth (Better Auth)
 BETTER_AUTH_SECRET=your-long-random-secret
-BETTER_AUTH_URL=https://your-app.vercel.app
+BETTER_AUTH_URL=http://localhost:3000
 
 # Stripe
-STRIPE_SECRET_KEY=sk_live_...
+STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
 # Email (Resend)
 RESEND_API_KEY=re_...
-RESEND_FROM_EMAIL=Your Store <hello@yourdomain.com>
+RESEND_FROM_EMAIL=My Store <onboarding@resend.dev>
 
 # App
-APP_URL=https://your-app.vercel.app
+APP_URL=http://localhost:3000
 ```
+
+> **Tip:** Generate `BETTER_AUTH_SECRET` with `openssl rand -base64 32`.
+> You'll set `STRIPE_WEBHOOK_SECRET` in step 7 below.
+
+### 6. Push the database schema
+
+```bash
+bunx drizzle-kit push
+```
+
+This creates all tables in your Turso database.
+
+### 7. Set up the Stripe webhook
+
+<details>
+<summary><strong>Option A — CLI (recommended for local dev)</strong></summary>
+
+Install the [Stripe CLI](https://stripe.com/docs/stripe-cli), then:
+
+```bash
+stripe login
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+```
+
+The CLI prints a signing secret like `whsec_...` — copy it and set it as `STRIPE_WEBHOOK_SECRET` in `.env.local`.
+
+Keep this terminal running while you develop.
+
+</details>
+
+<details>
+<summary><strong>Option B — Dashboard (for production)</strong></summary>
+
+1. Go to **[Stripe Dashboard → Developers → Webhooks](https://dashboard.stripe.com/webhooks)**
+2. Click **Add endpoint**
+3. Set the **Endpoint URL** to `https://your-app.vercel.app/api/stripe/webhook`
+4. Under **Select events to listen to**, click **Select events** and add:
+   - `checkout.session.completed`
+   - `charge.refunded`
+   - `charge.dispute.created`
+5. Click **Add endpoint**
+6. On the endpoint page, click **Reveal** under **Signing secret** — copy it
+7. Add it as `STRIPE_WEBHOOK_SECRET` in your Vercel environment variables
+
+</details>
+
+### 8. Run locally
+
+```bash
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Navigate to `/setup` to create your admin account, then follow the onboarding flow.
+
+### 9. Deploy to Vercel
+
+<details>
+<summary><strong>Option A — CLI</strong></summary>
+
+```bash
+npx vercel
+```
+
+Then add environment variables:
+
+```bash
+vercel env add TURSO_DATABASE_URL
+vercel env add TURSO_AUTH_TOKEN
+# ... repeat for all variables
+```
+
+Or just paste them all in the Vercel dashboard (see Option B).
+
+</details>
+
+<details>
+<summary><strong>Option B — Dashboard</strong></summary>
+
+1. Push your code to GitHub
+2. Go to [vercel.com/new](https://vercel.com/new)
+3. Click **Import** next to your `payshelf` repo
+4. Before deploying, go to **Settings → Environment Variables**
+5. Add each variable from your `.env.local` (swap `localhost:3000` for your Vercel URL in `BETTER_AUTH_URL` and `APP_URL`)
+6. Click **Deploy**
+
+After deploying, update `BETTER_AUTH_URL` and `APP_URL` to your production URL (e.g. `https://payshelf.vercel.app`).
+
+</details>
 
 ---
 
