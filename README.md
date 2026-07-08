@@ -1,241 +1,165 @@
-Welcome to your new TanStack Start app! 
+# Payshelf
 
-# Getting Started
+A minimal, self-hosted digital storefront. Sell digital products (eBooks, templates, presets, courses) via Stripe Checkout. Buyers receive a magic-link email to download their purchase. Access is revoked automatically on refund or dispute.
 
-To run this application:
+Built with [TanStack Start](https://tanstack.com/start), [Better Auth](https://www.better-auth.com/), [Drizzle ORM](https://orm.drizzle.team/), [Turso](https://turso.tech/), [Stripe](https://stripe.com/), and [Resend](https://resend.com/).
 
-```bash
-npm install
-npm run dev
-```
+---
 
-# Building For Production
+## Features
 
-To build this application for production:
+- 🛒 **Public storefront** — product grid with Stripe Checkout
+- 🔐 **Single-admin dashboard** — protected by Better Auth; first user to sign up owns the store
+- 📦 **Product management** — create, edit, and delete products with Stripe Product ID linking
+- 📊 **Analytics** — total revenue, weekly/monthly sales, 30-day revenue chart
+- 📧 **Magic link delivery** — purchase confirmation email with a one-click download link
+- 🔁 **Automated access revocation** — webhook revokes access on refund or dispute
+- ⚙️ **Shop settings** — customize store name, tagline, and sender email from the dashboard
+- 🧭 **Onboarding flow** — step-by-step guide for new admins
 
-```bash
-npm run build
-```
+---
 
-## Testing
+## Stack
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+| Layer | Technology |
+|---|---|
+| Framework | TanStack Start (React, SSR) |
+| Auth | Better Auth |
+| Database | Turso (LibSQL / SQLite) |
+| ORM | Drizzle ORM |
+| Payments | Stripe Checkout + Webhooks |
+| Email | Resend |
+| Deployment | Vercel |
+| Styling | Tailwind CSS v4 + shadcn/ui |
 
-```bash
-npm run test
-```
+---
 
-## Styling
+## Setup
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `npm install @tailwindcss/vite tailwindcss -D`
-
-
-## Deploy with Nitro
-
-This project uses Nitro as a generic server adapter, so it can run on any Node-compatible host.
+### 1. Clone and install
 
 ```bash
-npm run build
-node dist/server/index.mjs
+git clone https://github.com/your-username/payshelf.git
+cd payshelf
+bun install
 ```
 
-The build output is a self-contained Node server. To deploy, push the `dist/` directory to your host (Render, Fly.io, your own VPS, etc.) and run the server command above.
-
-For host-specific presets (Vercel, Netlify, Cloudflare, AWS Lambda, etc.) and tuning, see https://v3.nitro.build/deploy.
-
-
-## Setting up Better Auth
-
-1. Generate and set the `BETTER_AUTH_SECRET` environment variable in your `.env.local`:
-
-   ```bash
-   npx -y @better-auth/cli secret
-   ```
-
-2. Visit the [Better Auth documentation](https://www.better-auth.com) to unlock the full potential of authentication in your app.
-
-### Adding a Database (Optional)
-
-Better Auth can work in stateless mode, but to persist user data, add a database:
-
-```typescript
-// src/lib/auth.ts
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-
-export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  // ... rest of config
-});
-```
-
-Then run migrations:
+### 2. Create a Turso database
 
 ```bash
-npx -y @better-auth/cli migrate
+# Install the Turso CLI
+curl -sSfL https://get.tur.so/install.sh | bash
+
+turso auth login
+turso db create payshelf
+turso db show payshelf           # note the URL
+turso db tokens create payshelf  # note the auth token
 ```
 
+### 3. Configure environment variables
 
+Copy and fill in the values:
 
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
+```bash
+cp .env.example .env.local
 ```
 
-Then anywhere in your JSX you can use it like so:
+| Variable | Description |
+|---|---|
+| `TURSO_DATABASE_URL` | Your Turso database URL (`libsql://...`) |
+| `TURSO_AUTH_TOKEN` | Turso database auth token |
+| `BETTER_AUTH_SECRET` | Long random secret — run `openssl rand -base64 32` |
+| `BETTER_AUTH_URL` | Your app's public URL (e.g. `https://payshelf.vercel.app`) |
+| `STRIPE_SECRET_KEY` | Stripe secret key from the Stripe Dashboard |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret (see step 6) |
+| `RESEND_API_KEY` | Resend API key |
+| `RESEND_FROM_EMAIL` | Verified sender address (e.g. `Store <hello@yourdomain.com>`) |
+| `APP_URL` | Your app's public URL — used in magic-link emails |
 
-```tsx
-<Link to="/about">About</Link>
+### 4. Push the database schema
+
+```bash
+bunx drizzle-kit push
 ```
 
-This will create a link that will navigate to the `/about` route.
+This creates all tables in your Turso database.
 
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
+### 5. Run locally
 
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
+```bash
+bun dev
 ```
 
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
+Open [http://localhost:3000](http://localhost:3000). Navigate to `/setup` to create your admin account, then follow the onboarding flow.
 
-## Server Functions
+### 6. Set up the Stripe webhook
 
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
+**Locally (for testing)** — install the [Stripe CLI](https://stripe.com/docs/stripe-cli) and forward events:
 
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
+```bash
+stripe login
+stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
-## API Routes
+Copy the signing secret printed by the CLI and set it as `STRIPE_WEBHOOK_SECRET`.
 
-You can create API routes by using the `server` property in your route definitions:
+**In production:**
 
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
+1. Go to **Stripe Dashboard → Developers → Webhooks → Add endpoint**
+2. Set the URL to `https://your-app.vercel.app/api/stripe/webhook`
+3. Select these events:
+   - `checkout.session.completed`
+   - `charge.refunded`
+   - `charge.dispute.created`
+4. Copy the **Signing secret** → set as `STRIPE_WEBHOOK_SECRET`
 
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
+### 7. Deploy to Vercel
+
+Connect your GitHub repo at [vercel.com/new](https://vercel.com/new) and add all environment variables in **Settings → Environment Variables**.
+
+Or via CLI:
+
+```bash
+npx vercel
 ```
 
-## Data Fetching
+---
 
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
+## Environment variables reference
 
-For example:
+```env
+# Database (Turso)
+TURSO_DATABASE_URL=libsql://your-db.turso.io
+TURSO_AUTH_TOKEN=your-turso-auth-token
 
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
+# Auth (Better Auth)
+BETTER_AUTH_SECRET=your-long-random-secret
+BETTER_AUTH_URL=https://your-app.vercel.app
 
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
+# Stripe
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
+# Email (Resend)
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=Your Store <hello@yourdomain.com>
+
+# App
+APP_URL=https://your-app.vercel.app
 ```
 
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
+---
 
-# Demo files
+## Usage
 
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
+1. Sign up at `/setup` (only works once — redirects to `/login` after)
+2. Complete onboarding to add your first product and link a Stripe Product ID
+3. Customers visit `/` to browse and purchase
+4. After payment they receive a magic-link email to download their file
+5. Manage products, view analytics, and update branding from `/dashboard` and `/settings`
 
-# Learn More
+---
 
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+## License
 
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+MIT © Ksawery
