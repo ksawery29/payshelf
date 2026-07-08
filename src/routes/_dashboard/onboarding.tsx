@@ -280,7 +280,7 @@ function StepAddProduct() {
   const [price, setPrice] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [filePath, setFilePath] = useState('');
-  const [stripeProductId, setStripeProductId] = useState('');
+  const [stripePriceId, setStripePriceId] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -301,7 +301,7 @@ function StepAddProduct() {
           priceCents,
           imageUrl: imageUrl || undefined,
           filePath: filePath || undefined,
-          stripeProductId: stripeProductId || undefined,
+          stripePriceId: stripePriceId || undefined,
         },
       });
       window.location.href = '/dashboard';
@@ -366,12 +366,12 @@ function StepAddProduct() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ob-stripe">Stripe Product ID</Label>
+            <Label htmlFor="ob-stripe">Stripe Price ID</Label>
             <Input
               id="ob-stripe"
-              placeholder="prod_..."
-              value={stripeProductId}
-              onChange={(e) => setStripeProductId(e.target.value)}
+              placeholder="price_..."
+              value={stripePriceId}
+              onChange={(e) => setStripePriceId(e.target.value)}
             />
           </div>
           <div className="sm:col-span-2">

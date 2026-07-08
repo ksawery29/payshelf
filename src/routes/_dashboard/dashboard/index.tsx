@@ -93,7 +93,7 @@ interface ProductType {
   priceCents: number;
   imageUrl: string | null;
   filePath: string | null;
-  stripeProductId: string | null;
+  stripePriceId: string | null;
 }
 
 function DashboardPage() {
@@ -107,7 +107,7 @@ function DashboardPage() {
     label: formatDate(d.date),
   }));
 
-  const linkedProducts = products.filter((product) => product.stripeProductId).length;
+  const linkedProducts = products.filter((product) => product.stripePriceId).length;
   const downloadableProducts = products.filter((product) => product.filePath).length;
 
   return (
@@ -465,8 +465,8 @@ function ProductManagementCard({
         <div className="grid gap-2 text-xs text-muted-foreground">
           <StatusRow
             icon={<Link2 className="size-3.5" />}
-            label={product.stripeProductId ? product.stripeProductId : 'Stripe ID missing'}
-            ready={Boolean(product.stripeProductId)}
+            label={product.stripePriceId ? product.stripePriceId : 'Stripe Price ID missing'}
+            ready={Boolean(product.stripePriceId)}
           />
           <StatusRow
             icon={<FileArchive className="size-3.5" />}
@@ -481,10 +481,10 @@ function ProductManagementCard({
           {formatPrice(product.priceCents)}
         </Badge>
         <Badge
-          variant={product.stripeProductId ? 'outline' : 'secondary'}
-          className={product.stripeProductId ? 'text-emerald-700' : ''}
+          variant={product.stripePriceId ? 'outline' : 'secondary'}
+          className={product.stripePriceId ? 'text-emerald-700' : ''}
         >
-          {product.stripeProductId ? 'Checkout ready' : 'Draft'}
+          {product.stripePriceId ? 'Checkout ready' : 'Draft'}
         </Badge>
       </CardFooter>
     </Card>
@@ -534,7 +534,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
   const [price, setPrice] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [filePath, setFilePath] = useState('');
-  const [stripeProductId, setStripeProductId] = useState('');
+  const [stripePriceId, setStripePriceId] = useState('');
 
   function resetForm() {
     setName('');
@@ -542,7 +542,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
     setPrice('');
     setImageUrl('');
     setFilePath('');
-    setStripeProductId('');
+    setStripePriceId('');
     setError('');
   }
 
@@ -563,7 +563,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
           priceCents,
           imageUrl: imageUrl || undefined,
           filePath: filePath || undefined,
-          stripeProductId: stripeProductId || undefined,
+          stripePriceId: stripePriceId || undefined,
         },
       });
       resetForm();
@@ -608,8 +608,8 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
             setImageUrl={setImageUrl}
             filePath={filePath}
             setFilePath={setFilePath}
-            stripeProductId={stripeProductId}
-            setStripeProductId={setStripeProductId}
+            stripePriceId={stripePriceId}
+            setStripePriceId={setStripePriceId}
             prefix="product"
           />
           <DialogFooter className="pt-6">
@@ -646,7 +646,7 @@ function EditProductDialog({
   const [price, setPrice] = useState((product.priceCents / 100).toString());
   const [imageUrl, setImageUrl] = useState(product.imageUrl || '');
   const [filePath, setFilePath] = useState(product.filePath || '');
-  const [stripeProductId, setStripeProductId] = useState(product.stripeProductId || '');
+  const [stripePriceId, setStripePriceId] = useState(product.stripePriceId || '');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -666,7 +666,7 @@ function EditProductDialog({
           priceCents,
           imageUrl: imageUrl || undefined,
           filePath: filePath || undefined,
-          stripeProductId: stripeProductId || undefined,
+          stripePriceId: stripePriceId || undefined,
         },
       });
       setOpen(false);
@@ -707,8 +707,8 @@ function EditProductDialog({
             setImageUrl={setImageUrl}
             filePath={filePath}
             setFilePath={setFilePath}
-            stripeProductId={stripeProductId}
-            setStripeProductId={setStripeProductId}
+            stripePriceId={stripePriceId}
+            setStripePriceId={setStripePriceId}
             prefix="edit"
           />
           <DialogFooter className="pt-6">
@@ -734,8 +734,8 @@ function ProductFormFields({
   setImageUrl,
   filePath,
   setFilePath,
-  stripeProductId,
-  setStripeProductId,
+  stripePriceId,
+  setStripePriceId,
   prefix,
 }: {
   error: string;
@@ -749,8 +749,8 @@ function ProductFormFields({
   setImageUrl: (url: string) => void;
   filePath: string;
   setFilePath: (url: string) => void;
-  stripeProductId: string;
-  setStripeProductId: (value: string) => void;
+  stripePriceId: string;
+  setStripePriceId: (value: string) => void;
   prefix: string;
 }) {
   return (
@@ -795,12 +795,12 @@ function ProductFormFields({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor={`${prefix}-stripe`}>Stripe Product ID</Label>
+          <Label htmlFor={`${prefix}-stripe`}>Stripe Price ID</Label>
           <Input
             id={`${prefix}-stripe`}
-            placeholder="prod_..."
-            value={stripeProductId}
-            onChange={(e) => setStripeProductId(e.target.value)}
+            placeholder="price_..."
+            value={stripePriceId}
+            onChange={(e) => setStripePriceId(e.target.value)}
           />
         </div>
         <div className="sm:col-span-2">

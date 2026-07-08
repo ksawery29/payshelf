@@ -20,12 +20,16 @@ export const createCheckoutFn = createServerFn({ method: 'POST' })
       throw new Error('Product not found');
     }
 
-    // Create checkout session with dynamic price
+    if (!prod.stripePriceId) {
+      throw new Error('Stripe Price ID is missing for this product');
+    }
+
+    // Create checkout session with static price
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [
         {
-          price: prod.stripeProductId!,
+          price: prod.stripePriceId,
           quantity: 1,
         },
       ],

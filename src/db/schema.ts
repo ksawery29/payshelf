@@ -110,7 +110,7 @@ export const product = sqliteTable('product', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  stripeProductId: text('stripe_product_id'),
+  stripePriceId: text('stripe_price_id'),
   name: text('name').notNull(),
   description: text('description').notNull().default(''),
   priceCents: integer('price_cents').notNull(),

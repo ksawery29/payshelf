@@ -15,7 +15,7 @@ export const updateProductFn = createServerFn({ method: 'POST' })
       priceCents: number;
       imageUrl?: string;
       filePath?: string;
-      stripeProductId?: string;
+      stripePriceId?: string;
     }) => data
   )
   .handler(async ({ data }) => {
@@ -27,7 +27,7 @@ export const updateProductFn = createServerFn({ method: 'POST' })
         priceCents: data.priceCents,
         imageUrl: data.imageUrl || null,
         filePath: data.filePath || null,
-        stripeProductId: data.stripeProductId || null,
+        stripePriceId: data.stripePriceId || null,
       })
       .where(eq(product.id, data.id))
       .returning();
