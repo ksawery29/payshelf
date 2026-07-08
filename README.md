@@ -168,7 +168,9 @@ APP_URL=http://localhost:3000
 bunx drizzle-kit push
 ```
 
-This creates all tables in your Turso database.
+This creates the tables in your local or remote Turso database. 
+
+> **Vercel Automatic Deployments:** You don't need to manually run this in production! The database schema sync is automatically run on every Vercel build using the environment variables you configure in the dashboard.
 
 ### 7. Set up the Stripe webhook
 
