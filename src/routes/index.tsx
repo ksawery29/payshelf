@@ -9,6 +9,7 @@ import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardFooter } from "#/components/ui/card";
 import { Badge } from "#/components/ui/badge";
 import { ArrowRight, PackageOpen } from "lucide-react";
+import { Footer } from "#/components/footer";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
@@ -46,7 +47,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="min-h-[100dvh] bg-background">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       <header className="border-b border-border/80 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <BrandLockup shopName={settings.shopName} />
@@ -62,7 +63,7 @@ function Home() {
 
       <main
         id="main-content"
-        className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
+        className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8"
       >
         {products.length === 0 ? (
           <EmptyShelf />
@@ -77,6 +78,8 @@ function Home() {
           </section>
         )}
       </main>
+
+      <Footer shopName={settings.shopName} />
     </div>
   );
 }

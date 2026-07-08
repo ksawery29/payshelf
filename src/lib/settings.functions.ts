@@ -30,6 +30,8 @@ export const saveSettingsFn = createServerFn({ method: 'POST' })
       shopName: string
       shopTagline?: string
       fromEmail?: string
+      termsOfService?: string
+      privacyPolicy?: string
     }) => data,
   )
   .handler(async ({ data }) => {
@@ -40,6 +42,8 @@ export const saveSettingsFn = createServerFn({ method: 'POST' })
         shopName: data.shopName,
         shopTagline: data.shopTagline || null,
         fromEmail: data.fromEmail || null,
+        termsOfService: data.termsOfService || null,
+        privacyPolicy: data.privacyPolicy || null,
       })
       .onConflictDoUpdate({
         target: shopSettings.id,
@@ -47,6 +51,8 @@ export const saveSettingsFn = createServerFn({ method: 'POST' })
           shopName: data.shopName,
           shopTagline: data.shopTagline || null,
           fromEmail: data.fromEmail || null,
+          termsOfService: data.termsOfService || null,
+          privacyPolicy: data.privacyPolicy || null,
         },
       })
       .returning()

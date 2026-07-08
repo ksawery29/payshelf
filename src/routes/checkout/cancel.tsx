@@ -7,8 +7,14 @@ import { Label } from '#/components/ui/label'
 import { Input } from '#/components/ui/input'
 import { CircleX, CircleCheck } from 'lucide-react'
 import { trackEventFn, submitCancelFeedbackFn, getOrCreateVisitorId } from '#/lib/events.functions'
+import { getSettingsFn } from '#/lib/settings.functions'
+import { Footer } from '#/components/footer'
 
 export const Route = createFileRoute('/checkout/cancel')({
+  loader: async () => {
+    const settings = await getSettingsFn()
+    return { settings }
+  },
   component: CheckoutCancelPage,
 })
 
@@ -23,6 +29,7 @@ const REASONS: { value: Reason; label: string }[] = [
 ]
 
 function CheckoutCancelPage() {
+  const { settings } = Route.useLoaderData()
   const [stage, setStage] = useState<'form' | 'thanks'>('form')
   const [selected, setSelected] = useState<Reason | null>(null)
   const [comment, setComment] = useState('')
@@ -58,15 +65,15 @@ function CheckoutCancelPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-background">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       <header className="border-b border-border/80 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-5xl items-center px-4 sm:px-6">
-          <BrandLockup />
+          <BrandLockup shopName={settings.shopName} />
         </div>
       </header>
       <main
         id="main-content"
-        className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-5xl items-center justify-center px-4 py-10 sm:px-6"
+        className="mx-auto flex flex-1 w-full max-w-5xl items-center justify-center px-4 py-10 sm:px-6"
       >
         {stage === 'form' ? (
           <Card className="w-full max-w-md bg-card/95">
@@ -187,6 +194,7 @@ function CheckoutCancelPage() {
           </Card>
         )}
       </main>
+      <Footer shopName={settings.shopName} />
     </div>
   )
 }

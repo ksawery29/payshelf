@@ -4,22 +4,30 @@ import { Card, CardContent } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
 import { Badge } from '#/components/ui/badge'
 import { CircleCheck, MailCheck } from 'lucide-react'
+import { getSettingsFn } from '#/lib/settings.functions'
+import { Footer } from '#/components/footer'
 
 export const Route = createFileRoute('/checkout/success')({
+  loader: async () => {
+    const settings = await getSettingsFn()
+    return { settings }
+  },
   component: CheckoutSuccessPage,
 })
 
 function CheckoutSuccessPage() {
+  const { settings } = Route.useLoaderData()
+
   return (
-    <div className="min-h-[100dvh] bg-background">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       <header className="border-b border-border/80 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-5xl items-center px-4 sm:px-6">
-          <BrandLockup />
+          <BrandLockup shopName={settings.shopName} />
         </div>
       </header>
       <main
         id="main-content"
-        className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-5xl items-center justify-center px-4 py-10 sm:px-6"
+        className="mx-auto flex flex-1 w-full max-w-5xl items-center justify-center px-4 py-10 sm:px-6"
       >
         <Card className="w-full max-w-lg bg-card/95 text-center">
           <CardContent className="flex flex-col items-center gap-5 py-12">
@@ -50,6 +58,7 @@ function CheckoutSuccessPage() {
           </CardContent>
         </Card>
       </main>
+      <Footer shopName={settings.shopName} />
     </div>
   )
 }

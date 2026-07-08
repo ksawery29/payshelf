@@ -22,6 +22,8 @@ function SettingsPage() {
   const [shopName, setShopName] = useState(settings.shopName)
   const [shopTagline, setShopTagline] = useState(settings.shopTagline ?? '')
   const [fromEmail, setFromEmail] = useState(settings.fromEmail ?? '')
+  const [termsOfService, setTermsOfService] = useState(settings.termsOfService ?? '')
+  const [privacyPolicy, setPrivacyPolicy] = useState(settings.privacyPolicy ?? '')
 
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -44,6 +46,8 @@ function SettingsPage() {
           shopName: shopName.trim(),
           shopTagline: shopTagline.trim() || undefined,
           fromEmail: fromEmail.trim() || undefined,
+          termsOfService: termsOfService.trim() || undefined,
+          privacyPolicy: privacyPolicy.trim() || undefined,
         },
       })
       setSaved(true)
@@ -185,6 +189,44 @@ function SettingsPage() {
                   Overrides the <code className="rounded bg-muted px-1 py-0.5">RESEND_FROM_EMAIL</code> env
                   variable. Must be a verified sender in Resend.
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/95">
+            <CardHeader>
+              <CardTitle className="text-base">Legal Policies</CardTitle>
+              <CardDescription>
+                Add or override custom terms of service and privacy policy text for your store footer. Leaving these blank will use default standard legal texts.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="terms-of-service">
+                  Custom Terms of Service{' '}
+                  <span className="font-normal text-muted-foreground">(optional)</span>
+                </Label>
+                <textarea
+                  id="terms-of-service"
+                  placeholder="Welcome to our shop..."
+                  value={termsOfService}
+                  onChange={(e) => setTermsOfService(e.target.value)}
+                  className="w-full min-h-[140px] rounded-lg border border-border/90 bg-background px-3 py-2 text-sm transition-[color,box-shadow,background-color,border-color] duration-200 outline-none placeholder:text-muted-foreground/75 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="privacy-policy">
+                  Custom Privacy Policy{' '}
+                  <span className="font-normal text-muted-foreground">(optional)</span>
+                </Label>
+                <textarea
+                  id="privacy-policy"
+                  placeholder="We care about your privacy..."
+                  value={privacyPolicy}
+                  onChange={(e) => setPrivacyPolicy(e.target.value)}
+                  className="w-full min-h-[140px] rounded-lg border border-border/90 bg-background px-3 py-2 text-sm transition-[color,box-shadow,background-color,border-color] duration-200 outline-none placeholder:text-muted-foreground/75 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                />
               </div>
             </CardContent>
           </Card>
