@@ -4,7 +4,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { db } from '#/db'
 import { purchase, product } from '#/db/schema'
 import { eq } from 'drizzle-orm'
-import { head } from '@vercel/blob'
+import { issueSignedToken, presignUrl } from '@vercel/blob'
 import { BrandLockup } from '#/components/brand'
 import { Card, CardContent, CardFooter } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
@@ -63,25 +63,41 @@ const getAccessFn = createServerFn({ method: 'GET' })
   })
 
 /**
- * Generates a short-lived signed download URL for a private Vercel Blob.
- * Returns the blob URL itself if it's already a public URL (non-private blobs)
- * so the function works regardless of whether the file was uploaded via
- * the old manual path or the new Vercel Blob flow.
+ * Generates a short-lived presigned download URL for a private Vercel Blob.
+ * Uses the issueSignedToken → presignUrl pattern so the client browser can
+ * download directly from Vercel's CDN with a time-limited signed URL.
+ * Falls back to returning the URL as-is for legacy (non-blob) paths.
  */
 const getSignedDownloadUrlFn = createServerFn({ method: 'POST' })
   .validator((data: { blobUrl: string }) => data)
   .handler(async ({ data }) => {
-    const token = process.env.PRIVATE_BLOB_READ_WRITE_TOKEN
-    if (!token) throw new Error('PRIVATE_BLOB_READ_WRITE_TOKEN is not set')
+    const rwToken = process.env.PRIVATE_BLOB_READ_WRITE_TOKEN
+    if (!rwToken) throw new Error('PRIVATE_BLOB_READ_WRITE_TOKEN is not set')
 
-    try {
-      const info = await head(data.blobUrl, { token })
-      // info.downloadUrl is the signed URL for private blobs
-      return { url: info.downloadUrl ?? info.url }
-    } catch {
-      // Not a Vercel Blob URL (legacy path) — return as-is
+    // Only attempt presigning for Vercel Blob private URLs
+    if (!data.blobUrl.includes('.private.blob.vercel-storage.com')) {
       return { url: data.blobUrl }
     }
+
+    // Extract the pathname from the blob URL (strip the host)
+    const { pathname } = new URL(data.blobUrl)
+
+    // Step 1: issue a short-lived signed token scoped to this file
+    const signedToken = await issueSignedToken({
+      pathname,
+      operations: ['get'],
+      validUntil: Date.now() + 5 * 60 * 1000, // 5 minutes
+      token: rwToken,
+    })
+
+    // Step 2: generate the presigned URL the browser will redirect to
+    const { presignedUrl } = await presignUrl(signedToken, {
+      pathname,
+      operation: 'get',
+      validUntil: Date.now() + 5 * 60 * 1000,
+    })
+
+    return { url: presignedUrl }
   })
 
 export const Route = createFileRoute('/access/$token')({

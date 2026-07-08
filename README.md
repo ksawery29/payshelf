@@ -11,6 +11,7 @@ Built with [TanStack Start](https://tanstack.com/start), [Better Auth](https://w
 - 🛒 **Public storefront** — product grid with Stripe Checkout
 - 🔐 **Single-admin dashboard** — protected by Better Auth; first user to sign up owns the store
 - 📦 **Product management** — create, edit, and delete products with Stripe Product ID linking
+- 🖼️ **Vercel Blob uploads** — drag-and-drop image and file upload from the dashboard (public images, private download files)
 - 📊 **Analytics** — total revenue, weekly/monthly sales, 30-day revenue chart
 - 📧 **Magic link delivery** — purchase confirmation email with a one-click download link
 - 🔁 **Automated access revocation** — webhook revokes access on refund or dispute
@@ -29,6 +30,7 @@ Built with [TanStack Start](https://tanstack.com/start), [Better Auth](https://w
 | ORM | Drizzle ORM |
 | Payments | Stripe Checkout + Webhooks |
 | Email | Resend |
+| File storage | Vercel Blob (public images + private downloads) |
 | Deployment | Vercel |
 | Styling | Tailwind CSS v4 + shadcn/ui |
 
@@ -128,7 +130,46 @@ That's your `STRIPE_SECRET_KEY`.
 
 </details>
 
-### 5. Configure environment variables
+### 5. Create Vercel Blob stores
+
+Payshelf uses **two separate Blob stores** — one for public product images and one for private download files.
+
+<details>
+<summary><strong>Option A — Vercel Dashboard (recommended)</strong></summary>
+
+1. Go to your [Vercel dashboard](https://vercel.com/dashboard) → open your project (or create it first via `npx vercel`)
+2. Click **Storage** in the top nav → **Create Database** → select **Blob**
+3. Name it `payshelf-public` → click **Create**
+4. Once created, go to the store page → **Settings** → copy the **`PUBLIC_BLOB_READ_WRITE_TOKEN`** token (the env var name matches this prefix automatically if you use the Vercel CLI link)
+5. Repeat steps 2–4 to create a second store named `payshelf-private`, using the token as `PRIVATE_BLOB_READ_WRITE_TOKEN`
+
+</details>
+
+<details>
+<summary><strong>Option B — Vercel CLI</strong></summary>
+
+```bash
+# Link your project first if you haven't
+npx vercel link
+
+# Create both stores (answer the prompts)
+npx vercel blob create payshelf-public
+npx vercel blob create payshelf-private
+```
+
+Then pull the generated env vars:
+
+```bash
+npx vercel env pull .env.local
+```
+
+Rename the pulled tokens in `.env.local` to match the names Payshelf expects:
+- `BLOB_READ_WRITE_TOKEN` (from the first store) → `PUBLIC_BLOB_READ_WRITE_TOKEN`
+- `BLOB_READ_WRITE_TOKEN` (from the second store) → `PRIVATE_BLOB_READ_WRITE_TOKEN`
+
+</details>
+
+### 6. Configure environment variables
 
 Create your `.env.local`:
 
@@ -155,14 +196,20 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 RESEND_API_KEY=re_...
 RESEND_FROM_EMAIL=My Store <onboarding@resend.dev>
 
+# Vercel Blob — public store (product images)
+PUBLIC_BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+
+# Vercel Blob — private store (download files)
+PRIVATE_BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+
 # App
 APP_URL=http://localhost:3000
 ```
 
 > **Tip:** Generate `BETTER_AUTH_SECRET` with `openssl rand -base64 32`.
-> You'll set `STRIPE_WEBHOOK_SECRET` in step 7 below.
+> You'll set `STRIPE_WEBHOOK_SECRET` in step 8 below.
 
-### 6. Push the database schema
+### 7. Push the database schema
 
 ```bash
 bunx drizzle-kit push
@@ -172,7 +219,7 @@ This creates the tables in your local or remote Turso database.
 
 > **Vercel Automatic Deployments:** You don't need to manually run this in production! The database schema sync is automatically run on every Vercel build using the environment variables you configure in the dashboard.
 
-### 7. Set up the Stripe webhook
+### 8. Set up the Stripe webhook
 
 <details>
 <summary><strong>Option A — CLI (recommended for local dev)</strong></summary>
@@ -206,7 +253,7 @@ Keep this terminal running while you develop.
 
 </details>
 
-### 8. Run locally
+### 9. Run locally
 
 ```bash
 bun dev
@@ -214,7 +261,7 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000). Navigate to `/setup` to create your admin account, then follow the onboarding flow.
 
-### 9. Deploy to Vercel
+### 10. Deploy to Vercel
 
 <details>
 <summary><strong>Option A — CLI</strong></summary>
@@ -243,7 +290,8 @@ Or just paste them all in the Vercel dashboard (see Option B).
 3. Click **Import** next to your `payshelf` repo
 4. Before deploying, go to **Settings → Environment Variables**
 5. Add each variable from your `.env.local` (swap `localhost:3000` for your Vercel URL in `BETTER_AUTH_URL` and `APP_URL`)
-6. Click **Deploy**
+6. Go to **Storage** → link both `payshelf-public` and `payshelf-private` Blob stores to your project — Vercel will inject the tokens automatically. Make sure you rename them to `PUBLIC_BLOB_READ_WRITE_TOKEN` and `PRIVATE_BLOB_READ_WRITE_TOKEN` in the env var settings.
+7. Click **Deploy**
 
 After deploying, update `BETTER_AUTH_URL` and `APP_URL` to your production URL (e.g. `https://payshelf.vercel.app`).
 
