@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "build": "drizzle-kit push --accept-provider-talk && vite build",
+    "build": "drizzle-kit push && vite build",
     "preview": "vite preview",
     "test": "vitest run"
   },
