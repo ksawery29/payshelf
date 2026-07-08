@@ -2,11 +2,17 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { listProductsFn } from '#/lib/products.functions'
 import { createCheckoutFn } from '#/lib/checkout.functions'
+import { BrandLockup } from '#/components/brand'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardFooter } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import { Separator } from '#/components/ui/separator'
-import { PackageOpen } from 'lucide-react'
+import {
+  ArrowRight,
+  LockKeyhole,
+  PackageOpen,
+  ShieldCheck,
+  ShoppingBag,
+} from 'lucide-react'
 
 export const Route = createFileRoute('/')({
   loader: () => listProductsFn(),
@@ -20,35 +26,6 @@ function formatPrice(cents: number) {
   })
 }
 
-function Home() {
-  const products = Route.useLoaderData()
-
-  return (
-    <div className="min-h-screen bg-background px-6 py-16">
-      <div className="mx-auto max-w-5xl">
-        <header className="mb-12 border-b pb-6">
-          <p className="text-xs tracking-widest text-muted-foreground uppercase">
-            Payshelf
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            The shelf
-          </h1>
-        </header>
-
-        {products.length === 0 ? (
-          <EmptyShelf />
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
 type Product = {
   id: string
   name: string
@@ -57,10 +34,79 @@ type Product = {
   imageUrl: string | null
 }
 
+function Home() {
+  const products = Route.useLoaderData()
+
+  return (
+    <div className="min-h-[100dvh] bg-background">
+      <header className="border-b border-border/80 bg-background/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <BrandLockup />
+          <Button variant="outline" size="sm" onClick={() => (window.location.href = '/login')}>
+            Seller login
+          </Button>
+        </div>
+      </header>
+
+      <main
+        id="main-content"
+        className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
+      >
+        <section className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,0.55fr)] lg:items-end">
+          <div>
+            <Badge className="mb-4 bg-accent text-accent-foreground">
+              Digital storefront
+            </Badge>
+            <h1 className="font-heading text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
+              A clean shelf for digital products.
+            </h1>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
+              Browse available downloads, pay securely with Stripe, and receive
+              access by email after purchase.
+            </p>
+          </div>
+
+          <Card className="bg-card/95">
+            <CardContent className="grid gap-4">
+              {[
+                ['Secure checkout', <LockKeyhole className="size-4" />],
+                ['Email access links', <ShieldCheck className="size-4" />],
+                [`${products.length} product${products.length === 1 ? '' : 's'} available`, <ShoppingBag className="size-4" />],
+              ].map(([label, icon]) => (
+                <div key={label as string} className="flex items-center gap-3">
+                  <span className="flex size-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                    {icon}
+                  </span>
+                  <span className="text-sm font-medium">{label}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
+
+        {products.length === 0 ? (
+          <EmptyShelf />
+        ) : (
+          <section
+            aria-label="Products"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </section>
+        )}
+      </main>
+    </div>
+  )
+}
+
 function ProductCard({ product }: { product: Product }) {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   async function handleBuy() {
+    setError('')
     setLoading(true)
     try {
       const result = await createCheckoutFn({ data: { productId: product.id } })
@@ -69,42 +115,62 @@ function ProductCard({ product }: { product: Product }) {
       }
     } catch (err) {
       console.error('Failed to create checkout session:', err)
+      setError('Checkout could not be started. Please try again.')
       setLoading(false)
     }
   }
 
   return (
-    <Card className="overflow-hidden py-0 gap-0">
-      {product.imageUrl && (
-        <div className="aspect-[4/3] overflow-hidden bg-muted">
+    <Card className="group overflow-hidden bg-card/95 py-0 transition-transform duration-200 hover:-translate-y-0.5">
+      {product.imageUrl ? (
+        <div className="aspect-[16/10] overflow-hidden bg-muted">
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
+        </div>
+      ) : (
+        <div className="flex aspect-[16/10] items-center justify-center border-b border-border/80 bg-muted/70">
+          <span className="flex size-12 items-center justify-center rounded-lg bg-card text-lg font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+            {product.name.charAt(0).toUpperCase()}
+          </span>
         </div>
       )}
 
-      <CardContent className="flex flex-1 flex-col gap-2 px-5 pt-5">
-        <h2 className="font-medium">{product.name}</h2>
+      <CardContent className="flex flex-1 flex-col gap-2 p-5">
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="font-heading text-base font-semibold tracking-tight">
+            {product.name}
+          </h2>
+          <Badge variant="secondary" className="font-mono text-sm">
+            {formatPrice(product.priceCents)}
+          </Badge>
+        </div>
         {product.description && (
-          <p className="text-sm text-muted-foreground">{product.description}</p>
+          <p className="text-sm leading-6 text-muted-foreground">
+            {product.description}
+          </p>
+        )}
+        {error && (
+          <p className="mt-2 rounded-lg border border-destructive/25 bg-destructive/5 px-3 py-2 text-sm font-medium text-destructive">
+            {error}
+          </p>
         )}
       </CardContent>
 
-      <Separator />
-
-      <CardFooter className="flex items-center justify-between px-5 py-4">
-        <Badge variant="secondary" className="font-mono text-sm">
-          {formatPrice(product.priceCents)}
-        </Badge>
-        <Button size="sm" onClick={handleBuy} disabled={loading}>
+      <CardFooter className="border-t border-border/80 bg-muted/30 px-5 py-4">
+        <Button className="w-full" onClick={handleBuy} disabled={loading}>
           {loading ? (
             <span className="flex items-center gap-2">
-              <span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Starting checkout
             </span>
           ) : (
-            'Buy'
+            <>
+              Buy now
+              <ArrowRight className="size-4" data-icon="inline-end" />
+            </>
           )}
         </Button>
       </CardFooter>
@@ -114,14 +180,20 @@ function ProductCard({ product }: { product: Product }) {
 
 function EmptyShelf() {
   return (
-    <Card className="flex flex-col items-center gap-4 border-dashed bg-transparent py-24 text-center shadow-none">
-      <PackageOpen className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
-      <div>
-        <h2 className="text-xl font-medium">The shelf is empty</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Nothing's for sale yet. Add a product to fill it.
+    <Card className="items-center border-dashed bg-card/70 py-16 text-center">
+      <PackageOpen className="size-10 text-muted-foreground" strokeWidth={1.5} />
+      <CardContent className="max-w-md">
+        <h2 className="font-heading text-2xl font-semibold tracking-tight">
+          The shelf is empty
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Products added from the seller dashboard will appear here with secure
+          checkout.
         </p>
-      </div>
+      </CardContent>
+      <Button variant="outline" onClick={() => (window.location.href = '/login')}>
+        Go to dashboard
+      </Button>
     </Card>
   )
 }

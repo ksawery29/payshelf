@@ -73,17 +73,17 @@ function SetupPage() {
   }
 
   return (
-    <Card className="animate-in fade-in-0 slide-in-from-bottom-4 border-border/50 shadow-xl backdrop-blur duration-500">
+    <Card className="animate-in fade-in-0 slide-in-from-bottom-3 border-border/80 bg-card/95 duration-500">
       <CardHeader className="space-y-1">
-        <CardTitle className="font-heading text-2xl">Set up your store</CardTitle>
+        <CardTitle className="font-heading text-2xl">Set up your shelf</CardTitle>
         <CardDescription>
-          Create your admin account to get started
+          Create the first admin account for this Payshelf workspace.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <div className="rounded-lg border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive">
               {error}
             </div>
           )}
@@ -92,7 +92,7 @@ function SetupPage() {
             <Input
               id="setup-name"
               type="text"
-              placeholder="Your name"
+              placeholder="Maya Chen"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -105,7 +105,7 @@ function SetupPage() {
             <Input
               id="setup-email"
               type="email"
-              placeholder="admin@example.com"
+              placeholder="maya@studio.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -117,7 +117,7 @@ function SetupPage() {
             <Input
               id="setup-password"
               type="password"
-              placeholder="Min. 8 characters"
+              placeholder="8 or more characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -126,16 +126,17 @@ function SetupPage() {
             />
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="pt-2">
           <Button
             type="submit"
             className="w-full"
+            size="lg"
             disabled={loading}
           >
             {loading ? (
               <span className="flex items-center gap-2">
                 <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Creating account…
+                Creating account
               </span>
             ) : (
               'Create account'

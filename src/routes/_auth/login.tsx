@@ -65,17 +65,17 @@ function LoginPage() {
   }
 
   return (
-    <Card className="animate-in fade-in-0 slide-in-from-bottom-4 border-border/50 shadow-xl backdrop-blur duration-500">
+    <Card className="animate-in fade-in-0 slide-in-from-bottom-3 border-border/80 bg-card/95 duration-500">
       <CardHeader className="space-y-1">
         <CardTitle className="font-heading text-2xl">Welcome back</CardTitle>
         <CardDescription>
-          Sign in to your admin account
+          Sign in to manage products, orders, and delivery links.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <div className="rounded-lg border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive">
               {error}
             </div>
           )}
@@ -84,7 +84,7 @@ function LoginPage() {
             <Input
               id="login-email"
               type="email"
-              placeholder="admin@example.com"
+              placeholder="admin@payshelf.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -97,7 +97,7 @@ function LoginPage() {
             <Input
               id="login-password"
               type="password"
-              placeholder="••••••••"
+              placeholder="Your account password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -105,16 +105,17 @@ function LoginPage() {
             />
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="pt-2">
           <Button
             type="submit"
             className="w-full"
+            size="lg"
             disabled={loading}
           >
             {loading ? (
               <span className="flex items-center gap-2">
                 <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Signing in…
+                Signing in
               </span>
             ) : (
               'Sign in'

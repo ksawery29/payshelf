@@ -4,14 +4,22 @@ import { authClient } from '#/lib/auth-client'
 import { listProductsFn, createProductFn } from '#/lib/products.functions'
 import { updateProductFn, deleteProductFn } from '#/lib/products.mutations'
 import { getAnalyticsFn } from '#/lib/analytics.functions'
+import { BrandLockup } from '#/components/brand'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import { Separator } from '#/components/ui/separator'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -26,7 +34,21 @@ import {
   type ChartConfig,
 } from '#/components/ui/chart'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
-import { PackageOpen, Plus, TrendingUp, ShoppingBag, CalendarDays, Calendar } from 'lucide-react'
+import {
+  AlertCircle,
+  Calendar,
+  CalendarDays,
+  CheckCircle2,
+  FileArchive,
+  Link2,
+  LogOut,
+  PackageOpen,
+  Pencil,
+  Plus,
+  ShoppingBag,
+  Trash2,
+  TrendingUp,
+} from 'lucide-react'
 
 export const Route = createFileRoute('/_dashboard/dashboard')({
   loader: async () => {
@@ -34,7 +56,6 @@ export const Route = createFileRoute('/_dashboard/dashboard')({
       listProductsFn(),
       getAnalyticsFn(),
     ])
-    // New users with no products get walked through onboarding
     if (products.length === 0) {
       throw redirect({ to: '/onboarding' })
     }
@@ -58,9 +79,19 @@ function formatDate(dateStr: string) {
 const chartConfig = {
   revenue: {
     label: 'Revenue',
-    color: 'var(--color-primary)',
+    color: 'var(--color-chart-1)',
   },
 } satisfies ChartConfig
+
+interface ProductType {
+  id: string
+  name: string
+  description: string
+  priceCents: number
+  imageUrl: string | null
+  filePath: string | null
+  stripeProductId: string | null
+}
 
 function DashboardPage() {
   const { data: session } = authClient.useSession()
@@ -69,23 +100,40 @@ function DashboardPage() {
 
   const chartData = analytics.chartData.map((d) => ({
     ...d,
-    revenue: d.revenue / 100, // convert to dollars for display
+    revenue: d.revenue / 100,
     label: formatDate(d.date),
   }))
 
+  const linkedProducts = products.filter((product) => product.stripeProductId).length
+  const downloadableProducts = products.filter((product) => product.filePath).length
+
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-          <h1 className="font-heading text-lg font-semibold tracking-tight">
-            Payshelf
-          </h1>
-          <div className="flex items-center gap-3">
+    <div className="min-h-[100dvh] bg-background">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-6">
+            <BrandLockup />
+            <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+              <a
+                href="/dashboard"
+                className="rounded-md bg-muted px-3 py-1.5 text-sm font-medium text-foreground"
+              >
+                Dashboard
+              </a>
+              <a
+                href="/"
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                Storefront
+              </a>
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2">
             {session?.user && (
-              <span className="text-sm text-muted-foreground">
+              <div className="hidden max-w-[220px] truncate rounded-lg border border-border/80 bg-card px-3 py-1.5 text-sm text-muted-foreground sm:block">
                 {session.user.email}
-              </span>
+              </div>
             )}
             <Button
               variant="outline"
@@ -93,178 +141,109 @@ function DashboardPage() {
               onClick={() => {
                 void authClient.signOut({
                   fetchOptions: {
-                    onSuccess: () => { window.location.href = '/login' },
+                    onSuccess: () => {
+                      window.location.href = '/login'
+                    },
                   },
                 })
               }}
             >
+              <LogOut className="size-4" data-icon="inline-start" />
               Sign out
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 space-y-8">
-
-        {/* ── Analytics ──────────────────────────────────────── */}
-        <section>
-          <h2 className="font-heading text-xl font-semibold tracking-tight mb-4">Overview</h2>
-
-          {/* Stat cards */}
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-6">
-            <StatCard
-              title="Total revenue"
-              value={formatPrice(analytics.totalRevenue)}
-              sub={`${analytics.totalSales} sale${analytics.totalSales === 1 ? '' : 's'}`}
-              icon={<TrendingUp className="size-4 text-muted-foreground" />}
-            />
-            <StatCard
-              title="This month"
-              value={formatPrice(analytics.monthRevenue)}
-              sub={`${analytics.monthSales} sale${analytics.monthSales === 1 ? '' : 's'}`}
-              icon={<Calendar className="size-4 text-muted-foreground" />}
-            />
-            <StatCard
-              title="This week"
-              value={formatPrice(analytics.weekRevenue)}
-              sub={`${analytics.weekSales} sale${analytics.weekSales === 1 ? '' : 's'}`}
-              icon={<CalendarDays className="size-4 text-muted-foreground" />}
-            />
-            <StatCard
-              title="Products"
-              value={String(products.length)}
-              sub="in your shelf"
-              icon={<ShoppingBag className="size-4 text-muted-foreground" />}
-            />
+      <main
+        id="main-content"
+        className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
+      >
+        <section className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <Badge className="mb-3 bg-accent text-accent-foreground">
+              Seller dashboard
+            </Badge>
+            <h1 className="font-heading text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
+              Sales overview
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              Track revenue, keep Stripe product IDs tidy, and make sure every
+              purchase has a file ready for delivery.
+            </p>
           </div>
-
-          {/* Revenue chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-medium">Revenue — last 30 days</CardTitle>
-              <CardDescription>
-                Daily active purchase revenue
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig} className="h-52 w-full">
-                <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/50" />
-                  <XAxis
-                    dataKey="label"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 11 }}
-                    interval="preserveStartEnd"
-                    minTickGap={40}
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 11 }}
-                    tickFormatter={(v: number) => `$${v}`}
-                  />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value) => [
-                          `$${(value as number).toFixed(2)}`,
-                          'Revenue',
-                        ]}
-                      />
-                    }
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="var(--color-primary)"
-                    strokeWidth={2}
-                    fill="url(#revenueGradient)"
-                    dot={false}
-                    activeDot={{ r: 4, strokeWidth: 0 }}
-                  />
-                </AreaChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
+          <CreateProductDialog onCreated={() => router.invalidate()} />
         </section>
 
-        {/* ── Products ───────────────────────────────────────── */}
-        <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-heading text-xl font-semibold tracking-tight">
-              Products
-            </h2>
-            <CreateProductDialog onCreated={() => router.invalidate()} />
+        <section
+          aria-label="Performance metrics"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        >
+          <StatCard
+            title="Total revenue"
+            value={formatPrice(analytics.totalRevenue)}
+            sub={`${analytics.totalSales} sale${analytics.totalSales === 1 ? '' : 's'} processed`}
+            icon={<TrendingUp className="size-4" />}
+          />
+          <StatCard
+            title="This month"
+            value={formatPrice(analytics.monthRevenue)}
+            sub={`${analytics.monthSales} sale${analytics.monthSales === 1 ? '' : 's'} this month`}
+            icon={<Calendar className="size-4" />}
+          />
+          <StatCard
+            title="This week"
+            value={formatPrice(analytics.weekRevenue)}
+            sub={`${analytics.weekSales} sale${analytics.weekSales === 1 ? '' : 's'} since Monday`}
+            icon={<CalendarDays className="size-4" />}
+          />
+          <StatCard
+            title="Products"
+            value={String(products.length)}
+            sub={`${linkedProducts} Stripe linked`}
+            icon={<ShoppingBag className="size-4" />}
+          />
+        </section>
+
+        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.75fr)]">
+          <RevenueChartCard chartData={chartData} />
+          <ReadinessCard
+            products={products.length}
+            linkedProducts={linkedProducts}
+            downloadableProducts={downloadableProducts}
+          />
+        </section>
+
+        <section className="mt-10">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-heading text-2xl font-semibold tracking-tight">
+                Product shelf
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                The products customers can buy from your public storefront.
+              </p>
+            </div>
+            <span className="text-sm text-muted-foreground">
+              {products.length} item{products.length === 1 ? '' : 's'}
+            </span>
           </div>
 
           {products.length === 0 ? (
-            <Card className="flex flex-col items-center gap-4 border-dashed bg-transparent py-24 text-center shadow-none">
-              <PackageOpen className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
-              <div>
-                <h3 className="text-xl font-medium">No products yet</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Create your first product to start selling.
-                </p>
-              </div>
-            </Card>
+            <EmptyProducts onCreate={() => router.invalidate()} />
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {products.map((product) => (
-                <Card key={product.id} className="overflow-hidden py-0 gap-0">
-                  {product.imageUrl && (
-                    <div className="aspect-[4/3] overflow-hidden bg-muted">
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <CardContent className="flex flex-1 flex-col gap-1 px-5 pt-5">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-medium">{product.name}</h3>
-                      <div className="flex gap-1 shrink-0">
-                        <EditProductDialog product={product} onUpdated={() => router.invalidate()} />
-                        <DeleteProductButton id={product.id} onDeleted={() => router.invalidate()} />
-                      </div>
-                    </div>
-                    {product.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {product.description}
-                      </p>
-                    )}
-                    {product.filePath && (
-                      <p className="mt-1 truncate text-xs text-muted-foreground/60 font-mono">
-                        {product.filePath}
-                      </p>
-                    )}
-                  </CardContent>
-                  <Separator />
-                  <CardFooter className="flex items-center justify-between px-5 py-4">
-                    <Badge variant="secondary" className="font-mono text-sm">
-                      {formatPrice(product.priceCents)}
-                    </Badge>
-                    {product.stripeProductId ? (
-                      <Badge variant="outline" className="text-xs">
-                        Stripe linked
-                      </Badge>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">No Stripe ID</span>
-                    )}
-                  </CardFooter>
-                </Card>
+                <ProductManagementCard
+                  key={product.id}
+                  product={product}
+                  onUpdated={() => router.invalidate()}
+                  onDeleted={() => router.invalidate()}
+                />
               ))}
             </div>
           )}
         </section>
-
       </main>
     </div>
   )
@@ -282,15 +261,271 @@ function StatCard({
   icon: React.ReactNode
 }) {
   return (
-    <Card>
-      <CardContent className="pt-5 pb-5">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-sm text-muted-foreground">{title}</p>
-          {icon}
+    <Card size="sm" className="bg-card/95">
+      <CardContent className="py-1">
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <span className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+            {icon}
+          </span>
         </div>
-        <p className="font-heading text-2xl font-semibold tracking-tight">{value}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
+        <p className="metric-number text-3xl font-semibold">{value}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
       </CardContent>
+    </Card>
+  )
+}
+
+function RevenueChartCard({
+  chartData,
+}: {
+  chartData: Array<{ date: string; revenue: number; sales: number; label: string }>
+}) {
+  return (
+    <Card className="bg-card/95">
+      <CardHeader className="border-b border-border/80 pb-5">
+        <div>
+          <CardTitle className="text-lg">Revenue trend</CardTitle>
+          <CardDescription>
+            Daily purchase revenue over the last 30 days.
+          </CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-2">
+        <ChartContainer config={chartConfig} className="h-72 w-full">
+          <AreaChart
+            data={chartData}
+            margin={{ top: 12, right: 12, left: -12, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="8%"
+                  stopColor="var(--color-revenue)"
+                  stopOpacity={0.24}
+                />
+                <stop
+                  offset="92%"
+                  stopColor="var(--color-revenue)"
+                  stopOpacity={0.02}
+                />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="4 4"
+              className="stroke-border/70"
+            />
+            <XAxis
+              dataKey="label"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 11 }}
+              interval="preserveStartEnd"
+              minTickGap={42}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 11 }}
+              tickFormatter={(v: number) => `$${v}`}
+            />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(value) => [
+                    `$${(value as number).toFixed(2)}`,
+                    'Revenue',
+                  ]}
+                />
+              }
+            />
+            <Area
+              type="monotone"
+              dataKey="revenue"
+              stroke="var(--color-revenue)"
+              strokeWidth={2.5}
+              fill="url(#revenueGradient)"
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 0 }}
+            />
+          </AreaChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  )
+}
+
+function ReadinessCard({
+  products,
+  linkedProducts,
+  downloadableProducts,
+}: {
+  products: number
+  linkedProducts: number
+  downloadableProducts: number
+}) {
+  const items = [
+    {
+      label: 'Stripe IDs',
+      value: `${linkedProducts}/${products}`,
+      ready: linkedProducts === products,
+      icon: <Link2 className="size-4" />,
+    },
+    {
+      label: 'Download files',
+      value: `${downloadableProducts}/${products}`,
+      ready: downloadableProducts === products,
+      icon: <FileArchive className="size-4" />,
+    },
+    {
+      label: 'Storefront',
+      value: products > 0 ? 'Live' : 'Draft',
+      ready: products > 0,
+      icon: <ShoppingBag className="size-4" />,
+    },
+  ]
+
+  return (
+    <Card className="bg-card/95">
+      <CardHeader>
+        <CardTitle className="text-lg">Shelf readiness</CardTitle>
+        <CardDescription>
+          A quick check before sending customers to checkout.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-3">
+        {items.map((item) => (
+          <div
+            key={item.label}
+            className="flex items-center justify-between rounded-lg border border-border/80 bg-background/70 p-3"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                {item.icon}
+              </span>
+              <span className="text-sm font-medium">{item.label}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="metric-number text-sm font-semibold">
+                {item.value}
+              </span>
+              {item.ready ? (
+                <CheckCircle2 className="size-4 text-emerald-600" />
+              ) : (
+                <AlertCircle className="size-4 text-amber-600" />
+              )}
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  )
+}
+
+function ProductManagementCard({
+  product,
+  onUpdated,
+  onDeleted,
+}: {
+  product: ProductType
+  onUpdated: () => void
+  onDeleted: () => void
+}) {
+  return (
+    <Card className="group overflow-hidden bg-card/95 py-0 transition-transform duration-200 hover:-translate-y-0.5">
+      {product.imageUrl ? (
+        <div className="aspect-[16/10] overflow-hidden bg-muted">
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        </div>
+      ) : (
+        <div className="flex aspect-[16/10] items-center justify-center border-b border-border/80 bg-muted/70">
+          <span className="flex size-12 items-center justify-center rounded-lg bg-card text-lg font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+            {product.name.charAt(0).toUpperCase()}
+          </span>
+        </div>
+      )}
+
+      <CardContent className="flex flex-1 flex-col gap-4 p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h3 className="truncate font-heading text-base font-semibold tracking-tight">
+              {product.name}
+            </h3>
+            {product.description && (
+              <p className="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                {product.description}
+              </p>
+            )}
+          </div>
+          <div className="flex shrink-0 gap-1">
+            <EditProductDialog product={product} onUpdated={onUpdated} />
+            <DeleteProductButton product={product} onDeleted={onDeleted} />
+          </div>
+        </div>
+
+        <div className="grid gap-2 text-xs text-muted-foreground">
+          <StatusRow
+            icon={<Link2 className="size-3.5" />}
+            label={product.stripeProductId ? product.stripeProductId : 'Stripe ID missing'}
+            ready={Boolean(product.stripeProductId)}
+          />
+          <StatusRow
+            icon={<FileArchive className="size-3.5" />}
+            label={product.filePath ? product.filePath : 'Download file not set'}
+            ready={Boolean(product.filePath)}
+          />
+        </div>
+      </CardContent>
+
+      <CardFooter className="justify-between border-t border-border/80 bg-muted/30 px-5 py-4">
+        <Badge variant="secondary" className="font-mono text-sm">
+          {formatPrice(product.priceCents)}
+        </Badge>
+        <Badge
+          variant={product.stripeProductId ? 'outline' : 'secondary'}
+          className={product.stripeProductId ? 'text-emerald-700' : ''}
+        >
+          {product.stripeProductId ? 'Checkout ready' : 'Draft'}
+        </Badge>
+      </CardFooter>
+    </Card>
+  )
+}
+
+function StatusRow({
+  icon,
+  label,
+  ready,
+}: {
+  icon: React.ReactNode
+  label: string
+  ready: boolean
+}) {
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      <span className={ready ? 'text-emerald-600' : 'text-amber-600'}>{icon}</span>
+      <span className="truncate">{label}</span>
+    </div>
+  )
+}
+
+function EmptyProducts({ onCreate }: { onCreate: () => void }) {
+  return (
+    <Card className="items-center border-dashed bg-card/70 py-14 text-center">
+      <PackageOpen className="size-9 text-muted-foreground" strokeWidth={1.5} />
+      <CardContent className="max-w-md">
+        <h3 className="font-heading text-xl font-semibold">No products yet</h3>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Add a first product with a price, Stripe Product ID, and download path
+          so customers can buy from your shelf.
+        </p>
+      </CardContent>
+      <CreateProductDialog onCreated={onCreate} />
     </Card>
   )
 }
@@ -308,23 +543,40 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
   const [stripeProductId, setStripeProductId] = useState('')
 
   function resetForm() {
-    setName(''); setDescription(''); setPrice('')
-    setImageUrl(''); setFilePath(''); setStripeProductId(''); setError('')
+    setName('')
+    setDescription('')
+    setPrice('')
+    setImageUrl('')
+    setFilePath('')
+    setStripeProductId('')
+    setError('')
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     const priceCents = Math.round(parseFloat(price) * 100)
-    if (isNaN(priceCents) || priceCents <= 0) { setError('Enter a valid price'); return }
+    if (isNaN(priceCents) || priceCents <= 0) {
+      setError('Enter a valid price.')
+      return
+    }
     setLoading(true)
     try {
       await createProductFn({
-        data: { name, description, priceCents, imageUrl: imageUrl || undefined, filePath: filePath || undefined, stripeProductId: stripeProductId || undefined },
+        data: {
+          name,
+          description,
+          priceCents,
+          imageUrl: imageUrl || undefined,
+          filePath: filePath || undefined,
+          stripeProductId: stripeProductId || undefined,
+        },
       })
-      resetForm(); setOpen(false); onCreated()
+      resetForm()
+      setOpen(false)
+      onCreated()
     } catch {
-      setError('Failed to create product. Please try again.')
+      setError('We could not create the product. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -332,55 +584,44 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm() }}>
-      <DialogTrigger render={<Button size="sm" />}>
+      <DialogTrigger render={<Button size="lg" />}>
         <Plus className="size-4" data-icon="inline-start" />
         Add product
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>New product</DialogTitle>
-          <DialogDescription>Add a digital product to your shelf.</DialogDescription>
+          <DialogDescription>
+            Add the product details customers will see at checkout.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
-            {error && (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="product-name">Name *</Label>
-              <Input id="product-name" placeholder="e.g. Notion Template Pack" value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="product-description">Description</Label>
-              <Input id="product-description" placeholder="A short description of the product" value={description} onChange={(e) => setDescription(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="product-price">Price (USD) *</Label>
-              <Input id="product-price" type="number" step="0.01" min="0.01" placeholder="19.00" value={price} onChange={(e) => setPrice(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="product-image">Image URL</Label>
-              <Input id="product-image" type="url" placeholder="https://..." value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="product-file">File path</Label>
-              <Input id="product-file" placeholder="uploads/my-file.zip" value={filePath} onChange={(e) => setFilePath(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="product-stripe">Stripe Product ID</Label>
-              <Input id="product-stripe" placeholder="prod_..." value={stripeProductId} onChange={(e) => setStripeProductId(e.target.value)} />
-            </div>
-          </div>
-          <DialogFooter>
+          <ProductFormFields
+            error={error}
+            name={name}
+            setName={setName}
+            description={description}
+            setDescription={setDescription}
+            price={price}
+            setPrice={setPrice}
+            imageUrl={imageUrl}
+            setImageUrl={setImageUrl}
+            filePath={filePath}
+            setFilePath={setFilePath}
+            stripeProductId={stripeProductId}
+            setStripeProductId={setStripeProductId}
+            prefix="product"
+          />
+          <DialogFooter className="pt-6">
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Creating…
+                  Creating
                 </span>
-              ) : 'Create product'}
+              ) : (
+                'Create product'
+              )}
             </Button>
           </DialogFooter>
         </form>
@@ -389,17 +630,13 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
   )
 }
 
-interface ProductType {
-  id: string
-  name: string
-  description: string
-  priceCents: number
-  imageUrl: string | null
-  filePath: string | null
-  stripeProductId: string | null
-}
-
-function EditProductDialog({ product, onUpdated }: { product: ProductType; onUpdated: () => void }) {
+function EditProductDialog({
+  product,
+  onUpdated,
+}: {
+  product: ProductType
+  onUpdated: () => void
+}) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -415,7 +652,10 @@ function EditProductDialog({ product, onUpdated }: { product: ProductType; onUpd
     e.preventDefault()
     setError('')
     const priceCents = Math.round(parseFloat(price) * 100)
-    if (isNaN(priceCents) || priceCents <= 0) { setError('Enter a valid price'); return }
+    if (isNaN(priceCents) || priceCents <= 0) {
+      setError('Enter a valid price.')
+      return
+    }
     setLoading(true)
     try {
       await updateProductFn({
@@ -426,13 +666,13 @@ function EditProductDialog({ product, onUpdated }: { product: ProductType; onUpd
           priceCents,
           imageUrl: imageUrl || undefined,
           filePath: filePath || undefined,
-          stripeProductId: stripeProductId || undefined
+          stripeProductId: stripeProductId || undefined,
         },
       })
       setOpen(false)
       onUpdated()
     } catch {
-      setError('Failed to update product. Please try again.')
+      setError('We could not save the product. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -440,49 +680,45 @@ function EditProductDialog({ product, onUpdated }: { product: ProductType; onUpd
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="ghost" size="xs" />}>
-        Edit
+      <DialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            title="Edit product"
+            aria-label="Edit product"
+          />
+        }
+      >
+        <Pencil className="size-3.5" />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit product</DialogTitle>
-          <DialogDescription>Modify your product's details.</DialogDescription>
+          <DialogDescription>
+            Update storefront copy, pricing, and delivery settings.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
-            {error && (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Name *</Label>
-              <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
-              <Input id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-price">Price (USD) *</Label>
-              <Input id="edit-price" type="number" step="0.01" min="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-image">Image URL</Label>
-              <Input id="edit-image" type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-file">File path</Label>
-              <Input id="edit-file" value={filePath} onChange={(e) => setFilePath(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-stripe">Stripe Product ID</Label>
-              <Input id="edit-stripe" value={stripeProductId} onChange={(e) => setStripeProductId(e.target.value)} />
-            </div>
-          </div>
-          <DialogFooter>
+          <ProductFormFields
+            error={error}
+            name={name}
+            setName={setName}
+            description={description}
+            setDescription={setDescription}
+            price={price}
+            setPrice={setPrice}
+            imageUrl={imageUrl}
+            setImageUrl={setImageUrl}
+            filePath={filePath}
+            setFilePath={setFilePath}
+            stripeProductId={stripeProductId}
+            setStripeProductId={setStripeProductId}
+            prefix="edit"
+          />
+          <DialogFooter className="pt-6">
             <Button type="submit" disabled={loading}>
-              {loading ? 'Saving…' : 'Save changes'}
+              {loading ? 'Saving' : 'Save changes'}
             </Button>
           </DialogFooter>
         </form>
@@ -491,31 +727,170 @@ function EditProductDialog({ product, onUpdated }: { product: ProductType; onUpd
   )
 }
 
-function DeleteProductButton({ id, onDeleted }: { id: string; onDeleted: () => void }) {
+function ProductFormFields({
+  error,
+  name,
+  setName,
+  description,
+  setDescription,
+  price,
+  setPrice,
+  imageUrl,
+  setImageUrl,
+  filePath,
+  setFilePath,
+  stripeProductId,
+  setStripeProductId,
+  prefix,
+}: {
+  error: string
+  name: string
+  setName: (value: string) => void
+  description: string
+  setDescription: (value: string) => void
+  price: string
+  setPrice: (value: string) => void
+  imageUrl: string
+  setImageUrl: (value: string) => void
+  filePath: string
+  setFilePath: (value: string) => void
+  stripeProductId: string
+  setStripeProductId: (value: string) => void
+  prefix: string
+}) {
+  return (
+    <div className="space-y-5">
+      {error && (
+        <div className="rounded-lg border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive">
+          {error}
+        </div>
+      )}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor={`${prefix}-name`}>Name *</Label>
+          <Input
+            id={`${prefix}-name`}
+            placeholder="Creator Finance Toolkit"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            autoFocus
+          />
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor={`${prefix}-description`}>Description</Label>
+          <Input
+            id={`${prefix}-description`}
+            placeholder="What customers receive after purchase"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor={`${prefix}-price`}>Price (USD) *</Label>
+          <Input
+            id={`${prefix}-price`}
+            type="number"
+            step="0.01"
+            min="0.01"
+            placeholder="49.00"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor={`${prefix}-stripe`}>Stripe Product ID</Label>
+          <Input
+            id={`${prefix}-stripe`}
+            placeholder="prod_..."
+            value={stripeProductId}
+            onChange={(e) => setStripeProductId(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor={`${prefix}-image`}>Image URL</Label>
+          <Input
+            id={`${prefix}-image`}
+            type="url"
+            placeholder="https://..."
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor={`${prefix}-file`}>File path</Label>
+          <Input
+            id={`${prefix}-file`}
+            placeholder="uploads/product-file.zip"
+            value={filePath}
+            onChange={(e) => setFilePath(e.target.value)}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DeleteProductButton({
+  product,
+  onDeleted,
+}: {
+  product: ProductType
+  onDeleted: () => void
+}) {
+  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   async function handleDelete() {
-    if (!confirm('Are you sure you want to delete this product?')) return
+    setError('')
     setLoading(true)
     try {
-      await deleteProductFn({ data: { id } })
+      await deleteProductFn({ data: { id: product.id } })
+      setOpen(false)
       onDeleted()
     } catch {
-      alert('Failed to delete product.')
+      setError('We could not delete this product. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Button
-      variant="destructive"
-      size="xs"
-      onClick={handleDelete}
-      disabled={loading}
-    >
-      {loading ? 'Deleting…' : 'Delete'}
-    </Button>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setError('') }}>
+      <DialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            title="Delete product"
+            aria-label="Delete product"
+          />
+        }
+      >
+        <Trash2 className="size-3.5" />
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete product?</DialogTitle>
+          <DialogDescription>
+            This removes {product.name} from your shelf. Existing purchase
+            records stay in your database.
+          </DialogDescription>
+        </DialogHeader>
+        {error && (
+          <div className="rounded-lg border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive">
+            {error}
+          </div>
+        )}
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+          <Button variant="destructive" onClick={handleDelete} disabled={loading}>
+            {loading ? 'Deleting' : 'Delete product'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
-
