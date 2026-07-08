@@ -74,29 +74,29 @@ const getSignedDownloadUrlFn = createServerFn({ method: "POST" })
     const rwToken = process.env.PRIVATE_BLOB_READ_WRITE_TOKEN;
     if (!rwToken) throw new Error("PRIVATE_BLOB_READ_WRITE_TOKEN is not set");
 
-    // Only attempt presigning for Vercel Blob private URLs
     if (!data.blobUrl.includes(".private.blob.vercel-storage.com")) {
       return { url: data.blobUrl };
     }
 
-    // Extract the pathname from the blob URL (strip the host)
-    const { pathname } = new URL(data.blobUrl);
+    const { pathname: rawPathname } = new URL(data.blobUrl);
 
-    // Step 1: issue a short-lived signed token scoped to this file
+    // normalize: strip leading slash + decode percent-encoding
+    // so this matches the actual stored pathname exactly
+    const pathname = decodeURIComponent(rawPathname).replace(/^\//, "");
+
     const signedToken = await issueSignedToken({
       pathname,
       operations: ["get"],
-      validUntil: Date.now() + 5 * 60 * 1000, // 5 minutes
+      validUntil: Date.now() + 5 * 60 * 1000,
       token: rwToken,
     });
 
-    // Step 2: generate the presigned URL the browser will redirect to
     const { presignedUrl } = await presignUrl(signedToken, {
       pathname,
-      operation: 'get',
+      operation: "get",
+      access: "private",
       validUntil: Date.now() + 5 * 60 * 1000,
-      access: 'private',
-    } as any);
+    });
 
     return { url: presignedUrl };
   });
