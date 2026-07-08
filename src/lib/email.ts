@@ -1,17 +1,32 @@
 import { resend } from './resend'
+import { db } from '../db'
+import { shopSettings } from '../db/schema'
 
-const fromEmail = process.env.RESEND_FROM_EMAIL || 'Payshelf <onboarding@resend.dev>'
 const appUrl = process.env.APP_URL || 'http://localhost:3000'
+
+async function getShopSettings() {
+  const rows = await db.select().from(shopSettings).limit(1)
+  return rows[0] ?? { shopName: 'My Shop', fromEmail: null }
+}
 
 /**
  * Send a purchase confirmation email with a magic link to access the product.
+ * Uses shop name and from address from the database settings.
  */
 export async function sendPurchaseEmail(
   to: string,
   productName: string,
   accessToken: string,
 ) {
+  const settings = await getShopSettings()
   const accessUrl = `${appUrl}/access/${accessToken}`
+
+  const fromEmail =
+    settings.fromEmail ||
+    process.env.RESEND_FROM_EMAIL ||
+    `${settings.shopName} <onboarding@resend.dev>`
+
+  const shopName = settings.shopName
 
   const { error } = await resend.emails.send({
     from: fromEmail,
@@ -28,7 +43,7 @@ export async function sendPurchaseEmail(
           <div style="max-width:480px;margin:40px auto;background:#ffffff;border-radius:12px;border:1px solid #e5e5e5;overflow:hidden;">
             <div style="padding:32px 32px 24px;">
               <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#737373;">
-                Payshelf
+                ${shopName}
               </p>
               <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#171717;">
                 Thanks for your purchase!
@@ -48,6 +63,9 @@ export async function sendPurchaseEmail(
               <p style="margin:0;font-size:12px;color:#a3a3a3;line-height:1.5;">
                 You can also copy this link: <a href="${accessUrl}" style="color:#737373;">${accessUrl}</a>
               </p>
+              <p style="margin:8px 0 0;font-size:12px;color:#a3a3a3;">
+                Sent by ${shopName}
+              </p>
             </div>
           </div>
         </body>
@@ -56,6 +74,6 @@ export async function sendPurchaseEmail(
   })
 
   if (error) {
-    console.error('[Payshelf] Failed to send purchase email:', error)
+    console.error(`[${shopName}] Failed to send purchase email:`, error)
   }
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { listProductsFn } from '#/lib/products.functions'
+import { getSettingsFn } from '#/lib/settings.functions'
 import { createCheckoutFn } from '#/lib/checkout.functions'
 import { BrandLockup } from '#/components/brand'
 import { Button } from '#/components/ui/button'
@@ -15,7 +16,10 @@ import {
 } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
-  loader: () => listProductsFn(),
+  loader: async () => {
+    const [products, settings] = await Promise.all([listProductsFn(), getSettingsFn()])
+    return { products, settings }
+  },
   component: Home,
 })
 
@@ -35,13 +39,13 @@ type Product = {
 }
 
 function Home() {
-  const products = Route.useLoaderData()
+  const { products, settings } = Route.useLoaderData()
 
   return (
     <div className="min-h-[100dvh] bg-background">
       <header className="border-b border-border/80 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <BrandLockup />
+          <BrandLockup shopName={settings.shopName} />
           <Button variant="outline" size="sm" onClick={() => (window.location.href = '/login')}>
             Seller login
           </Button>
@@ -52,38 +56,6 @@ function Home() {
         id="main-content"
         className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
       >
-        <section className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,0.55fr)] lg:items-end">
-          <div>
-            <Badge className="mb-4 bg-accent text-accent-foreground">
-              Digital storefront
-            </Badge>
-            <h1 className="font-heading text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
-              A clean shelf for digital products.
-            </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-              Browse available downloads, pay securely with Stripe, and receive
-              access by email after purchase.
-            </p>
-          </div>
-
-          <Card className="bg-card/95">
-            <CardContent className="grid gap-4">
-              {[
-                ['Secure checkout', <LockKeyhole className="size-4" />],
-                ['Email access links', <ShieldCheck className="size-4" />],
-                [`${products.length} product${products.length === 1 ? '' : 's'} available`, <ShoppingBag className="size-4" />],
-              ].map(([label, icon]) => (
-                <div key={label as string} className="flex items-center gap-3">
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                    {icon}
-                  </span>
-                  <span className="text-sm font-medium">{label}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </section>
-
         {products.length === 0 ? (
           <EmptyShelf />
         ) : (

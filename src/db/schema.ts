@@ -169,3 +169,18 @@ export const purchaseRelations = relations(purchase, ({ one }) => ({
 export const productRelations = relations(product, ({ many }) => ({
   purchases: many(purchase),
 }));
+
+// ── Shop Settings ──────────────────────────────────────────────────────────
+// Single-row table — always upserted with id = 'singleton'
+
+export const shopSettings = sqliteTable("shop_settings", {
+  id: text("id").primaryKey().default("singleton"),
+  shopName: text("shop_name").notNull().default("My Shop"),
+  shopTagline: text("shop_tagline"),
+  fromEmail: text("from_email"),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+

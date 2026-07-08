@@ -4,6 +4,7 @@ import { authClient } from '#/lib/auth-client'
 import { listProductsFn, createProductFn } from '#/lib/products.functions'
 import { updateProductFn, deleteProductFn } from '#/lib/products.mutations'
 import { getAnalyticsFn } from '#/lib/analytics.functions'
+import { getSettingsFn } from '#/lib/settings.functions'
 import { BrandLockup } from '#/components/brand'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -52,14 +53,15 @@ import {
 
 export const Route = createFileRoute('/_dashboard/dashboard')({
   loader: async () => {
-    const [products, analytics] = await Promise.all([
+    const [products, analytics, settings] = await Promise.all([
       listProductsFn(),
       getAnalyticsFn(),
+      getSettingsFn(),
     ])
     if (products.length === 0) {
       throw redirect({ to: '/onboarding' })
     }
-    return { products, analytics }
+    return { products, analytics, settings }
   },
   component: DashboardPage,
 })
@@ -95,7 +97,7 @@ interface ProductType {
 
 function DashboardPage() {
   const { data: session } = authClient.useSession()
-  const { products, analytics } = Route.useLoaderData()
+  const { products, analytics, settings } = Route.useLoaderData()
   const router = useRouter()
 
   const chartData = analytics.chartData.map((d) => ({
@@ -112,13 +114,19 @@ function DashboardPage() {
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
-            <BrandLockup />
+            <BrandLockup shopName={settings.shopName} />
             <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
               <a
                 href="/dashboard"
                 className="rounded-md bg-muted px-3 py-1.5 text-sm font-medium text-foreground"
               >
                 Dashboard
+              </a>
+              <a
+                href="/settings"
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                Settings
               </a>
               <a
                 href="/"

@@ -1,6 +1,6 @@
 import { cn } from '#/lib/utils'
 
-function BrandMark({ className }: { className?: string }) {
+function BrandMark({ className, letter = 'S' }: { className?: string; letter?: string }) {
   return (
     <span
       aria-hidden="true"
@@ -9,17 +9,26 @@ function BrandMark({ className }: { className?: string }) {
         className,
       )}
     >
-      P
+      {letter}
     </span>
   )
 }
 
-function BrandLockup({ className }: { className?: string }) {
+function BrandLockup({
+  className,
+  shopName,
+}: {
+  className?: string
+  shopName?: string | null
+}) {
+  const name = shopName || 'My Shop'
+  const letter = name.charAt(0).toUpperCase()
+
   return (
     <div className={cn('flex items-center gap-2.5', className)}>
-      <BrandMark />
+      <BrandMark letter={letter} />
       <span className="font-heading text-base font-semibold tracking-tight">
-        Payshelf
+        {name}
       </span>
     </div>
   )
