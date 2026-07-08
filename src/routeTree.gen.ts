@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
 import { Route as CheckoutCancelRouteImport } from './routes/checkout/cancel'
 import { Route as AccessTokenRouteImport } from './routes/access/$token'
+import { Route as DashboardOnboardingRouteImport } from './routes/_dashboard/onboarding'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard/dashboard'
 import { Route as AuthSetupRouteImport } from './routes/_auth/setup'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
@@ -49,6 +50,11 @@ const AccessTokenRoute = AccessTokenRouteImport.update({
   path: '/access/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardOnboardingRoute = DashboardOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/setup': typeof AuthSetupRoute
   '/dashboard': typeof DashboardDashboardRoute
+  '/onboarding': typeof DashboardOnboardingRoute
   '/access/$token': typeof AccessTokenRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/setup': typeof AuthSetupRoute
   '/dashboard': typeof DashboardDashboardRoute
+  '/onboarding': typeof DashboardOnboardingRoute
   '/access/$token': typeof AccessTokenRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/setup': typeof AuthSetupRoute
   '/_dashboard/dashboard': typeof DashboardDashboardRoute
+  '/_dashboard/onboarding': typeof DashboardOnboardingRoute
   '/access/$token': typeof AccessTokenRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/dashboard'
+    | '/onboarding'
     | '/access/$token'
     | '/checkout/cancel'
     | '/checkout/success'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/dashboard'
+    | '/onboarding'
     | '/access/$token'
     | '/checkout/cancel'
     | '/checkout/success'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/setup'
     | '/_dashboard/dashboard'
+    | '/_dashboard/onboarding'
     | '/access/$token'
     | '/checkout/cancel'
     | '/checkout/success'
@@ -204,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccessTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_dashboard/onboarding': {
+      id: '/_dashboard/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof DashboardOnboardingRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/dashboard': {
       id: '/_dashboard/dashboard'
       path: '/dashboard'
@@ -256,10 +275,12 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface DashboardRouteChildren {
   DashboardDashboardRoute: typeof DashboardDashboardRoute
+  DashboardOnboardingRoute: typeof DashboardOnboardingRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardDashboardRoute: DashboardDashboardRoute,
+  DashboardOnboardingRoute: DashboardOnboardingRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

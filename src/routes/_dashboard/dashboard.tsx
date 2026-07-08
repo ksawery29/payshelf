@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter, redirect } from '@tanstack/react-router'
 import { authClient } from '#/lib/auth-client'
 import { listProductsFn, createProductFn } from '#/lib/products.functions'
 import { updateProductFn, deleteProductFn } from '#/lib/products.mutations'
@@ -34,6 +34,10 @@ export const Route = createFileRoute('/_dashboard/dashboard')({
       listProductsFn(),
       getAnalyticsFn(),
     ])
+    // New users with no products get walked through onboarding
+    if (products.length === 0) {
+      throw redirect({ to: '/onboarding' })
+    }
     return { products, analytics }
   },
   component: DashboardPage,
