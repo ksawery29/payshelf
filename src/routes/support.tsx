@@ -1,20 +1,20 @@
-import { useState, useEffect, useRef } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { getSettingsFn } from "#/lib/settings.functions";
-import { BrandLockup } from "#/components/brand";
-import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "#/components/ui/card";
-import { Badge } from "#/components/ui/badge";
-import { ArrowLeft, Send, MessageSquare, Loader2 } from "lucide-react";
-import { getOrCreateVisitorId } from "#/lib/events.functions";
+import { useState, useEffect, useRef } from 'react';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { getSettingsFn } from '#/lib/settings.functions';
+import { BrandLockup } from '#/components/brand';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card';
+import { Badge } from '#/components/ui/badge';
+import { ArrowLeft, Send, MessageSquare, Loader2 } from 'lucide-react';
+import { getOrCreateVisitorId } from '#/lib/events.functions';
 import {
   getOrCreateSupportChatFn,
   getChatMessagesFn,
   sendSupportMessageFn,
-} from "#/lib/support.functions";
+} from '#/lib/support.functions';
 
-export const Route = createFileRoute("/support")({
+export const Route = createFileRoute('/support')({
   loader: async () => {
     const settings = await getSettingsFn();
     return { settings };
@@ -25,20 +25,24 @@ export const Route = createFileRoute("/support")({
 type Message = {
   id: string;
   chatId: string;
-  sender: "customer" | "agent";
+  sender: 'customer' | 'agent';
   content: string;
   createdAt: Date;
 };
 
 function SupportPage() {
   const { settings } = Route.useLoaderData();
-  const shopName = settings.shopName || "My Shop";
+  const shopName = settings.shopName || 'My Shop';
 
-  const [visitorId, setVisitorId] = useState("");
-  const [chat, setChat] = useState<{ id: string; status: string; customerEmail: string | null } | null>(null);
+  const [visitorId, setVisitorId] = useState('');
+  const [chat, setChat] = useState<{
+    id: string;
+    status: string;
+    customerEmail: string | null;
+  } | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [emailInput, setEmailInput] = useState("");
-  const [messageInput, setMessageInput] = useState("");
+  const [emailInput, setEmailInput] = useState('');
+  const [messageInput, setMessageInput] = useState('');
   const [loadingChat, setLoadingChat] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -55,13 +59,15 @@ function SupportPage() {
 
     async function initChat() {
       try {
-        const activeChat = await getOrCreateSupportChatFn({ data: { visitorId } });
+        const activeChat = await getOrCreateSupportChatFn({
+          data: { visitorId },
+        });
         setChat(activeChat);
         if (activeChat.customerEmail) {
           setEmailInput(activeChat.customerEmail);
         }
       } catch (err) {
-        console.error("Failed to initialize support chat:", err);
+        console.error('Failed to initialize support chat:', err);
       } finally {
         setLoadingChat(false);
       }
@@ -85,7 +91,7 @@ function SupportPage() {
           }))
         );
       } catch (err) {
-        console.error("Failed to poll messages:", err);
+        console.error('Failed to poll messages:', err);
       }
     }
 
@@ -97,7 +103,7 @@ function SupportPage() {
 
   // Scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   async function handleUpdateEmail(e: React.FormEvent) {
@@ -110,7 +116,7 @@ function SupportPage() {
       });
       setChat(activeChat);
     } catch (err) {
-      console.error("Failed to associate email with support chat:", err);
+      console.error('Failed to associate email with support chat:', err);
     }
   }
 
@@ -119,14 +125,14 @@ function SupportPage() {
     if (!messageInput.trim() || !chat || sending) return;
 
     const content = messageInput.trim();
-    setMessageInput("");
+    setMessageInput('');
     setSending(true);
 
     try {
       await sendSupportMessageFn({
         data: {
           chatId: chat.id,
-          sender: "customer",
+          sender: 'customer',
           content,
         },
       });
@@ -139,7 +145,7 @@ function SupportPage() {
         }))
       );
     } catch (err) {
-      console.error("Failed to send support message:", err);
+      console.error('Failed to send support message:', err);
     } finally {
       setSending(false);
     }
@@ -188,10 +194,13 @@ function SupportPage() {
                         </p>
                       </div>
                     </div>
-                    {chat?.status === "closed" ? (
+                    {chat?.status === 'closed' ? (
                       <Badge variant="secondary">Resolved</Badge>
                     ) : (
-                      <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <Badge
+                        variant="outline"
+                        className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      >
                         Live chat
                       </Badge>
                     )}
@@ -202,9 +211,7 @@ function SupportPage() {
                     <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4">
                       <form onSubmit={handleUpdateEmail} className="flex flex-col gap-3">
                         <div>
-                          <h4 className="text-sm font-medium text-foreground">
-                            Link your email
-                          </h4>
+                          <h4 className="text-sm font-medium text-foreground">Link your email</h4>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             Provide your email so we can reach you if you close this page.
                           </p>
@@ -232,32 +239,34 @@ function SupportPage() {
                       <div className="flex flex-1 flex-col items-center justify-center text-center p-8 text-muted-foreground">
                         <MessageSquare className="size-8 opacity-40 mb-2" strokeWidth={1.5} />
                         <p className="text-sm font-medium">No messages yet</p>
-                        <p className="text-xs mt-1">Send a message below to start chatting with us.</p>
+                        <p className="text-xs mt-1">
+                          Send a message below to start chatting with us.
+                        </p>
                       </div>
                     ) : (
                       <div className="flex flex-col gap-3">
                         {messages.map((msg) => {
-                          const isCustomer = msg.sender === "customer";
+                          const isCustomer = msg.sender === 'customer';
                           return (
                             <div
                               key={msg.id}
                               className={`flex flex-col max-w-[80%] gap-1 ${
-                                isCustomer ? "self-end items-end" : "self-start items-start"
+                                isCustomer ? 'self-end items-end' : 'self-start items-start'
                               }`}
                             >
                               <div
                                 className={`rounded-2xl px-4 py-2 text-sm leading-relaxed ${
                                   isCustomer
-                                    ? "bg-primary text-primary-foreground rounded-tr-sm"
-                                    : "bg-accent/80 text-foreground rounded-tl-sm"
+                                    ? 'bg-primary text-primary-foreground rounded-tr-sm'
+                                    : 'bg-accent/80 text-foreground rounded-tl-sm'
                                 }`}
                               >
                                 {msg.content}
                               </div>
                               <span className="text-[10px] text-muted-foreground px-1">
-                                {msg.createdAt.toLocaleTimeString("en-US", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
+                                {msg.createdAt.toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
                                 })}
                               </span>
                             </div>
@@ -269,9 +278,10 @@ function SupportPage() {
                   </div>
 
                   {/* Send Input */}
-                  {chat?.status === "closed" ? (
+                  {chat?.status === 'closed' ? (
                     <div className="text-center py-2 text-sm text-muted-foreground">
-                      This support session has been closed. If you need further help, please start a new session.
+                      This support session has been closed. If you need further help, please start a
+                      new session.
                     </div>
                   ) : (
                     <form onSubmit={handleSendMessage} className="flex gap-2">
@@ -283,7 +293,11 @@ function SupportPage() {
                         disabled={sending}
                         className="flex-1 bg-background"
                       />
-                      <Button type="submit" disabled={sending || !messageInput.trim()} className="rounded-full shrink-0">
+                      <Button
+                        type="submit"
+                        disabled={sending || !messageInput.trim()}
+                        className="rounded-full shrink-0"
+                      >
                         {sending ? (
                           <Loader2 className="size-4 animate-spin" />
                         ) : (

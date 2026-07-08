@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { createProductFn } from '#/lib/products.functions'
-import { BrandLockup } from '#/components/brand'
-import { FileUpload } from '#/components/file-upload'
-import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
-import { Label } from '#/components/ui/label'
-import { Badge } from '#/components/ui/badge'
+import { useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { createProductFn } from '#/lib/products.functions';
+import { BrandLockup } from '#/components/brand';
+import { FileUpload } from '#/components/file-upload';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
+import { Badge } from '#/components/ui/badge';
 import {
   ArrowRight,
   Check,
@@ -16,16 +16,16 @@ import {
   PackageOpen,
   PanelsTopLeft,
   WalletCards,
-} from 'lucide-react'
+} from 'lucide-react';
 
 export const Route = createFileRoute('/_dashboard/onboarding')({
   component: OnboardingPage,
-})
+});
 
-const TOTAL_STEPS = 3
+const TOTAL_STEPS = 3;
 
 function OnboardingPage() {
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(1);
 
   return (
     <div className="min-h-[100dvh] bg-background">
@@ -54,11 +54,7 @@ function OnboardingPage() {
         <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
           <aside className="hidden lg:block">
             <div className="sticky top-24 space-y-2">
-              {[
-                'Basics',
-                'Stripe setup',
-                'First product',
-              ].map((label, index) => (
+              {['Basics', 'Stripe setup', 'First product'].map((label, index) => (
                 <div
                   key={label}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
@@ -86,15 +82,13 @@ function OnboardingPage() {
 
           <section className="app-surface animate-in fade-in-0 slide-in-from-bottom-3 p-5 duration-500 sm:p-8">
             {step === 1 && <StepWelcome onNext={() => setStep(2)} />}
-            {step === 2 && (
-              <StepStripe onNext={() => setStep(3)} onBack={() => setStep(1)} />
-            )}
+            {step === 2 && <StepStripe onNext={() => setStep(3)} onBack={() => setStep(1)} />}
             {step === 3 && <StepAddProduct />}
           </section>
         </div>
       </main>
     </div>
-  )
+  );
 }
 
 function StepWelcome({ onNext }: { onNext: () => void }) {
@@ -106,8 +100,8 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
           Welcome to Payshelf 👋
         </h1>
         <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-          Get a first product live in a few minutes. Payshelf uses Stripe
-          Checkout for payment and sends buyers an access link after purchase.
+          Get a first product live in a few minutes. Payshelf uses Stripe Checkout for payment and
+          sends buyers an access link after purchase.
         </p>
       </div>
 
@@ -144,7 +138,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
 function FeatureRow({
@@ -152,9 +146,9 @@ function FeatureRow({
   title,
   description,
 }: {
-  icon: React.ReactNode
-  title: string
-  description: string
+  icon: React.ReactNode;
+  title: string;
+  description: string;
 }) {
   return (
     <div className="flex gap-4 rounded-lg border border-border/80 bg-background/70 p-4">
@@ -163,12 +157,10 @@ function FeatureRow({
       </div>
       <div>
         <p className="font-medium">{title}</p>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          {description}
-        </p>
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
       </div>
     </div>
-  )
+  );
 }
 
 function StepStripe({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
@@ -180,8 +172,7 @@ function StepStripe({ onNext, onBack }: { onNext: () => void; onBack: () => void
           Set up your Stripe product
         </h1>
         <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-          Payshelf stores your Stripe Product ID so checkout sessions can be
-          created on demand.
+          Payshelf stores your Stripe Product ID so checkout sessions can be created on demand.
         </p>
       </div>
 
@@ -221,20 +212,21 @@ function StepStripe({ onNext, onBack }: { onNext: () => void; onBack: () => void
       </ol>
 
       <div className="rounded-lg border border-border/80 bg-accent/60 p-4 text-sm leading-6 text-accent-foreground">
-        <strong>Tip:</strong> You can skip the Stripe Product ID for now.
-        Checkout still works, but the purchase will not be linked to a specific
-        Stripe product in your dashboard.
+        <strong>Tip:</strong> You can skip the Stripe Product ID for now. Checkout still works, but
+        the purchase will not be linked to a specific Stripe product in your dashboard.
       </div>
 
       <div className="flex flex-col gap-3 border-t border-border/80 pt-6 sm:flex-row sm:justify-end">
-        <Button variant="outline" onClick={onBack}>Back</Button>
+        <Button variant="outline" onClick={onBack}>
+          Back
+        </Button>
         <Button onClick={onNext}>
           Add my product
           <ArrowRight className="size-4" data-icon="inline-end" />
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
 function InstructionStep({
@@ -243,10 +235,10 @@ function InstructionStep({
   description,
   action,
 }: {
-  number: number
-  title: string
-  description: string
-  action?: React.ReactNode
+  number: number;
+  title: string;
+  description: string;
+  action?: React.ReactNode;
 }) {
   return (
     <li className="grid gap-4 rounded-lg border border-border/80 bg-background/70 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
@@ -259,16 +251,16 @@ function InstructionStep({
         {action && <div className="mt-1">{action}</div>}
       </div>
     </li>
-  )
+  );
 }
 
 function CopyExample({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false);
 
   function copy() {
-    void navigator.clipboard.writeText(value)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    void navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
@@ -277,34 +269,30 @@ function CopyExample({ value }: { value: string }) {
       className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-muted"
     >
       {value}
-      {copied ? (
-        <Check className="size-3 text-emerald-600" />
-      ) : (
-        <Copy className="size-3" />
-      )}
+      {copied ? <Check className="size-3 text-emerald-600" /> : <Copy className="size-3" />}
     </button>
-  )
+  );
 }
 
 function StepAddProduct() {
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [price, setPrice] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [filePath, setFilePath] = useState('')
-  const [stripeProductId, setStripeProductId] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [filePath, setFilePath] = useState('');
+  const [stripeProductId, setStripeProductId] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    const priceCents = Math.round(parseFloat(price) * 100)
+    e.preventDefault();
+    setError('');
+    const priceCents = Math.round(parseFloat(price) * 100);
     if (isNaN(priceCents) || priceCents <= 0) {
-      setError('Enter a valid price.')
-      return
+      setError('Enter a valid price.');
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       await createProductFn({
         data: {
@@ -315,11 +303,11 @@ function StepAddProduct() {
           filePath: filePath || undefined,
           stripeProductId: stripeProductId || undefined,
         },
-      })
-      window.location.href = '/dashboard'
+      });
+      window.location.href = '/dashboard';
     } catch {
-      setError('We could not create the product. Please try again.')
-      setLoading(false)
+      setError('We could not create the product. Please try again.');
+      setLoading(false);
     }
   }
 
@@ -331,8 +319,8 @@ function StepAddProduct() {
           Add your first product
         </h1>
         <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-          Add storefront copy, pricing, and delivery details. You can edit all
-          fields from the dashboard later.
+          Add storefront copy, pricing, and delivery details. You can edit all fields from the
+          dashboard later.
         </p>
       </div>
 
@@ -427,5 +415,5 @@ function StepAddProduct() {
         </div>
       </form>
     </div>
-  )
+  );
 }

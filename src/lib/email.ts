@@ -1,32 +1,28 @@
-import { resend } from './resend'
-import { db } from '../db'
-import { shopSettings } from '../db/schema'
+import { resend } from './resend';
+import { db } from '../db';
+import { shopSettings } from '../db/schema';
 
-const appUrl = process.env.APP_URL || 'http://localhost:3000'
+const appUrl = process.env.APP_URL || 'http://localhost:3000';
 
 async function getShopSettings() {
-  const rows = await db.select().from(shopSettings).limit(1)
-  return rows[0] ?? { shopName: 'My Shop', fromEmail: null }
+  const rows = await db.select().from(shopSettings).limit(1);
+  return rows[0] ?? { shopName: 'My Shop', fromEmail: null };
 }
 
 /**
  * Send a purchase confirmation email with a magic link to access the product.
  * Uses shop name and from address from the database settings.
  */
-export async function sendPurchaseEmail(
-  to: string,
-  productName: string,
-  accessToken: string,
-) {
-  const settings = await getShopSettings()
-  const accessUrl = `${appUrl}/access/${accessToken}`
+export async function sendPurchaseEmail(to: string, productName: string, accessToken: string) {
+  const settings = await getShopSettings();
+  const accessUrl = `${appUrl}/access/${accessToken}`;
 
   const fromEmail =
     settings.fromEmail ||
     process.env.RESEND_FROM_EMAIL ||
-    `${settings.shopName} <onboarding@resend.dev>`
+    `${settings.shopName} <onboarding@resend.dev>`;
 
-  const shopName = settings.shopName
+  const shopName = settings.shopName;
 
   const { error } = await resend.emails.send({
     from: fromEmail,
@@ -71,9 +67,9 @@ export async function sendPurchaseEmail(
         </body>
       </html>
     `,
-  })
+  });
 
   if (error) {
-    console.error(`[${shopName}] Failed to send purchase email:`, error)
+    console.error(`[${shopName}] Failed to send purchase email:`, error);
   }
 }

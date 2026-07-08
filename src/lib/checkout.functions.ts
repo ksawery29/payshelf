@@ -1,10 +1,10 @@
-import { createServerFn } from '@tanstack/react-start'
-import { db } from '../db'
-import { product, analyticsEvent } from '../db/schema'
-import { eq } from 'drizzle-orm'
-import { stripe } from './stripe'
+import { createServerFn } from '@tanstack/react-start';
+import { db } from '../db';
+import { product, analyticsEvent } from '../db/schema';
+import { eq } from 'drizzle-orm';
+import { stripe } from './stripe';
 
-const appUrl = process.env.APP_URL || 'http://localhost:3000'
+const appUrl = process.env.APP_URL || 'http://localhost:3000';
 
 /**
  * Create a Stripe Checkout Session for purchasing a product.
@@ -14,14 +14,10 @@ export const createCheckoutFn = createServerFn({ method: 'POST' })
   .validator((data: { productId: string; visitorId?: string }) => data)
   .handler(async ({ data }) => {
     // Look up the product
-    const [prod] = await db
-      .select()
-      .from(product)
-      .where(eq(product.id, data.productId))
-      .limit(1)
+    const [prod] = await db.select().from(product).where(eq(product.id, data.productId)).limit(1);
 
     if (!prod) {
-      throw new Error('Product not found')
+      throw new Error('Product not found');
     }
 
     // Create checkout session with dynamic price
@@ -47,7 +43,7 @@ export const createCheckoutFn = createServerFn({ method: 'POST' })
       customer_email: undefined, // Let Stripe collect it
       success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/checkout/cancel`,
-    })
+    });
 
     // Fire checkout_initiated event (best-effort, don't block checkout)
     try {
@@ -55,10 +51,10 @@ export const createCheckoutFn = createServerFn({ method: 'POST' })
         event: 'checkout_initiated',
         productId: prod.id,
         visitorId: data.visitorId ?? null,
-      })
+      });
     } catch (err) {
-      console.warn('[Payshelf] Failed to record checkout_initiated event:', err)
+      console.warn('[Payshelf] Failed to record checkout_initiated event:', err);
     }
 
-    return { url: session.url }
-  })
+    return { url: session.url };
+  });

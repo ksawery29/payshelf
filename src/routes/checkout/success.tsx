@@ -1,22 +1,22 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { BrandLockup } from '#/components/brand'
-import { Card, CardContent } from '#/components/ui/card'
-import { Button } from '#/components/ui/button'
-import { Badge } from '#/components/ui/badge'
-import { CircleCheck, MailCheck } from 'lucide-react'
-import { getSettingsFn } from '#/lib/settings.functions'
-import { Footer } from '#/components/footer'
+import { createFileRoute } from '@tanstack/react-router';
+import { BrandLockup } from '#/components/brand';
+import { Card, CardContent } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
+import { Badge } from '#/components/ui/badge';
+import { CircleCheck, MailCheck } from 'lucide-react';
+import { getSettingsFn } from '#/lib/settings.functions';
+import { Footer } from '#/components/footer';
 
 export const Route = createFileRoute('/checkout/success')({
   loader: async () => {
-    const settings = await getSettingsFn()
-    return { settings }
+    const settings = await getSettingsFn();
+    return { settings };
   },
   component: CheckoutSuccessPage,
-})
+});
 
 function CheckoutSuccessPage() {
-  const { settings } = Route.useLoaderData()
+  const { settings } = Route.useLoaderData();
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
@@ -35,15 +35,13 @@ function CheckoutSuccessPage() {
               <CircleCheck className="size-7" strokeWidth={1.8} />
             </span>
             <div>
-              <Badge className="mb-3 bg-accent text-accent-foreground">
-                Payment received
-              </Badge>
+              <Badge className="mb-3 bg-accent text-accent-foreground">Payment received</Badge>
               <h1 className="font-heading text-2xl font-semibold tracking-tight">
                 You're all set 🎉
               </h1>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Check your email for a secure access link. You can use it
-                anytime to download your product.
+                Check your email for a secure access link. You can use it anytime to download your
+                product.
               </p>
             </div>
             <div className="flex w-full items-center gap-3 rounded-lg border border-border/80 bg-background/70 p-3 text-left">
@@ -65,5 +63,5 @@ function CheckoutSuccessPage() {
       </main>
       <Footer shopName={settings.shopName} />
     </div>
-  )
+  );
 }

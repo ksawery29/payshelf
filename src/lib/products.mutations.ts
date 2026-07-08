@@ -1,7 +1,7 @@
-import { createServerFn } from '@tanstack/react-start'
-import { db } from '../db'
-import { product } from '../db/schema'
-import { eq } from 'drizzle-orm'
+import { createServerFn } from '@tanstack/react-start';
+import { db } from '../db';
+import { product } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
 /**
  * Edit/Update an existing product.
@@ -9,14 +9,14 @@ import { eq } from 'drizzle-orm'
 export const updateProductFn = createServerFn({ method: 'POST' })
   .validator(
     (data: {
-      id: string
-      name: string
-      description: string
-      priceCents: number
-      imageUrl?: string
-      filePath?: string
-      stripeProductId?: string
-    }) => data,
+      id: string;
+      name: string;
+      description: string;
+      priceCents: number;
+      imageUrl?: string;
+      filePath?: string;
+      stripeProductId?: string;
+    }) => data
   )
   .handler(async ({ data }) => {
     const [updated] = await db
@@ -30,10 +30,10 @@ export const updateProductFn = createServerFn({ method: 'POST' })
         stripeProductId: data.stripeProductId || null,
       })
       .where(eq(product.id, data.id))
-      .returning()
+      .returning();
 
-    return updated
-  })
+    return updated;
+  });
 
 /**
  * Delete a product.
@@ -41,10 +41,7 @@ export const updateProductFn = createServerFn({ method: 'POST' })
 export const deleteProductFn = createServerFn({ method: 'POST' })
   .validator((data: { id: string }) => data)
   .handler(async ({ data }) => {
-    const [deleted] = await db
-      .delete(product)
-      .where(eq(product.id, data.id))
-      .returning()
+    const [deleted] = await db.delete(product).where(eq(product.id, data.id)).returning();
 
-    return deleted
-  })
+    return deleted;
+  });

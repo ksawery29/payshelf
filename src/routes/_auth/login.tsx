@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { authClient } from '#/lib/auth-client'
-import { getSessionFn, getHasUsersFn } from '#/lib/auth.functions'
-import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
-import { Label } from '#/components/ui/label'
+import { useState } from 'react';
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { authClient } from '#/lib/auth-client';
+import { getSessionFn, getHasUsersFn } from '#/lib/auth.functions';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
 import {
   Card,
   CardContent,
@@ -12,55 +12,52 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '#/components/ui/card'
+} from '#/components/ui/card';
 
 export const Route = createFileRoute('/_auth/login')({
   beforeLoad: async () => {
-    const [session, hasUsers] = await Promise.all([
-      getSessionFn(),
-      getHasUsersFn(),
-    ])
+    const [session, hasUsers] = await Promise.all([getSessionFn(), getHasUsersFn()]);
 
     // If no users exist, redirect to setup (onboarding)
     if (!hasUsers) {
-      throw redirect({ to: '/setup' })
+      throw redirect({ to: '/setup' });
     }
 
     // If already logged in, redirect to dashboard
     if (session) {
-      throw redirect({ to: '/dashboard' })
+      throw redirect({ to: '/dashboard' });
     }
   },
   component: LoginPage,
-})
+});
 
 function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
     try {
       const result = await authClient.signIn.email({
         email,
         password,
-      })
+      });
 
       if (result.error) {
-        setError(result.error.message ?? 'Invalid email or password')
-        return
+        setError(result.error.message ?? 'Invalid email or password');
+        return;
       }
 
-      window.location.href = '/dashboard'
+      window.location.href = '/dashboard';
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError('Something went wrong. Please try again.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -68,9 +65,7 @@ function LoginPage() {
     <Card className="animate-in fade-in-0 slide-in-from-bottom-3 border-border/80 bg-card/95 duration-500">
       <CardHeader className="space-y-1">
         <CardTitle className="font-heading text-2xl">Welcome back</CardTitle>
-        <CardDescription>
-          Sign in to manage products, orders, and delivery links.
-        </CardDescription>
+        <CardDescription>Sign in to manage products, orders, and delivery links.</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -106,12 +101,7 @@ function LoginPage() {
           </div>
         </CardContent>
         <CardFooter className="pt-2">
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" size="lg" disabled={loading}>
             {loading ? (
               <span className="flex items-center gap-2">
                 <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -124,5 +114,5 @@ function LoginPage() {
         </CardFooter>
       </form>
     </Card>
-  )
+  );
 }

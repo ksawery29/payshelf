@@ -1,26 +1,23 @@
-import { useState, useEffect, useRef } from "react";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { authClient } from "#/lib/auth-client";
-import { BrandLockup } from "#/components/brand";
-import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
-import { Card, CardContent } from "#/components/ui/card";
-import { Badge } from "#/components/ui/badge";
-import { LogOut, MessageSquare, CheckCircle, Clock, Loader2, ArrowRight } from "lucide-react";
-import { getSettingsFn } from "#/lib/settings.functions";
+import { useState, useEffect, useRef } from 'react';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
+import { authClient } from '#/lib/auth-client';
+import { BrandLockup } from '#/components/brand';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Card, CardContent } from '#/components/ui/card';
+import { Badge } from '#/components/ui/badge';
+import { LogOut, MessageSquare, CheckCircle, Clock, Loader2, ArrowRight } from 'lucide-react';
+import { getSettingsFn } from '#/lib/settings.functions';
 import {
   listAllChatsFn,
   getChatMessagesFn,
   sendSupportMessageFn,
   closeSupportChatFn,
-} from "#/lib/support.functions";
+} from '#/lib/support.functions';
 
-export const Route = createFileRoute("/_dashboard/dashboard/support")({
+export const Route = createFileRoute('/_dashboard/dashboard/support')({
   loader: async () => {
-    const [settings, chats] = await Promise.all([
-      getSettingsFn(),
-      listAllChatsFn(),
-    ]);
+    const [settings, chats] = await Promise.all([getSettingsFn(), listAllChatsFn()]);
     return { settings, initialChats: chats };
   },
   component: DashboardSupportPage,
@@ -30,7 +27,7 @@ type ChatSession = {
   id: string;
   visitorId: string;
   customerEmail: string | null;
-  status: "open" | "closed";
+  status: 'open' | 'closed';
   createdAt: string;
   updatedAt: string;
 };
@@ -38,7 +35,7 @@ type ChatSession = {
 type Message = {
   id: string;
   chatId: string;
-  sender: "customer" | "agent";
+  sender: 'customer' | 'agent';
   content: string;
   createdAt: Date;
 };
@@ -46,7 +43,7 @@ type Message = {
 function DashboardSupportPage() {
   const { data: session } = authClient.useSession();
   const { settings, initialChats } = Route.useLoaderData();
-  const shopName = settings.shopName || "My Shop";
+  const shopName = settings.shopName || 'My Shop';
 
   const [chats, setChats] = useState<ChatSession[]>(
     initialChats.map((c) => ({
@@ -59,7 +56,7 @@ function DashboardSupportPage() {
     initialChats.length > 0 ? initialChats[0].id : null
   );
   const [messages, setMessages] = useState<Message[]>([]);
-  const [replyText, setReplyText] = useState("");
+  const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -77,7 +74,7 @@ function DashboardSupportPage() {
           }))
         );
       } catch (err) {
-        console.error("Failed to poll chat list:", err);
+        console.error('Failed to poll chat list:', err);
       }
     }
 
@@ -95,7 +92,9 @@ function DashboardSupportPage() {
     async function fetchMessages(showLoader = false) {
       if (showLoader) setLoadingMessages(true);
       try {
-        const msgs = await getChatMessagesFn({ data: { chatId: selectedChatId! } });
+        const msgs = await getChatMessagesFn({
+          data: { chatId: selectedChatId! },
+        });
         setMessages(
           msgs.map((m) => ({
             ...m,
@@ -103,7 +102,7 @@ function DashboardSupportPage() {
           }))
         );
       } catch (err) {
-        console.error("Failed to fetch messages:", err);
+        console.error('Failed to fetch messages:', err);
       } finally {
         if (showLoader) setLoadingMessages(false);
       }
@@ -117,7 +116,7 @@ function DashboardSupportPage() {
 
   // Scroll to bottom on message updates
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const selectedChat = chats.find((c) => c.id === selectedChatId);
@@ -127,20 +126,22 @@ function DashboardSupportPage() {
     if (!replyText.trim() || !selectedChatId || sending) return;
 
     const content = replyText.trim();
-    setReplyText("");
+    setReplyText('');
     setSending(true);
 
     try {
       await sendSupportMessageFn({
         data: {
           chatId: selectedChatId,
-          sender: "agent",
+          sender: 'agent',
           content,
         },
       });
 
       // Instantly load new messages
-      const msgs = await getChatMessagesFn({ data: { chatId: selectedChatId } });
+      const msgs = await getChatMessagesFn({
+        data: { chatId: selectedChatId },
+      });
       setMessages(
         msgs.map((m) => ({
           ...m,
@@ -148,7 +149,7 @@ function DashboardSupportPage() {
         }))
       );
     } catch (err) {
-      console.error("Failed to send support reply:", err);
+      console.error('Failed to send support reply:', err);
     } finally {
       setSending(false);
     }
@@ -161,10 +162,10 @@ function DashboardSupportPage() {
       await closeSupportChatFn({ data: { chatId: selectedChatId } });
       // Update local state
       setChats((prev) =>
-        prev.map((c) => (c.id === selectedChatId ? { ...c, status: "closed" } : c))
+        prev.map((c) => (c.id === selectedChatId ? { ...c, status: 'closed' } : c))
       );
     } catch (err) {
-      console.error("Failed to close chat:", err);
+      console.error('Failed to close chat:', err);
     }
   }
 
@@ -220,7 +221,7 @@ function DashboardSupportPage() {
                 void authClient.signOut({
                   fetchOptions: {
                     onSuccess: () => {
-                      window.location.href = "/login";
+                      window.location.href = '/login';
                     },
                   },
                 });
@@ -261,7 +262,7 @@ function DashboardSupportPage() {
                         key={c.id}
                         onClick={() => setSelectedChatId(c.id)}
                         className={`w-full text-left p-4 hover:bg-muted/50 transition-colors flex flex-col gap-2 ${
-                          isSelected ? "bg-muted" : ""
+                          isSelected ? 'bg-muted' : ''
                         }`}
                       >
                         <div className="flex items-center justify-between w-full">
@@ -270,9 +271,9 @@ function DashboardSupportPage() {
                           </span>
                           <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                             <Clock className="size-3" />
-                            {new Date(c.updatedAt).toLocaleTimeString("en-US", {
-                              hour: "2-digit",
-                              minute: "2-digit",
+                            {new Date(c.updatedAt).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit',
                             })}
                           </span>
                         </div>
@@ -282,12 +283,15 @@ function DashboardSupportPage() {
                           </div>
                         )}
                         <div className="flex items-center justify-between w-full mt-1">
-                          {c.status === "closed" ? (
+                          {c.status === 'closed' ? (
                             <Badge variant="secondary" className="text-[10px] py-0.5 px-2">
                               Resolved
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] py-0.5 px-2">
+                            <Badge
+                              variant="outline"
+                              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] py-0.5 px-2"
+                            >
                               Open
                             </Badge>
                           )}
@@ -307,14 +311,20 @@ function DashboardSupportPage() {
                   <div className="border-b border-border/60 p-4 flex items-center justify-between bg-muted/20">
                     <div className="flex flex-col gap-0.5">
                       <div className="text-sm font-semibold">
-                        {selectedChat.customerEmail || `Visitor ${selectedChat.visitorId.slice(0, 8)}`}
+                        {selectedChat.customerEmail ||
+                          `Visitor ${selectedChat.visitorId.slice(0, 8)}`}
                       </div>
                       <div className="text-xs text-muted-foreground flex items-center gap-1">
                         Visitor ID: <span className="font-mono">{selectedChat.visitorId}</span>
                       </div>
                     </div>
-                    {selectedChat.status === "open" && (
-                      <Button variant="outline" size="sm" onClick={handleCloseChat} className="text-xs gap-1.5">
+                    {selectedChat.status === 'open' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCloseChat}
+                        className="text-xs gap-1.5"
+                      >
                         <CheckCircle className="size-4 text-emerald-600" />
                         Mark Resolved
                       </Button>
@@ -334,27 +344,28 @@ function DashboardSupportPage() {
                     ) : (
                       <div className="flex flex-col gap-3">
                         {messages.map((msg) => {
-                          const isAgent = msg.sender === "agent";
+                          const isAgent = msg.sender === 'agent';
                           return (
                             <div
                               key={msg.id}
                               className={`flex flex-col max-w-[85%] gap-1 ${
-                                isAgent ? "self-end items-end" : "self-start items-start"
+                                isAgent ? 'self-end items-end' : 'self-start items-start'
                               }`}
                             >
                               <div
                                 className={`rounded-2xl px-4 py-2 text-sm leading-relaxed ${
                                   isAgent
-                                    ? "bg-primary text-primary-foreground rounded-tr-sm"
-                                    : "bg-accent/80 text-foreground rounded-tl-sm"
+                                    ? 'bg-primary text-primary-foreground rounded-tr-sm'
+                                    : 'bg-accent/80 text-foreground rounded-tl-sm'
                                 }`}
                               >
                                 {msg.content}
                               </div>
                               <span className="text-[10px] text-muted-foreground px-1">
-                                {isAgent ? "Support Agent" : "Customer"} • {msg.createdAt.toLocaleTimeString("en-US", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
+                                {isAgent ? 'Support Agent' : 'Customer'} •{' '}
+                                {msg.createdAt.toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
                                 })}
                               </span>
                             </div>
@@ -367,7 +378,7 @@ function DashboardSupportPage() {
 
                   {/* Reply Input */}
                   <div className="border-t border-border/60 p-4">
-                    {selectedChat.status === "closed" ? (
+                    {selectedChat.status === 'closed' ? (
                       <div className="text-center py-2 text-sm text-muted-foreground">
                         This session is resolved and closed.
                       </div>
@@ -399,7 +410,9 @@ function DashboardSupportPage() {
                 <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
                   <MessageSquare className="size-12 opacity-30 mb-2" strokeWidth={1.5} />
                   <p className="text-sm font-medium">No conversation selected</p>
-                  <p className="text-xs mt-1">Select a ticket from the left panel to begin replying.</p>
+                  <p className="text-xs mt-1">
+                    Select a ticket from the left panel to begin replying.
+                  </p>
                 </div>
               )}
             </div>

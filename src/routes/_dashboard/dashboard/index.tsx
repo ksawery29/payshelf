@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { createFileRoute, useRouter, redirect } from "@tanstack/react-router";
-import { authClient } from "#/lib/auth-client";
-import { listProductsFn, createProductFn } from "#/lib/products.functions";
-import { updateProductFn, deleteProductFn } from "#/lib/products.mutations";
-import { getAnalyticsFn } from "#/lib/analytics.functions";
-import { getSettingsFn } from "#/lib/settings.functions";
-import { BrandLockup } from "#/components/brand";
-import { FileUpload } from "#/components/file-upload";
-import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
-import { Label } from "#/components/ui/label";
+import { useState } from 'react';
+import { createFileRoute, useRouter, redirect } from '@tanstack/react-router';
+import { authClient } from '#/lib/auth-client';
+import { listProductsFn, createProductFn } from '#/lib/products.functions';
+import { updateProductFn, deleteProductFn } from '#/lib/products.mutations';
+import { getAnalyticsFn } from '#/lib/analytics.functions';
+import { getSettingsFn } from '#/lib/settings.functions';
+import { BrandLockup } from '#/components/brand';
+import { FileUpload } from '#/components/file-upload';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
 import {
   Card,
   CardContent,
@@ -17,8 +17,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "#/components/ui/card";
-import { Badge } from "#/components/ui/badge";
+} from '#/components/ui/card';
+import { Badge } from '#/components/ui/badge';
 import {
   Dialog,
   DialogClose,
@@ -28,14 +28,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "#/components/ui/dialog";
+} from '#/components/ui/dialog';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "#/components/ui/chart";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+} from '#/components/ui/chart';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import {
   AlertCircle,
   Calendar,
@@ -50,9 +50,9 @@ import {
   ShoppingBag,
   Trash2,
   TrendingUp,
-} from "lucide-react";
+} from 'lucide-react';
 
-export const Route = createFileRoute("/_dashboard/dashboard/")({
+export const Route = createFileRoute('/_dashboard/dashboard/')({
   loader: async () => {
     const [products, analytics, settings] = await Promise.all([
       listProductsFn(),
@@ -60,7 +60,7 @@ export const Route = createFileRoute("/_dashboard/dashboard/")({
       getSettingsFn(),
     ]);
     if (products.length === 0) {
-      throw redirect({ to: "/onboarding" });
+      throw redirect({ to: '/onboarding' });
     }
     return { products, analytics, settings };
   },
@@ -68,21 +68,21 @@ export const Route = createFileRoute("/_dashboard/dashboard/")({
 });
 
 function formatPrice(cents: number) {
-  return (cents / 100).toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
+  return (cents / 100).toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
   });
 }
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 const chartConfig = {
   revenue: {
-    label: "Revenue",
-    color: "var(--color-chart-1)",
+    label: 'Revenue',
+    color: 'var(--color-chart-1)',
   },
 } satisfies ChartConfig;
 
@@ -107,12 +107,8 @@ function DashboardPage() {
     label: formatDate(d.date),
   }));
 
-  const linkedProducts = products.filter(
-    (product) => product.stripeProductId,
-  ).length;
-  const downloadableProducts = products.filter(
-    (product) => product.filePath,
-  ).length;
+  const linkedProducts = products.filter((product) => product.stripeProductId).length;
+  const downloadableProducts = products.filter((product) => product.filePath).length;
 
   return (
     <div className="min-h-[100dvh] bg-background">
@@ -120,10 +116,7 @@ function DashboardPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
             <BrandLockup shopName={settings.shopName} />
-            <nav
-              className="hidden items-center gap-1 md:flex"
-              aria-label="Primary"
-            >
+            <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
               <a
                 href="/dashboard"
                 className="rounded-md bg-muted px-3 py-1.5 text-sm font-medium text-foreground"
@@ -170,7 +163,7 @@ function DashboardPage() {
                 void authClient.signOut({
                   fetchOptions: {
                     onSuccess: () => {
-                      window.location.href = "/login";
+                      window.location.href = '/login';
                     },
                   },
                 });
@@ -183,15 +176,10 @@ function DashboardPage() {
         </div>
       </header>
 
-      <main
-        id="main-content"
-        className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
-      >
+      <main id="main-content" className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <section className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <Badge className="mb-3 bg-accent text-accent-foreground">
-              Seller dashboard
-            </Badge>
+            <Badge className="mb-3 bg-accent text-accent-foreground">Seller dashboard</Badge>
             <h1 className="font-heading text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
               Sales overview
             </h1>
@@ -209,19 +197,19 @@ function DashboardPage() {
           <StatCard
             title="Total revenue"
             value={formatPrice(analytics.totalRevenue)}
-            sub={`${analytics.totalSales} sale${analytics.totalSales === 1 ? "" : "s"} processed`}
+            sub={`${analytics.totalSales} sale${analytics.totalSales === 1 ? '' : 's'} processed`}
             icon={<TrendingUp className="size-4" />}
           />
           <StatCard
             title="This month"
             value={formatPrice(analytics.monthRevenue)}
-            sub={`${analytics.monthSales} sale${analytics.monthSales === 1 ? "" : "s"} this month`}
+            sub={`${analytics.monthSales} sale${analytics.monthSales === 1 ? '' : 's'} this month`}
             icon={<Calendar className="size-4" />}
           />
           <StatCard
             title="This week"
             value={formatPrice(analytics.weekRevenue)}
-            sub={`${analytics.weekSales} sale${analytics.weekSales === 1 ? "" : "s"} since Monday`}
+            sub={`${analytics.weekSales} sale${analytics.weekSales === 1 ? '' : 's'} since Monday`}
             icon={<CalendarDays className="size-4" />}
           />
           <StatCard
@@ -244,15 +232,13 @@ function DashboardPage() {
         <section className="mt-10">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="font-heading text-2xl font-semibold tracking-tight">
-                Product shelf
-              </h2>
+              <h2 className="font-heading text-2xl font-semibold tracking-tight">Product shelf</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 The products customers can buy from your public storefront.
               </p>
             </div>
             <span className="text-sm text-muted-foreground">
-              {products.length} item{products.length === 1 ? "" : "s"}
+              {products.length} item{products.length === 1 ? '' : 's'}
             </span>
           </div>
 
@@ -318,36 +304,19 @@ function RevenueChartCard({
       <CardHeader className="border-b border-border/80 pb-5">
         <div>
           <CardTitle className="text-lg">Revenue trend</CardTitle>
-          <CardDescription>
-            Daily purchase revenue over the last 30 days.
-          </CardDescription>
+          <CardDescription>Daily purchase revenue over the last 30 days.</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="pt-2">
         <ChartContainer config={chartConfig} className="h-72 w-full">
-          <AreaChart
-            data={chartData}
-            margin={{ top: 12, right: 12, left: -12, bottom: 0 }}
-          >
+          <AreaChart data={chartData} margin={{ top: 12, right: 12, left: -12, bottom: 0 }}>
             <defs>
               <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="8%"
-                  stopColor="var(--color-revenue)"
-                  stopOpacity={0.24}
-                />
-                <stop
-                  offset="92%"
-                  stopColor="var(--color-revenue)"
-                  stopOpacity={0.02}
-                />
+                <stop offset="8%" stopColor="var(--color-revenue)" stopOpacity={0.24} />
+                <stop offset="92%" stopColor="var(--color-revenue)" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid
-              vertical={false}
-              strokeDasharray="4 4"
-              className="stroke-border/70"
-            />
+            <CartesianGrid vertical={false} strokeDasharray="4 4" className="stroke-border/70" />
             <XAxis
               dataKey="label"
               tickLine={false}
@@ -365,10 +334,7 @@ function RevenueChartCard({
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  formatter={(value) => [
-                    `$${(value as number).toFixed(2)}`,
-                    "Revenue",
-                  ]}
+                  formatter={(value) => [`$${(value as number).toFixed(2)}`, 'Revenue']}
                 />
               }
             />
@@ -399,20 +365,20 @@ function ReadinessCard({
 }) {
   const items = [
     {
-      label: "Stripe IDs",
+      label: 'Stripe IDs',
       value: `${linkedProducts}/${products}`,
       ready: linkedProducts === products,
       icon: <Link2 className="size-4" />,
     },
     {
-      label: "Download files",
+      label: 'Download files',
       value: `${downloadableProducts}/${products}`,
       ready: downloadableProducts === products,
       icon: <FileArchive className="size-4" />,
     },
     {
-      label: "Storefront",
-      value: products > 0 ? "Live" : "Draft",
+      label: 'Storefront',
+      value: products > 0 ? 'Live' : 'Draft',
       ready: products > 0,
       icon: <ShoppingBag className="size-4" />,
     },
@@ -422,9 +388,7 @@ function ReadinessCard({
     <Card className="bg-card/95">
       <CardHeader>
         <CardTitle className="text-lg">Shelf readiness</CardTitle>
-        <CardDescription>
-          A quick check before sending customers to checkout.
-        </CardDescription>
+        <CardDescription>A quick check before sending customers to checkout.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
         {items.map((item) => (
@@ -439,9 +403,7 @@ function ReadinessCard({
               <span className="text-sm font-medium">{item.label}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="metric-number text-sm font-semibold">
-                {item.value}
-              </span>
+              <span className="metric-number text-sm font-semibold">{item.value}</span>
               {item.ready ? (
                 <CheckCircle2 className="size-4 text-emerald-600" />
               ) : (
@@ -503,18 +465,12 @@ function ProductManagementCard({
         <div className="grid gap-2 text-xs text-muted-foreground">
           <StatusRow
             icon={<Link2 className="size-3.5" />}
-            label={
-              product.stripeProductId
-                ? product.stripeProductId
-                : "Stripe ID missing"
-            }
+            label={product.stripeProductId ? product.stripeProductId : 'Stripe ID missing'}
             ready={Boolean(product.stripeProductId)}
           />
           <StatusRow
             icon={<FileArchive className="size-3.5" />}
-            label={
-              product.filePath ? product.filePath : "Download file not set"
-            }
+            label={product.filePath ? product.filePath : 'Download file not set'}
             ready={Boolean(product.filePath)}
           />
         </div>
@@ -525,10 +481,10 @@ function ProductManagementCard({
           {formatPrice(product.priceCents)}
         </Badge>
         <Badge
-          variant={product.stripeProductId ? "outline" : "secondary"}
-          className={product.stripeProductId ? "text-emerald-700" : ""}
+          variant={product.stripeProductId ? 'outline' : 'secondary'}
+          className={product.stripeProductId ? 'text-emerald-700' : ''}
         >
-          {product.stripeProductId ? "Checkout ready" : "Draft"}
+          {product.stripeProductId ? 'Checkout ready' : 'Draft'}
         </Badge>
       </CardFooter>
     </Card>
@@ -546,9 +502,7 @@ function StatusRow({
 }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <span className={ready ? "text-emerald-600" : "text-amber-600"}>
-        {icon}
-      </span>
+      <span className={ready ? 'text-emerald-600' : 'text-amber-600'}>{icon}</span>
       <span className="truncate">{label}</span>
     </div>
   );
@@ -561,8 +515,8 @@ function EmptyProducts({ onCreate }: { onCreate: () => void }) {
       <CardContent className="max-w-md">
         <h3 className="font-heading text-xl font-semibold">No products yet</h3>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Add a first product with a price, Stripe Product ID, and download path
-          so customers can buy from your shelf.
+          Add a first product with a price, Stripe Product ID, and download path so customers can
+          buy from your shelf.
         </p>
       </CardContent>
       <CreateProductDialog onCreated={onCreate} />
@@ -573,31 +527,31 @@ function EmptyProducts({ onCreate }: { onCreate: () => void }) {
 function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [filePath, setFilePath] = useState("");
-  const [stripeProductId, setStripeProductId] = useState("");
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [filePath, setFilePath] = useState('');
+  const [stripeProductId, setStripeProductId] = useState('');
 
   function resetForm() {
-    setName("");
-    setDescription("");
-    setPrice("");
-    setImageUrl("");
-    setFilePath("");
-    setStripeProductId("");
-    setError("");
+    setName('');
+    setDescription('');
+    setPrice('');
+    setImageUrl('');
+    setFilePath('');
+    setStripeProductId('');
+    setError('');
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError('');
     const priceCents = Math.round(parseFloat(price) * 100);
     if (isNaN(priceCents) || priceCents <= 0) {
-      setError("Enter a valid price.");
+      setError('Enter a valid price.');
       return;
     }
     setLoading(true);
@@ -616,7 +570,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
       setOpen(false);
       onCreated();
     } catch {
-      setError("We could not create the product. Please try again.");
+      setError('We could not create the product. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -666,7 +620,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
                   Creating
                 </span>
               ) : (
-                "Create product"
+                'Create product'
               )}
             </Button>
           </DialogFooter>
@@ -685,23 +639,21 @@ function EditProductDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const [name, setName] = useState(product.name);
-  const [description, setDescription] = useState(product.description || "");
+  const [description, setDescription] = useState(product.description || '');
   const [price, setPrice] = useState((product.priceCents / 100).toString());
-  const [imageUrl, setImageUrl] = useState(product.imageUrl || "");
-  const [filePath, setFilePath] = useState(product.filePath || "");
-  const [stripeProductId, setStripeProductId] = useState(
-    product.stripeProductId || "",
-  );
+  const [imageUrl, setImageUrl] = useState(product.imageUrl || '');
+  const [filePath, setFilePath] = useState(product.filePath || '');
+  const [stripeProductId, setStripeProductId] = useState(product.stripeProductId || '');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError('');
     const priceCents = Math.round(parseFloat(price) * 100);
     if (isNaN(priceCents) || priceCents <= 0) {
-      setError("Enter a valid price.");
+      setError('Enter a valid price.');
       return;
     }
     setLoading(true);
@@ -720,7 +672,7 @@ function EditProductDialog({
       setOpen(false);
       onUpdated();
     } catch {
-      setError("We could not save the product. Please try again.");
+      setError('We could not save the product. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -730,12 +682,7 @@ function EditProductDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            title="Edit product"
-            aria-label="Edit product"
-          />
+          <Button variant="ghost" size="icon-xs" title="Edit product" aria-label="Edit product" />
         }
       >
         <Pencil className="size-3.5" />
@@ -766,7 +713,7 @@ function EditProductDialog({
           />
           <DialogFooter className="pt-6">
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving" : "Save changes"}
+              {loading ? 'Saving' : 'Save changes'}
             </Button>
           </DialogFooter>
         </form>
@@ -892,17 +839,17 @@ function DeleteProductButton({
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   async function handleDelete() {
-    setError("");
+    setError('');
     setLoading(true);
     try {
       await deleteProductFn({ data: { id: product.id } });
       setOpen(false);
       onDeleted();
     } catch {
-      setError("We could not delete this product. Please try again.");
+      setError('We could not delete this product. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -913,7 +860,7 @@ function DeleteProductButton({
       open={open}
       onOpenChange={(v) => {
         setOpen(v);
-        if (!v) setError("");
+        if (!v) setError('');
       }}
     >
       <DialogTrigger
@@ -932,8 +879,8 @@ function DeleteProductButton({
         <DialogHeader>
           <DialogTitle>Delete product?</DialogTitle>
           <DialogDescription>
-            This removes {product.name} from your shelf. Existing purchase
-            records stay in your database.
+            This removes {product.name} from your shelf. Existing purchase records stay in your
+            database.
           </DialogDescription>
         </DialogHeader>
         {error && (
@@ -942,15 +889,9 @@ function DeleteProductButton({
           </div>
         )}
         <DialogFooter>
-          <DialogClose render={<Button variant="outline" />}>
-            Cancel
-          </DialogClose>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={loading}
-          >
-            {loading ? "Deleting" : "Delete product"}
+          <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+          <Button variant="destructive" onClick={handleDelete} disabled={loading}>
+            {loading ? 'Deleting' : 'Delete product'}
           </Button>
         </DialogFooter>
       </DialogContent>

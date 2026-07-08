@@ -1,9 +1,9 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { BrandLockup, BrandMark } from '#/components/brand'
+import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { BrandLockup, BrandMark } from '#/components/brand';
 
 export const Route = createFileRoute('/_auth')({
   component: AuthLayout,
-})
+});
 
 function AuthLayout() {
   return (
@@ -15,9 +15,7 @@ function AuthLayout() {
         <section className="relative hidden overflow-hidden bg-primary p-8 text-primary-foreground lg:flex lg:flex-col lg:justify-between">
           <div className="flex items-center gap-2.5">
             <BrandMark className="bg-primary-foreground text-primary" />
-            <span className="font-heading text-base font-semibold tracking-tight">
-              Payshelf
-            </span>
+            <span className="font-heading text-base font-semibold tracking-tight">Payshelf</span>
           </div>
 
           <div className="max-w-md">
@@ -28,8 +26,8 @@ function AuthLayout() {
               Checkout, delivery, and product ops in one quiet workspace.
             </h1>
             <p className="mt-4 max-w-sm text-sm leading-6 text-white/68">
-              Manage your shelf, track revenue, and hand off secure access links
-              without rebuilding payment plumbing.
+              Manage your shelf, track revenue, and hand off secure access links without rebuilding
+              payment plumbing.
             </p>
           </div>
 
@@ -48,9 +46,7 @@ function AuthLayout() {
               ].map(([label, value]) => (
                 <div key={label}>
                   <p className="text-xs text-white/48">{label}</p>
-                  <p className="metric-number mt-1 text-lg font-semibold">
-                    {value}
-                  </p>
+                  <p className="metric-number mt-1 text-lg font-semibold">{value}</p>
                 </div>
               ))}
             </div>
@@ -65,5 +61,5 @@ function AuthLayout() {
         </section>
       </main>
     </div>
-  )
+  );
 }

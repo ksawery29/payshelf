@@ -1,25 +1,22 @@
-import { createServerFn } from '@tanstack/react-start'
-import { db } from '../db'
-import { shopSettings } from '../db/schema'
+import { createServerFn } from '@tanstack/react-start';
+import { db } from '../db';
+import { shopSettings } from '../db/schema';
 
-const SINGLETON_ID = 'singleton'
+const SINGLETON_ID = 'singleton';
 
 /**
  * Get shop settings, inserting defaults if the row doesn't exist yet.
  */
 export const getSettingsFn = createServerFn({ method: 'GET' }).handler(async () => {
-  const rows = await db.select().from(shopSettings).limit(1)
+  const rows = await db.select().from(shopSettings).limit(1);
 
-  if (rows.length > 0) return rows[0]
+  if (rows.length > 0) return rows[0];
 
   // First-time: seed defaults
-  const [created] = await db
-    .insert(shopSettings)
-    .values({ id: SINGLETON_ID })
-    .returning()
+  const [created] = await db.insert(shopSettings).values({ id: SINGLETON_ID }).returning();
 
-  return created
-})
+  return created;
+});
 
 /**
  * Save shop settings (upsert on the singleton row).
@@ -27,12 +24,12 @@ export const getSettingsFn = createServerFn({ method: 'GET' }).handler(async () 
 export const saveSettingsFn = createServerFn({ method: 'POST' })
   .validator(
     (data: {
-      shopName: string
-      shopTagline?: string
-      fromEmail?: string
-      termsOfService?: string
-      privacyPolicy?: string
-    }) => data,
+      shopName: string;
+      shopTagline?: string;
+      fromEmail?: string;
+      termsOfService?: string;
+      privacyPolicy?: string;
+    }) => data
   )
   .handler(async ({ data }) => {
     const [row] = await db
@@ -55,7 +52,7 @@ export const saveSettingsFn = createServerFn({ method: 'POST' })
           privacyPolicy: data.privacyPolicy || null,
         },
       })
-      .returning()
+      .returning();
 
-    return row
-  })
+    return row;
+  });

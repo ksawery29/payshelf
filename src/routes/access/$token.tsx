@@ -1,24 +1,17 @@
-import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { db } from "#/db";
-import { purchase, product } from "#/db/schema";
-import { eq } from "drizzle-orm";
-import { issueSignedToken, presignUrl } from "@vercel/blob";
-import { BrandLockup } from "#/components/brand";
-import { Card, CardContent, CardFooter } from "#/components/ui/card";
-import { Badge } from "#/components/ui/badge";
-import { Button } from "#/components/ui/button";
-import {
-  AlertTriangle,
-  Download,
-  FileArchive,
-  Mail,
-  ShieldCheck,
-  ShieldX,
-} from "lucide-react";
+import { useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { db } from '#/db';
+import { purchase, product } from '#/db/schema';
+import { eq } from 'drizzle-orm';
+import { issueSignedToken, presignUrl } from '@vercel/blob';
+import { BrandLockup } from '#/components/brand';
+import { Card, CardContent, CardFooter } from '#/components/ui/card';
+import { Badge } from '#/components/ui/badge';
+import { Button } from '#/components/ui/button';
+import { AlertTriangle, Download, FileArchive, Mail, ShieldCheck, ShieldX } from 'lucide-react';
 
-const getAccessFn = createServerFn({ method: "GET" })
+const getAccessFn = createServerFn({ method: 'GET' })
   .validator((data: { token: string }) => data)
   .handler(async ({ data }) => {
     const results = await db
@@ -42,11 +35,11 @@ const getAccessFn = createServerFn({ method: "GET" })
 
     const row = results[0];
 
-    if (row.status !== "active") {
+    if (row.status !== 'active') {
       return {
         found: true as const,
         revoked: true as const,
-        reason: row.status as "refunded" | "disputed",
+        reason: row.status as 'refunded' | 'disputed',
         productName: row.productName,
       };
     }
@@ -68,13 +61,13 @@ const getAccessFn = createServerFn({ method: "GET" })
  * download directly from Vercel's CDN with a time-limited signed URL.
  * Falls back to returning the URL as-is for legacy (non-blob) paths.
  */
-const getSignedDownloadUrlFn = createServerFn({ method: "POST" })
+const getSignedDownloadUrlFn = createServerFn({ method: 'POST' })
   .validator((data: { blobUrl: string }) => data)
   .handler(async ({ data }) => {
     const rwToken = process.env.PRIVATE_BLOB_READ_WRITE_TOKEN;
-    if (!rwToken) throw new Error("PRIVATE_BLOB_READ_WRITE_TOKEN is not set");
+    if (!rwToken) throw new Error('PRIVATE_BLOB_READ_WRITE_TOKEN is not set');
 
-    if (!data.blobUrl.includes(".private.blob.vercel-storage.com")) {
+    if (!data.blobUrl.includes('.private.blob.vercel-storage.com')) {
       return { url: data.blobUrl };
     }
 
@@ -82,26 +75,26 @@ const getSignedDownloadUrlFn = createServerFn({ method: "POST" })
 
     // normalize: strip leading slash + decode percent-encoding
     // so this matches the actual stored pathname exactly
-    const pathname = decodeURIComponent(rawPathname).replace(/^\//, "");
+    const pathname = decodeURIComponent(rawPathname).replace(/^\//, '');
 
     const signedToken = await issueSignedToken({
       pathname,
-      operations: ["get"],
+      operations: ['get'],
       validUntil: Date.now() + 5 * 60 * 1000,
       token: rwToken,
     });
 
     const { presignedUrl } = await presignUrl(signedToken, {
       pathname,
-      operation: "get",
-      access: "private",
+      operation: 'get',
+      access: 'private',
       validUntil: Date.now() + 5 * 60 * 1000,
     });
 
     return { url: presignedUrl };
   });
 
-export const Route = createFileRoute("/access/$token")({
+export const Route = createFileRoute('/access/$token')({
   loader: ({ params }) => getAccessFn({ data: { token: params.token } }),
   component: AccessPage,
 });
@@ -128,7 +121,7 @@ function AccessPage() {
           icon={<ShieldX className="size-7" strokeWidth={1.8} />}
           tone="destructive"
           title="Access revoked"
-          description={`Your access to ${data.productName} was revoked because of a ${data.reason === "refunded" ? "refund" : "payment dispute"}.`}
+          description={`Your access to ${data.productName} was revoked because of a ${data.reason === 'refunded' ? 'refund' : 'payment dispute'}.`}
         />
       </AccessShell>
     );
@@ -155,9 +148,7 @@ function AccessPage() {
 
         <CardContent className="grid gap-6 p-6 sm:p-8">
           <div>
-            <Badge className="mb-3 bg-accent text-accent-foreground">
-              Purchased
-            </Badge>
+            <Badge className="mb-3 bg-accent text-accent-foreground">Purchased</Badge>
             <h1 className="font-heading text-2xl font-semibold tracking-tight">
               {data.productName}
             </h1>
@@ -184,10 +175,7 @@ function AccessPage() {
           {!data.productFilePath && (
             <div className="flex gap-3 rounded-lg border border-amber-500/20 bg-amber-500/8 p-4 text-sm leading-6 text-muted-foreground">
               <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" />
-              <p>
-                The download file has not been uploaded yet. Check this link
-                again soon.
-              </p>
+              <p>The download file has not been uploaded yet. Check this link again soon.</p>
             </div>
           )}
         </CardContent>
@@ -229,34 +217,30 @@ function AccessState({
   icon,
   title,
   description,
-  tone = "muted",
+  tone = 'muted',
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
-  tone?: "muted" | "destructive";
+  tone?: 'muted' | 'destructive';
 }) {
   return (
     <Card className="w-full max-w-lg bg-card/95 text-center">
       <CardContent className="flex flex-col items-center gap-5 py-12">
         <span
           className={
-            tone === "destructive"
-              ? "flex size-14 items-center justify-center rounded-lg bg-destructive/10 text-destructive"
-              : "flex size-14 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+            tone === 'destructive'
+              ? 'flex size-14 items-center justify-center rounded-lg bg-destructive/10 text-destructive'
+              : 'flex size-14 items-center justify-center rounded-lg bg-muted text-muted-foreground'
           }
         >
           {icon}
         </span>
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">
-            {title}
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            {description}
-          </p>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">{title}</h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
         </div>
-        <Button variant="outline" onClick={() => (window.location.href = "/")}>
+        <Button variant="outline" onClick={() => (window.location.href = '/')}>
           Back to store
         </Button>
       </CardContent>
@@ -288,10 +272,10 @@ function DetailRow({
 
 function DownloadButton({ filePath }: { filePath: string }) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   async function handleDownload() {
-    setError("");
+    setError('');
     setLoading(true);
     try {
       const result = await getSignedDownloadUrlFn({
@@ -299,7 +283,7 @@ function DownloadButton({ filePath }: { filePath: string }) {
       });
       window.location.href = result.url;
     } catch {
-      setError("Could not generate download link. Please try again.");
+      setError('Could not generate download link. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -307,12 +291,7 @@ function DownloadButton({ filePath }: { filePath: string }) {
 
   return (
     <div className="w-full space-y-2">
-      <Button
-        className="w-full"
-        size="lg"
-        onClick={() => void handleDownload()}
-        disabled={loading}
-      >
+      <Button className="w-full" size="lg" onClick={() => void handleDownload()} disabled={loading}>
         {loading ? (
           <span className="flex items-center gap-2">
             <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -326,10 +305,7 @@ function DownloadButton({ filePath }: { filePath: string }) {
         )}
       </Button>
       {error && (
-        <p
-          className="text-center text-xs font-medium text-destructive"
-          role="alert"
-        >
+        <p className="text-center text-xs font-medium text-destructive" role="alert">
           {error}
         </p>
       )}

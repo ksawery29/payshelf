@@ -1,8 +1,8 @@
-import { authClient } from '#/lib/auth-client'
-import { Button } from '#/components/ui/button'
+import { authClient } from '#/lib/auth-client';
+import { Button } from '#/components/ui/button';
 
 export default function BetterAuthHeader() {
-  const { data: session, isPending } = authClient.useSession()
+  const { data: session, isPending } = authClient.useSession();
 
   if (isPending) {
     return (
@@ -10,7 +10,7 @@ export default function BetterAuthHeader() {
         <div className="size-9 animate-pulse rounded-lg bg-muted" />
         <div className="h-9 w-24 animate-pulse rounded-lg bg-muted" />
       </div>
-    )
+    );
   }
 
   if (session?.user) {
@@ -31,14 +31,14 @@ export default function BetterAuthHeader() {
           variant="outline"
           size="sm"
           onClick={() => {
-            void authClient.signOut()
+            void authClient.signOut();
           }}
         >
           Sign out
         </Button>
       </div>
-    )
+    );
   }
 
-  return null
+  return null;
 }

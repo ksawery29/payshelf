@@ -1,32 +1,32 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { TanStackDevtools } from "@tanstack/react-devtools";
-import { ThemeProvider } from "@/components/theme-provider";
+import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+import { TanStackDevtools } from '@tanstack/react-devtools';
+import { ThemeProvider } from '@/components/theme-provider';
 
-import appCss from "../styles.css?url";
-import { ModeToggle } from "#/components/ui/mode-toggle";
+import appCss from '../styles.css?url';
+import { ModeToggle } from '#/components/ui/mode-toggle';
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
       {
-        charSet: "utf-8",
+        charSet: 'utf-8',
       },
       {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1',
       },
       {
-        title: "Payshelf",
+        title: 'Payshelf',
       },
       {
-        name: "description",
-        content: "A clean storefront and checkout layer for digital products.",
+        name: 'description',
+        content: 'A clean storefront and checkout layer for digital products.',
       },
     ],
     links: [
       {
-        rel: "stylesheet",
+        rel: 'stylesheet',
         href: appCss,
       },
     ],
@@ -54,11 +54,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
           <TanStackDevtools
             config={{
-              position: "bottom-right",
+              position: 'bottom-right',
             }}
             plugins={[
               {
-                name: "Tanstack Router",
+                name: 'Tanstack Router',
                 render: <TanStackRouterDevtoolsPanel />,
               },
             ]}

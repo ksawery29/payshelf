@@ -1,24 +1,24 @@
-import { useEffect, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { BrandLockup } from '#/components/brand'
-import { Card, CardContent } from '#/components/ui/card'
-import { Button } from '#/components/ui/button'
-import { Label } from '#/components/ui/label'
-import { Input } from '#/components/ui/input'
-import { CircleX, CircleCheck } from 'lucide-react'
-import { trackEventFn, submitCancelFeedbackFn, getOrCreateVisitorId } from '#/lib/events.functions'
-import { getSettingsFn } from '#/lib/settings.functions'
-import { Footer } from '#/components/footer'
+import { useEffect, useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { BrandLockup } from '#/components/brand';
+import { Card, CardContent } from '#/components/ui/card';
+import { Button } from '#/components/ui/button';
+import { Label } from '#/components/ui/label';
+import { Input } from '#/components/ui/input';
+import { CircleX, CircleCheck } from 'lucide-react';
+import { trackEventFn, submitCancelFeedbackFn, getOrCreateVisitorId } from '#/lib/events.functions';
+import { getSettingsFn } from '#/lib/settings.functions';
+import { Footer } from '#/components/footer';
 
 export const Route = createFileRoute('/checkout/cancel')({
   loader: async () => {
-    const settings = await getSettingsFn()
-    return { settings }
+    const settings = await getSettingsFn();
+    return { settings };
   },
   component: CheckoutCancelPage,
-})
+});
 
-type Reason = 'too_expensive' | 'just_browsing' | 'found_alternative' | 'trust' | 'other'
+type Reason = 'too_expensive' | 'just_browsing' | 'found_alternative' | 'trust' | 'other';
 
 const REASONS: { value: Reason; label: string }[] = [
   { value: 'too_expensive', label: 'Price was too high' },
@@ -26,41 +26,41 @@ const REASONS: { value: Reason; label: string }[] = [
   { value: 'found_alternative', label: 'Found a free or cheaper alternative' },
   { value: 'trust', label: "Wasn't sure about the purchase" },
   { value: 'other', label: 'Something else' },
-]
+];
 
 function CheckoutCancelPage() {
-  const { settings } = Route.useLoaderData()
-  const [stage, setStage] = useState<'form' | 'thanks'>('form')
-  const [selected, setSelected] = useState<Reason | null>(null)
-  const [comment, setComment] = useState('')
-  const [loading, setLoading] = useState(false)
+  const { settings } = Route.useLoaderData();
+  const [stage, setStage] = useState<'form' | 'thanks'>('form');
+  const [selected, setSelected] = useState<Reason | null>(null);
+  const [comment, setComment] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Fire checkout_cancelled event once on mount
   useEffect(() => {
-    const visitorId = getOrCreateVisitorId()
-    void trackEventFn({ data: { event: 'checkout_cancelled', visitorId } })
-  }, [])
+    const visitorId = getOrCreateVisitorId();
+    void trackEventFn({ data: { event: 'checkout_cancelled', visitorId } });
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!selected) return
-    setLoading(true)
+    e.preventDefault();
+    if (!selected) return;
+    setLoading(true);
     try {
-      const visitorId = getOrCreateVisitorId()
+      const visitorId = getOrCreateVisitorId();
       await submitCancelFeedbackFn({
         data: {
           reason: selected,
           comment: comment.trim() || undefined,
           visitorId,
         },
-      })
-      setStage('thanks')
+      });
+      setStage('thanks');
     } catch (err) {
-      console.error('Failed to submit feedback:', err)
+      console.error('Failed to submit feedback:', err);
       // Still show thanks — don't punish the user for a backend error
-      setStage('thanks')
+      setStage('thanks');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -138,7 +138,8 @@ function CheckoutCancelPage() {
                 {selected && (
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="cancel-comment">
-                      Anything else? <span className="text-muted-foreground font-normal">(optional)</span>
+                      Anything else?{' '}
+                      <span className="text-muted-foreground font-normal">(optional)</span>
                     </Label>
                     <Input
                       id="cancel-comment"
@@ -209,5 +210,5 @@ function CheckoutCancelPage() {
       </main>
       <Footer shopName={settings.shopName} />
     </div>
-  )
+  );
 }

@@ -20,6 +20,7 @@ Default: balanced. Switch: /unslop subtle|balanced|full|voice-match|anti-detecto
 ## Rules
 
 Drop:
+
 - Sycophancy: "Great question!", "I'd be happy to help", "Certainly!", "Absolutely!", "Sure!", "What a fascinating..."
 - Stock vocab: delve, tapestry, testament, navigate (figurative), embark, journey (figurative), pivotal, paramount, nuanced (when meaningless), robust (as filler), seamless, leverage (as verb when "use" works), holistic, comprehensive (when "complete" works), realm, landscape (figurative), cutting-edge, state-of-the-art (as filler)
 - Hedging stacks: "It's important to note that", "It's worth mentioning", "Generally speaking", "In essence", "At its core", "It should be noted that"
@@ -30,6 +31,7 @@ Drop:
 - Performative balance: every claim doesn't need a "however".
 
 Keep:
+
 - Technical terms exact. Errors quoted exact. Code blocks unchanged.
 - Real uncertainty when it exists. Use "I think", "probably", "seems", "in my experience" when honest. Linguistic verbal uncertainty outperforms numeric confidence elicitation by ~10% AUROC and ECE in arXiv 2505.23854.
 - Concrete nouns over abstract ones. Specific examples over general ones.
@@ -58,13 +60,13 @@ Five framing rules that override the cosmetic ones when they conflict:
 
 ## Intensity
 
-| Level | What changes |
-|-------|--------------|
-| **subtle** | Trim AI stock vocab (delve, tapestry, testament, etc.). Keep length and structure roughly same. (Sycophancy and hedging stacks need at least balanced.) |
-| **balanced** | Default. Cut slop, vary rhythm, restore voice, allow opinions and short fragments. Reasonable rewrite. |
-| **full** | Strong rewrite. Restructure paragraphs. Drop performative balance. Sound like a human with a stake. |
-| **voice-match** | Follow an external voice/style sample. See voice-match procedure below. |
-| **anti-detector** | Adversarial rewrite for AI-detector resistance. See anti-detector procedure below. Slower. Use only when user explicitly requests. |
+| Level             | What changes                                                                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **subtle**        | Trim AI stock vocab (delve, tapestry, testament, etc.). Keep length and structure roughly same. (Sycophancy and hedging stacks need at least balanced.) |
+| **balanced**      | Default. Cut slop, vary rhythm, restore voice, allow opinions and short fragments. Reasonable rewrite.                                                  |
+| **full**          | Strong rewrite. Restructure paragraphs. Drop performative balance. Sound like a human with a stake.                                                     |
+| **voice-match**   | Follow an external voice/style sample. See voice-match procedure below.                                                                                 |
+| **anti-detector** | Adversarial rewrite for AI-detector resistance. See anti-detector procedure below. Slower. Use only when user explicitly requests.                      |
 
 ### voice-match procedure
 
@@ -115,6 +117,7 @@ Example — "Explain database connection pooling."
 ## Auto-Clarity
 
 Drop unslop style and switch to literal, careful prose for:
+
 - Security warnings, CVE descriptions, irreversible actions
 - Legal/compliance text, regulated disclosures
 - Medical, financial, or safety advice where precision beats voice

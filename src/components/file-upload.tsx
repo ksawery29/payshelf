@@ -1,19 +1,19 @@
-import { useRef, useState } from 'react'
-import { Label } from '#/components/ui/label'
-import { UploadCloud, X, FileCheck, ImageIcon } from 'lucide-react'
-import { cn } from '#/lib/utils'
+import { useRef, useState } from 'react';
+import { Label } from '#/components/ui/label';
+import { UploadCloud, X, FileCheck, ImageIcon } from 'lucide-react';
+import { cn } from '#/lib/utils';
 
 interface FileUploadProps {
-  id: string
-  label: string
-  blobType: 'image' | 'file'
+  id: string;
+  label: string;
+  blobType: 'image' | 'file';
   /** accepted MIME types, e.g. "image/*" or "*" */
-  accept?: string
+  accept?: string;
   /** current blob URL (from DB / after upload) */
-  value: string
-  onChange: (url: string) => void
-  hint?: string
-  required?: boolean
+  value: string;
+  onChange: (url: string) => void;
+  hint?: string;
+  required?: boolean;
 }
 
 /**
@@ -31,89 +31,89 @@ export function FileUpload({
   hint,
   required,
 }: FileUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [error, setError] = useState('')
-  const [dragging, setDragging] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState('');
+  const [dragging, setDragging] = useState(false);
 
-  const isImage = blobType === 'image'
+  const isImage = blobType === 'image';
 
   async function uploadFile(file: File) {
-    setError('')
-    setUploading(true)
-    setProgress(0)
+    setError('');
+    setUploading(true);
+    setProgress(0);
 
     // Fake smooth progress while the real upload runs
     const ticker = setInterval(() => {
-      setProgress((p) => Math.min(p + 4, 85))
-    }, 80)
+      setProgress((p) => Math.min(p + 4, 85));
+    }, 80);
 
     try {
-      const form = new FormData()
-      form.append('file', file)
-      form.append('blobType', blobType)
+      const form = new FormData();
+      form.append('file', file);
+      form.append('blobType', blobType);
 
       const res = await fetch('/api/blob-upload', {
         method: 'POST',
         body: form,
-      })
+      });
 
-      clearInterval(ticker)
+      clearInterval(ticker);
 
       if (!res.ok) {
-        const body = (await res.json()) as { error?: string }
-        throw new Error(body.error ?? `Upload failed (${res.status})`)
+        const body = (await res.json()) as { error?: string };
+        throw new Error(body.error ?? `Upload failed (${res.status})`);
       }
 
-      const body = (await res.json()) as { url: string }
-      setProgress(100)
-      onChange(body.url)
+      const body = (await res.json()) as { url: string };
+      setProgress(100);
+      onChange(body.url);
     } catch (err) {
-      clearInterval(ticker)
-      setError(err instanceof Error ? err.message : 'Upload failed')
-      setProgress(0)
+      clearInterval(ticker);
+      setError(err instanceof Error ? err.message : 'Upload failed');
+      setProgress(0);
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) void uploadFile(file)
+    const file = e.target.files?.[0];
+    if (file) void uploadFile(file);
   }
 
   function handleDrop(e: React.DragEvent) {
-    e.preventDefault()
-    setDragging(false)
-    const file = e.dataTransfer.files?.[0]
-    if (file) void uploadFile(file)
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) void uploadFile(file);
   }
 
   function handleDragOver(e: React.DragEvent) {
-    e.preventDefault()
-    setDragging(true)
+    e.preventDefault();
+    setDragging(true);
   }
 
   function handleDragLeave() {
-    setDragging(false)
+    setDragging(false);
   }
 
   function clearValue(e: React.MouseEvent) {
-    e.stopPropagation()
-    onChange('')
-    if (inputRef.current) inputRef.current.value = ''
+    e.stopPropagation();
+    onChange('');
+    if (inputRef.current) inputRef.current.value = '';
   }
 
   /** Derive a short display name from a blob URL */
   function getDisplayName(url: string) {
     try {
-      const parts = new URL(url).pathname.split('/')
-      const raw = parts[parts.length - 1] ?? url
+      const parts = new URL(url).pathname.split('/');
+      const raw = parts[parts.length - 1] ?? url;
       // strip uuid prefix (36 chars + dash)
-      return raw.length > 37 ? raw.slice(37) : raw
+      return raw.length > 37 ? raw.slice(37) : raw;
     } catch {
-      return url
+      return url;
     }
   }
 
@@ -148,7 +148,7 @@ export function FileUpload({
             : value
               ? 'border-border/80 bg-muted/40 hover:border-primary/50 hover:bg-muted/60'
               : 'border-border/60 bg-muted/20 hover:border-primary/50 hover:bg-muted/40',
-          uploading && 'pointer-events-none opacity-75',
+          uploading && 'pointer-events-none opacity-75'
         )}
         aria-busy={uploading}
       >
@@ -191,19 +191,13 @@ export function FileUpload({
           /* Empty state */
           <>
             <span className="flex size-11 items-center justify-center rounded-xl bg-accent text-accent-foreground transition-transform duration-200 group-hover:scale-105">
-              {isImage ? (
-                <ImageIcon className="size-5" />
-              ) : (
-                <UploadCloud className="size-5" />
-              )}
+              {isImage ? <ImageIcon className="size-5" /> : <UploadCloud className="size-5" />}
             </span>
             <div>
               <p className="text-sm font-medium text-foreground">
                 {dragging ? 'Drop to upload' : 'Click or drag & drop'}
               </p>
-              {hint && (
-                <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
-              )}
+              {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
             </div>
           </>
         )}
@@ -232,5 +226,5 @@ export function FileUpload({
         </p>
       )}
     </div>
-  )
+  );
 }

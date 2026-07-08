@@ -1,20 +1,20 @@
-import { createServerFn } from '@tanstack/react-start'
-import { getRequestHeaders } from '@tanstack/react-start/server'
-import { db } from '../db'
-import { supportChat, supportMessage } from '../db/schema'
-import { desc, eq } from 'drizzle-orm'
-import { auth } from './auth'
+import { createServerFn } from '@tanstack/react-start';
+import { getRequestHeaders } from '@tanstack/react-start/server';
+import { db } from '../db';
+import { supportChat, supportMessage } from '../db/schema';
+import { desc, eq } from 'drizzle-orm';
+import { auth } from './auth';
 
 /**
  * Helper to assert admin session.
  */
 async function requireAdmin() {
-  const headers = getRequestHeaders()
-  const session = await auth.api.getSession({ headers })
+  const headers = getRequestHeaders();
+  const session = await auth.api.getSession({ headers });
   if (!session) {
-    throw new Error('Unauthorized')
+    throw new Error('Unauthorized');
   }
-  return session
+  return session;
 }
 
 /**
@@ -29,7 +29,7 @@ export const getOrCreateSupportChatFn = createServerFn({ method: 'POST' })
       .from(supportChat)
       .where(eq(supportChat.visitorId, data.visitorId))
       .orderBy(desc(supportChat.createdAt))
-      .limit(1)
+      .limit(1);
 
     if (existing.length > 0 && existing[0].status === 'open') {
       // Update email if provided now and not already set
@@ -38,10 +38,10 @@ export const getOrCreateSupportChatFn = createServerFn({ method: 'POST' })
           .update(supportChat)
           .set({ customerEmail: data.customerEmail })
           .where(eq(supportChat.id, existing[0].id))
-          .returning()
-        return updated
+          .returning();
+        return updated;
       }
-      return existing[0]
+      return existing[0];
     }
 
     // Otherwise create a new chat session
@@ -52,10 +52,10 @@ export const getOrCreateSupportChatFn = createServerFn({ method: 'POST' })
         customerEmail: data.customerEmail || null,
         status: 'open',
       })
-      .returning()
+      .returning();
 
-    return created
-  })
+    return created;
+  });
 
 /**
  * Fetch all messages for a support chat.
@@ -67,23 +67,20 @@ export const getChatMessagesFn = createServerFn({ method: 'GET' })
       .select()
       .from(supportMessage)
       .where(eq(supportMessage.chatId, data.chatId))
-      .orderBy(supportMessage.createdAt)
+      .orderBy(supportMessage.createdAt);
 
-    return messages
-  })
+    return messages;
+  });
 
 /**
  * Send a message in a chat session.
  */
 export const sendSupportMessageFn = createServerFn({ method: 'POST' })
-  .validator(
-    (data: { chatId: string; sender: 'customer' | 'agent'; content: string }) =>
-      data,
-  )
+  .validator((data: { chatId: string; sender: 'customer' | 'agent'; content: string }) => data)
   .handler(async ({ data }) => {
     // If agent is sending, verify authorization
     if (data.sender === 'agent') {
-      await requireAdmin()
+      await requireAdmin();
     }
 
     const [msg] = await db
@@ -93,32 +90,27 @@ export const sendSupportMessageFn = createServerFn({ method: 'POST' })
         sender: data.sender,
         content: data.content,
       })
-      .returning()
+      .returning();
 
     // Touch supportChat's updatedAt
     await db
       .update(supportChat)
       .set({ updatedAt: new Date() })
-      .where(eq(supportChat.id, data.chatId))
+      .where(eq(supportChat.id, data.chatId));
 
-    return msg
-  })
+    return msg;
+  });
 
 /**
  * List all support chats (admin only).
  */
-export const listAllChatsFn = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    await requireAdmin()
+export const listAllChatsFn = createServerFn({ method: 'GET' }).handler(async () => {
+  await requireAdmin();
 
-    const chats = await db
-      .select()
-      .from(supportChat)
-      .orderBy(desc(supportChat.updatedAt))
+  const chats = await db.select().from(supportChat).orderBy(desc(supportChat.updatedAt));
 
-    return chats
-  },
-)
+  return chats;
+});
 
 /**
  * Close/resolve a support chat (admin only).
@@ -126,13 +118,13 @@ export const listAllChatsFn = createServerFn({ method: 'GET' }).handler(
 export const closeSupportChatFn = createServerFn({ method: 'POST' })
   .validator((data: { chatId: string }) => data)
   .handler(async ({ data }) => {
-    await requireAdmin()
+    await requireAdmin();
 
     const [updated] = await db
       .update(supportChat)
       .set({ status: 'closed', updatedAt: new Date() })
       .where(eq(supportChat.id, data.chatId))
-      .returning()
+      .returning();
 
-    return updated
-  })
+    return updated;
+  });

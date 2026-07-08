@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { authClient } from '#/lib/auth-client'
-import { getSessionFn, getHasUsersFn } from '#/lib/auth.functions'
-import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
-import { Label } from '#/components/ui/label'
+import { useState } from 'react';
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { authClient } from '#/lib/auth-client';
+import { getSessionFn, getHasUsersFn } from '#/lib/auth.functions';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
 import {
   Card,
   CardContent,
@@ -12,63 +12,60 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '#/components/ui/card'
+} from '#/components/ui/card';
 
 export const Route = createFileRoute('/_auth/setup')({
   beforeLoad: async () => {
-    const [session, hasUsers] = await Promise.all([
-      getSessionFn(),
-      getHasUsersFn(),
-    ])
+    const [session, hasUsers] = await Promise.all([getSessionFn(), getHasUsersFn()]);
 
     // If users already exist, setup is done — go to login
     if (hasUsers) {
-      throw redirect({ to: '/login' })
+      throw redirect({ to: '/login' });
     }
 
     // If already logged in, go to dashboard
     if (session) {
-      throw redirect({ to: '/dashboard' })
+      throw redirect({ to: '/dashboard' });
     }
   },
   component: SetupPage,
-})
+});
 
 function SetupPage() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters')
-      return
+      setError('Password must be at least 8 characters');
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
       const result = await authClient.signUp.email({
         name,
         email,
         password,
-      })
+      });
 
       if (result.error) {
-        setError(result.error.message ?? 'Could not create account')
-        return
+        setError(result.error.message ?? 'Could not create account');
+        return;
       }
 
-      window.location.href = '/dashboard'
+      window.location.href = '/dashboard';
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError('Something went wrong. Please try again.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -127,12 +124,7 @@ function SetupPage() {
           </div>
         </CardContent>
         <CardFooter className="pt-2">
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" size="lg" disabled={loading}>
             {loading ? (
               <span className="flex items-center gap-2">
                 <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -145,5 +137,5 @@ function SetupPage() {
         </CardFooter>
       </form>
     </Card>
-  )
+  );
 }

@@ -1,45 +1,45 @@
-import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { getSettingsFn, saveSettingsFn } from '#/lib/settings.functions'
-import { authClient } from '#/lib/auth-client'
-import { BrandLockup } from '#/components/brand'
-import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
-import { Label } from '#/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card'
-import { Badge } from '#/components/ui/badge'
-import { LogOut, Check } from 'lucide-react'
+import { useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { getSettingsFn, saveSettingsFn } from '#/lib/settings.functions';
+import { authClient } from '#/lib/auth-client';
+import { BrandLockup } from '#/components/brand';
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
+import { Badge } from '#/components/ui/badge';
+import { LogOut, Check } from 'lucide-react';
 
 export const Route = createFileRoute('/_dashboard/settings')({
   loader: () => getSettingsFn(),
   component: SettingsPage,
-})
+});
 
 function SettingsPage() {
-  const { data: session } = authClient.useSession()
-  const settings = Route.useLoaderData()
+  const { data: session } = authClient.useSession();
+  const settings = Route.useLoaderData();
 
-  const [shopName, setShopName] = useState(settings.shopName)
-  const [shopTagline, setShopTagline] = useState(settings.shopTagline ?? '')
-  const [fromEmail, setFromEmail] = useState(settings.fromEmail ?? '')
-  const [termsOfService, setTermsOfService] = useState(settings.termsOfService ?? '')
-  const [privacyPolicy, setPrivacyPolicy] = useState(settings.privacyPolicy ?? '')
+  const [shopName, setShopName] = useState(settings.shopName);
+  const [shopTagline, setShopTagline] = useState(settings.shopTagline ?? '');
+  const [fromEmail, setFromEmail] = useState(settings.fromEmail ?? '');
+  const [termsOfService, setTermsOfService] = useState(settings.termsOfService ?? '');
+  const [privacyPolicy, setPrivacyPolicy] = useState(settings.privacyPolicy ?? '');
 
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setSaved(false)
+    e.preventDefault();
+    setError('');
+    setSaved(false);
 
     if (!shopName.trim()) {
-      setError('Shop name is required.')
-      return
+      setError('Shop name is required.');
+      return;
     }
 
-    setSaving(true)
+    setSaving(true);
     try {
       await saveSettingsFn({
         data: {
@@ -49,13 +49,13 @@ function SettingsPage() {
           termsOfService: termsOfService.trim() || undefined,
           privacyPolicy: privacyPolicy.trim() || undefined,
         },
-      })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } catch {
-      setError('Failed to save settings. Please try again.')
+      setError('Failed to save settings. Please try again.');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
@@ -109,7 +109,11 @@ function SettingsPage() {
               size="sm"
               onClick={() =>
                 void authClient.signOut({
-                  fetchOptions: { onSuccess: () => { window.location.href = '/login' } },
+                  fetchOptions: {
+                    onSuccess: () => {
+                      window.location.href = '/login';
+                    },
+                  },
                 })
               }
             >
@@ -123,12 +127,10 @@ function SettingsPage() {
       <main className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8">
           <Badge className="mb-3 bg-accent text-accent-foreground">Shop settings</Badge>
-          <h1 className="font-heading text-3xl font-semibold tracking-[-0.03em]">
-            Settings
-          </h1>
+          <h1 className="font-heading text-3xl font-semibold tracking-[-0.03em]">Settings</h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Customize your storefront name and branding. These appear in the
-            store header, emails, and browser tab.
+            Customize your storefront name and branding. These appear in the store header, emails,
+            and browser tab.
           </p>
         </div>
 
@@ -136,9 +138,7 @@ function SettingsPage() {
           <Card className="bg-card/95">
             <CardHeader>
               <CardTitle className="text-base">Branding</CardTitle>
-              <CardDescription>
-                How your shop appears to customers.
-              </CardDescription>
+              <CardDescription>How your shop appears to customers.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {error && (
@@ -161,8 +161,7 @@ function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="shop-tagline">
-                  Tagline{' '}
-                  <span className="font-normal text-muted-foreground">(optional)</span>
+                  Tagline <span className="font-normal text-muted-foreground">(optional)</span>
                 </Label>
                 <Input
                   id="shop-tagline"
@@ -187,8 +186,7 @@ function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="from-email">
-                  From address{' '}
-                  <span className="font-normal text-muted-foreground">(optional)</span>
+                  From address <span className="font-normal text-muted-foreground">(optional)</span>
                 </Label>
                 <Input
                   id="from-email"
@@ -198,7 +196,8 @@ function SettingsPage() {
                   onChange={(e) => setFromEmail(e.target.value)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Overrides the <code className="rounded bg-muted px-1 py-0.5">RESEND_FROM_EMAIL</code> env
+                  Overrides the{' '}
+                  <code className="rounded bg-muted px-1 py-0.5">RESEND_FROM_EMAIL</code> env
                   variable. Must be a verified sender in Resend.
                 </p>
               </div>
@@ -209,7 +208,8 @@ function SettingsPage() {
             <CardHeader>
               <CardTitle className="text-base">Legal Policies</CardTitle>
               <CardDescription>
-                Add or override custom terms of service and privacy policy text for your store footer. Leaving these blank will use default standard legal texts.
+                Add or override custom terms of service and privacy policy text for your store
+                footer. Leaving these blank will use default standard legal texts.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -268,5 +268,5 @@ function SettingsPage() {
         </form>
       </main>
     </div>
-  )
+  );
 }

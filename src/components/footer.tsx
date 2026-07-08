@@ -1,8 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from '@tanstack/react-router';
 
 export function Footer({ shopName }: { shopName?: string | null }) {
   const currentYear = new Date().getFullYear();
-  const name = shopName || "My Shop";
+  const name = shopName || 'My Shop';
 
   return (
     <footer className="border-t border-border/80 bg-background/50 backdrop-blur-md py-8">

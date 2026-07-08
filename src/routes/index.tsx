@@ -1,31 +1,28 @@
-import { useEffect, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { listProductsFn } from "#/lib/products.functions";
-import { getSettingsFn } from "#/lib/settings.functions";
-import { createCheckoutFn } from "#/lib/checkout.functions";
-import { trackEventFn, getOrCreateVisitorId } from "#/lib/events.functions";
-import { BrandLockup } from "#/components/brand";
-import { Button } from "#/components/ui/button";
-import { Card, CardContent, CardFooter } from "#/components/ui/card";
-import { Badge } from "#/components/ui/badge";
-import { ArrowRight, PackageOpen } from "lucide-react";
-import { Footer } from "#/components/footer";
+import { useEffect, useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { listProductsFn } from '#/lib/products.functions';
+import { getSettingsFn } from '#/lib/settings.functions';
+import { createCheckoutFn } from '#/lib/checkout.functions';
+import { trackEventFn, getOrCreateVisitorId } from '#/lib/events.functions';
+import { BrandLockup } from '#/components/brand';
+import { Button } from '#/components/ui/button';
+import { Card, CardContent, CardFooter } from '#/components/ui/card';
+import { Badge } from '#/components/ui/badge';
+import { ArrowRight, PackageOpen } from 'lucide-react';
+import { Footer } from '#/components/footer';
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute('/')({
   loader: async () => {
-    const [products, settings] = await Promise.all([
-      listProductsFn(),
-      getSettingsFn(),
-    ]);
+    const [products, settings] = await Promise.all([listProductsFn(), getSettingsFn()]);
     return { products, settings };
   },
   component: Home,
 });
 
 function formatPrice(cents: number) {
-  return (cents / 100).toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
+  return (cents / 100).toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
   });
 }
 
@@ -43,7 +40,7 @@ function Home() {
   // Fire a page_view event once on mount (anonymous, best-effort)
   useEffect(() => {
     const visitorId = getOrCreateVisitorId();
-    void trackEventFn({ data: { event: "page_view", visitorId } });
+    void trackEventFn({ data: { event: 'page_view', visitorId } });
   }, []);
 
   return (
@@ -51,11 +48,7 @@ function Home() {
       <header className="border-b border-border/80 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <BrandLockup shopName={settings.shopName} />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => (window.location.href = "/login")}
-          >
+          <Button variant="outline" size="sm" onClick={() => (window.location.href = '/login')}>
             Seller login
           </Button>
         </div>
@@ -86,10 +79,10 @@ function Home() {
 
 function ProductCard({ product }: { product: Product }) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   async function handleBuy() {
-    setError("");
+    setError('');
     setLoading(true);
     try {
       const visitorId = getOrCreateVisitorId();
@@ -100,8 +93,8 @@ function ProductCard({ product }: { product: Product }) {
         window.location.href = result.url;
       }
     } catch (err) {
-      console.error("Failed to create checkout session:", err);
-      setError("Checkout could not be started. Please try again.");
+      console.error('Failed to create checkout session:', err);
+      setError('Checkout could not be started. Please try again.');
       setLoading(false);
     }
   }
@@ -126,17 +119,13 @@ function ProductCard({ product }: { product: Product }) {
 
       <CardContent className="flex flex-1 flex-col gap-2 p-5">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="font-heading text-base font-semibold tracking-tight">
-            {product.name}
-          </h2>
+          <h2 className="font-heading text-base font-semibold tracking-tight">{product.name}</h2>
           <Badge variant="secondary" className="font-mono text-sm">
             {formatPrice(product.priceCents)}
           </Badge>
         </div>
         {product.description && (
-          <p className="text-sm leading-6 text-muted-foreground">
-            {product.description}
-          </p>
+          <p className="text-sm leading-6 text-muted-foreground">{product.description}</p>
         )}
         {error && (
           <p className="mt-2 rounded-lg border border-destructive/25 bg-destructive/5 px-3 py-2 text-sm font-medium text-destructive">
@@ -167,23 +156,14 @@ function ProductCard({ product }: { product: Product }) {
 function EmptyShelf() {
   return (
     <Card className="items-center border-dashed bg-card/70 py-16 text-center">
-      <PackageOpen
-        className="size-10 text-muted-foreground"
-        strokeWidth={1.5}
-      />
+      <PackageOpen className="size-10 text-muted-foreground" strokeWidth={1.5} />
       <CardContent className="max-w-md">
-        <h2 className="font-heading text-2xl font-semibold tracking-tight">
-          The shelf is empty
-        </h2>
+        <h2 className="font-heading text-2xl font-semibold tracking-tight">The shelf is empty</h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Products added from the seller dashboard will appear here with secure
-          checkout.
+          Products added from the seller dashboard will appear here with secure checkout.
         </p>
       </CardContent>
-      <Button
-        variant="outline"
-        onClick={() => (window.location.href = "/login")}
-      >
+      <Button variant="outline" onClick={() => (window.location.href = '/login')}>
         Go to dashboard
       </Button>
     </Card>
