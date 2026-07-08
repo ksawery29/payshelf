@@ -1,15 +1,15 @@
-import { useState } from 'react'
-import { createFileRoute, useRouter, redirect } from '@tanstack/react-router'
-import { authClient } from '#/lib/auth-client'
-import { listProductsFn, createProductFn } from '#/lib/products.functions'
-import { updateProductFn, deleteProductFn } from '#/lib/products.mutations'
-import { getAnalyticsFn } from '#/lib/analytics.functions'
-import { getSettingsFn } from '#/lib/settings.functions'
-import { BrandLockup } from '#/components/brand'
-import { FileUpload } from '#/components/file-upload'
-import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
-import { Label } from '#/components/ui/label'
+import { useState } from "react";
+import { createFileRoute, useRouter, redirect } from "@tanstack/react-router";
+import { authClient } from "#/lib/auth-client";
+import { listProductsFn, createProductFn } from "#/lib/products.functions";
+import { updateProductFn, deleteProductFn } from "#/lib/products.mutations";
+import { getAnalyticsFn } from "#/lib/analytics.functions";
+import { getSettingsFn } from "#/lib/settings.functions";
+import { BrandLockup } from "#/components/brand";
+import { FileUpload } from "#/components/file-upload";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
+import { Label } from "#/components/ui/label";
 import {
   Card,
   CardContent,
@@ -17,8 +17,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from '#/components/ui/card'
-import { Badge } from '#/components/ui/badge'
+} from "#/components/ui/card";
+import { Badge } from "#/components/ui/badge";
 import {
   Dialog,
   DialogClose,
@@ -28,14 +28,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '#/components/ui/dialog'
+} from "#/components/ui/dialog";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from '#/components/ui/chart'
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+} from "#/components/ui/chart";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   AlertCircle,
   Calendar,
@@ -50,65 +50,69 @@ import {
   ShoppingBag,
   Trash2,
   TrendingUp,
-} from 'lucide-react'
+} from "lucide-react";
 
-export const Route = createFileRoute('/_dashboard/dashboard')({
+export const Route = createFileRoute("/_dashboard/dashboard")({
   loader: async () => {
     const [products, analytics, settings] = await Promise.all([
       listProductsFn(),
       getAnalyticsFn(),
       getSettingsFn(),
-    ])
+    ]);
     if (products.length === 0) {
-      throw redirect({ to: '/onboarding' })
+      throw redirect({ to: "/onboarding" });
     }
-    return { products, analytics, settings }
+    return { products, analytics, settings };
   },
   component: DashboardPage,
-})
+});
 
 function formatPrice(cents: number) {
-  return (cents / 100).toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  })
+  return (cents / 100).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
 }
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 const chartConfig = {
   revenue: {
-    label: 'Revenue',
-    color: 'var(--color-chart-1)',
+    label: "Revenue",
+    color: "var(--color-chart-1)",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 interface ProductType {
-  id: string
-  name: string
-  description: string
-  priceCents: number
-  imageUrl: string | null
-  filePath: string | null
-  stripeProductId: string | null
+  id: string;
+  name: string;
+  description: string;
+  priceCents: number;
+  imageUrl: string | null;
+  filePath: string | null;
+  stripeProductId: string | null;
 }
 
 function DashboardPage() {
-  const { data: session } = authClient.useSession()
-  const { products, analytics, settings } = Route.useLoaderData()
-  const router = useRouter()
+  const { data: session } = authClient.useSession();
+  const { products, analytics, settings } = Route.useLoaderData();
+  const router = useRouter();
 
   const chartData = analytics.chartData.map((d) => ({
     ...d,
     revenue: d.revenue / 100,
     label: formatDate(d.date),
-  }))
+  }));
 
-  const linkedProducts = products.filter((product) => product.stripeProductId).length
-  const downloadableProducts = products.filter((product) => product.filePath).length
+  const linkedProducts = products.filter(
+    (product) => product.stripeProductId,
+  ).length;
+  const downloadableProducts = products.filter(
+    (product) => product.filePath,
+  ).length;
 
   return (
     <div className="min-h-[100dvh] bg-background">
@@ -116,7 +120,10 @@ function DashboardPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
             <BrandLockup shopName={settings.shopName} />
-            <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+            <nav
+              className="hidden items-center gap-1 md:flex"
+              aria-label="Primary"
+            >
               <a
                 href="/dashboard"
                 className="rounded-md bg-muted px-3 py-1.5 text-sm font-medium text-foreground"
@@ -157,10 +164,10 @@ function DashboardPage() {
                 void authClient.signOut({
                   fetchOptions: {
                     onSuccess: () => {
-                      window.location.href = '/login'
+                      window.location.href = "/login";
                     },
                   },
-                })
+                });
               }}
             >
               <LogOut className="size-4" data-icon="inline-start" />
@@ -183,8 +190,7 @@ function DashboardPage() {
               Sales overview
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Track revenue, keep Stripe product IDs tidy, and make sure every
-              purchase has a file ready for delivery.
+              Track your sales and grow your business.
             </p>
           </div>
           <CreateProductDialog onCreated={() => router.invalidate()} />
@@ -197,19 +203,19 @@ function DashboardPage() {
           <StatCard
             title="Total revenue"
             value={formatPrice(analytics.totalRevenue)}
-            sub={`${analytics.totalSales} sale${analytics.totalSales === 1 ? '' : 's'} processed`}
+            sub={`${analytics.totalSales} sale${analytics.totalSales === 1 ? "" : "s"} processed`}
             icon={<TrendingUp className="size-4" />}
           />
           <StatCard
             title="This month"
             value={formatPrice(analytics.monthRevenue)}
-            sub={`${analytics.monthSales} sale${analytics.monthSales === 1 ? '' : 's'} this month`}
+            sub={`${analytics.monthSales} sale${analytics.monthSales === 1 ? "" : "s"} this month`}
             icon={<Calendar className="size-4" />}
           />
           <StatCard
             title="This week"
             value={formatPrice(analytics.weekRevenue)}
-            sub={`${analytics.weekSales} sale${analytics.weekSales === 1 ? '' : 's'} since Monday`}
+            sub={`${analytics.weekSales} sale${analytics.weekSales === 1 ? "" : "s"} since Monday`}
             icon={<CalendarDays className="size-4" />}
           />
           <StatCard
@@ -240,7 +246,7 @@ function DashboardPage() {
               </p>
             </div>
             <span className="text-sm text-muted-foreground">
-              {products.length} item{products.length === 1 ? '' : 's'}
+              {products.length} item{products.length === 1 ? "" : "s"}
             </span>
           </div>
 
@@ -261,7 +267,7 @@ function DashboardPage() {
         </section>
       </main>
     </div>
-  )
+  );
 }
 
 function StatCard({
@@ -270,10 +276,10 @@ function StatCard({
   sub,
   icon,
 }: {
-  title: string
-  value: string
-  sub: string
-  icon: React.ReactNode
+  title: string;
+  value: string;
+  sub: string;
+  icon: React.ReactNode;
 }) {
   return (
     <Card size="sm" className="bg-card/95">
@@ -288,13 +294,18 @@ function StatCard({
         <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function RevenueChartCard({
   chartData,
 }: {
-  chartData: Array<{ date: string; revenue: number; sales: number; label: string }>
+  chartData: Array<{
+    date: string;
+    revenue: number;
+    sales: number;
+    label: string;
+  }>;
 }) {
   return (
     <Card className="bg-card/95">
@@ -350,7 +361,7 @@ function RevenueChartCard({
                 <ChartTooltipContent
                   formatter={(value) => [
                     `$${(value as number).toFixed(2)}`,
-                    'Revenue',
+                    "Revenue",
                   ]}
                 />
               }
@@ -368,7 +379,7 @@ function RevenueChartCard({
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function ReadinessCard({
@@ -376,30 +387,30 @@ function ReadinessCard({
   linkedProducts,
   downloadableProducts,
 }: {
-  products: number
-  linkedProducts: number
-  downloadableProducts: number
+  products: number;
+  linkedProducts: number;
+  downloadableProducts: number;
 }) {
   const items = [
     {
-      label: 'Stripe IDs',
+      label: "Stripe IDs",
       value: `${linkedProducts}/${products}`,
       ready: linkedProducts === products,
       icon: <Link2 className="size-4" />,
     },
     {
-      label: 'Download files',
+      label: "Download files",
       value: `${downloadableProducts}/${products}`,
       ready: downloadableProducts === products,
       icon: <FileArchive className="size-4" />,
     },
     {
-      label: 'Storefront',
-      value: products > 0 ? 'Live' : 'Draft',
+      label: "Storefront",
+      value: products > 0 ? "Live" : "Draft",
       ready: products > 0,
       icon: <ShoppingBag className="size-4" />,
     },
-  ]
+  ];
 
   return (
     <Card className="bg-card/95">
@@ -435,7 +446,7 @@ function ReadinessCard({
         ))}
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function ProductManagementCard({
@@ -443,9 +454,9 @@ function ProductManagementCard({
   onUpdated,
   onDeleted,
 }: {
-  product: ProductType
-  onUpdated: () => void
-  onDeleted: () => void
+  product: ProductType;
+  onUpdated: () => void;
+  onDeleted: () => void;
 }) {
   return (
     <Card className="group overflow-hidden bg-card/95 py-0 transition-transform duration-200 hover:-translate-y-0.5">
@@ -486,12 +497,18 @@ function ProductManagementCard({
         <div className="grid gap-2 text-xs text-muted-foreground">
           <StatusRow
             icon={<Link2 className="size-3.5" />}
-            label={product.stripeProductId ? product.stripeProductId : 'Stripe ID missing'}
+            label={
+              product.stripeProductId
+                ? product.stripeProductId
+                : "Stripe ID missing"
+            }
             ready={Boolean(product.stripeProductId)}
           />
           <StatusRow
             icon={<FileArchive className="size-3.5" />}
-            label={product.filePath ? product.filePath : 'Download file not set'}
+            label={
+              product.filePath ? product.filePath : "Download file not set"
+            }
             ready={Boolean(product.filePath)}
           />
         </div>
@@ -502,14 +519,14 @@ function ProductManagementCard({
           {formatPrice(product.priceCents)}
         </Badge>
         <Badge
-          variant={product.stripeProductId ? 'outline' : 'secondary'}
-          className={product.stripeProductId ? 'text-emerald-700' : ''}
+          variant={product.stripeProductId ? "outline" : "secondary"}
+          className={product.stripeProductId ? "text-emerald-700" : ""}
         >
-          {product.stripeProductId ? 'Checkout ready' : 'Draft'}
+          {product.stripeProductId ? "Checkout ready" : "Draft"}
         </Badge>
       </CardFooter>
     </Card>
-  )
+  );
 }
 
 function StatusRow({
@@ -517,16 +534,18 @@ function StatusRow({
   label,
   ready,
 }: {
-  icon: React.ReactNode
-  label: string
-  ready: boolean
+  icon: React.ReactNode;
+  label: string;
+  ready: boolean;
 }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <span className={ready ? 'text-emerald-600' : 'text-amber-600'}>{icon}</span>
+      <span className={ready ? "text-emerald-600" : "text-amber-600"}>
+        {icon}
+      </span>
       <span className="truncate">{label}</span>
     </div>
-  )
+  );
 }
 
 function EmptyProducts({ onCreate }: { onCreate: () => void }) {
@@ -542,40 +561,40 @@ function EmptyProducts({ onCreate }: { onCreate: () => void }) {
       </CardContent>
       <CreateProductDialog onCreated={onCreate} />
     </Card>
-  )
+  );
 }
 
 function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [price, setPrice] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [filePath, setFilePath] = useState('')
-  const [stripeProductId, setStripeProductId] = useState('')
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [filePath, setFilePath] = useState("");
+  const [stripeProductId, setStripeProductId] = useState("");
 
   function resetForm() {
-    setName('')
-    setDescription('')
-    setPrice('')
-    setImageUrl('')
-    setFilePath('')
-    setStripeProductId('')
-    setError('')
+    setName("");
+    setDescription("");
+    setPrice("");
+    setImageUrl("");
+    setFilePath("");
+    setStripeProductId("");
+    setError("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    const priceCents = Math.round(parseFloat(price) * 100)
+    e.preventDefault();
+    setError("");
+    const priceCents = Math.round(parseFloat(price) * 100);
     if (isNaN(priceCents) || priceCents <= 0) {
-      setError('Enter a valid price.')
-      return
+      setError("Enter a valid price.");
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       await createProductFn({
         data: {
@@ -586,19 +605,25 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
           filePath: filePath || undefined,
           stripeProductId: stripeProductId || undefined,
         },
-      })
-      resetForm()
-      setOpen(false)
-      onCreated()
+      });
+      resetForm();
+      setOpen(false);
+      onCreated();
     } catch {
-      setError('We could not create the product. Please try again.')
+      setError("We could not create the product. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm() }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) resetForm();
+      }}
+    >
       <DialogTrigger render={<Button size="lg" />}>
         <Plus className="size-4" data-icon="inline-start" />
         Add product
@@ -635,43 +660,45 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
                   Creating
                 </span>
               ) : (
-                'Create product'
+                "Create product"
               )}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function EditProductDialog({
   product,
   onUpdated,
 }: {
-  product: ProductType
-  onUpdated: () => void
+  product: ProductType;
+  onUpdated: () => void;
 }) {
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [name, setName] = useState(product.name)
-  const [description, setDescription] = useState(product.description || '')
-  const [price, setPrice] = useState((product.priceCents / 100).toString())
-  const [imageUrl, setImageUrl] = useState(product.imageUrl || '')
-  const [filePath, setFilePath] = useState(product.filePath || '')
-  const [stripeProductId, setStripeProductId] = useState(product.stripeProductId || '')
+  const [name, setName] = useState(product.name);
+  const [description, setDescription] = useState(product.description || "");
+  const [price, setPrice] = useState((product.priceCents / 100).toString());
+  const [imageUrl, setImageUrl] = useState(product.imageUrl || "");
+  const [filePath, setFilePath] = useState(product.filePath || "");
+  const [stripeProductId, setStripeProductId] = useState(
+    product.stripeProductId || "",
+  );
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    const priceCents = Math.round(parseFloat(price) * 100)
+    e.preventDefault();
+    setError("");
+    const priceCents = Math.round(parseFloat(price) * 100);
     if (isNaN(priceCents) || priceCents <= 0) {
-      setError('Enter a valid price.')
-      return
+      setError("Enter a valid price.");
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       await updateProductFn({
         data: {
@@ -683,13 +710,13 @@ function EditProductDialog({
           filePath: filePath || undefined,
           stripeProductId: stripeProductId || undefined,
         },
-      })
-      setOpen(false)
-      onUpdated()
+      });
+      setOpen(false);
+      onUpdated();
     } catch {
-      setError('We could not save the product. Please try again.')
+      setError("We could not save the product. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -733,13 +760,13 @@ function EditProductDialog({
           />
           <DialogFooter className="pt-6">
             <Button type="submit" disabled={loading}>
-              {loading ? 'Saving' : 'Save changes'}
+              {loading ? "Saving" : "Save changes"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function ProductFormFields({
@@ -758,20 +785,20 @@ function ProductFormFields({
   setStripeProductId,
   prefix,
 }: {
-  error: string
-  name: string
-  setName: (value: string) => void
-  description: string
-  setDescription: (value: string) => void
-  price: string
-  setPrice: (value: string) => void
-  imageUrl: string
-  setImageUrl: (url: string) => void
-  filePath: string
-  setFilePath: (url: string) => void
-  stripeProductId: string
-  setStripeProductId: (value: string) => void
-  prefix: string
+  error: string;
+  name: string;
+  setName: (value: string) => void;
+  description: string;
+  setDescription: (value: string) => void;
+  price: string;
+  setPrice: (value: string) => void;
+  imageUrl: string;
+  setImageUrl: (url: string) => void;
+  filePath: string;
+  setFilePath: (url: string) => void;
+  stripeProductId: string;
+  setStripeProductId: (value: string) => void;
+  prefix: string;
 }) {
   return (
     <div className="space-y-5">
@@ -847,36 +874,42 @@ function ProductFormFields({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function DeleteProductButton({
   product,
   onDeleted,
 }: {
-  product: ProductType
-  onDeleted: () => void
+  product: ProductType;
+  onDeleted: () => void;
 }) {
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleDelete() {
-    setError('')
-    setLoading(true)
+    setError("");
+    setLoading(true);
     try {
-      await deleteProductFn({ data: { id: product.id } })
-      setOpen(false)
-      onDeleted()
+      await deleteProductFn({ data: { id: product.id } });
+      setOpen(false);
+      onDeleted();
     } catch {
-      setError('We could not delete this product. Please try again.')
+      setError("We could not delete this product. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setError('') }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) setError("");
+      }}
+    >
       <DialogTrigger
         render={
           <Button
@@ -903,12 +936,18 @@ function DeleteProductButton({
           </div>
         )}
         <DialogFooter>
-          <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
-          <Button variant="destructive" onClick={handleDelete} disabled={loading}>
-            {loading ? 'Deleting' : 'Delete product'}
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
+          </DialogClose>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={loading}
+          >
+            {loading ? "Deleting" : "Delete product"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -1,24 +1,24 @@
-import { useState } from 'react'
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { authClient } from '#/lib/auth-client'
-import { getEventAnalyticsFn } from '#/lib/analytics.functions'
-import { getSettingsFn } from '#/lib/settings.functions'
-import { BrandLockup } from '#/components/brand'
-import { Button } from '#/components/ui/button'
-import { Badge } from '#/components/ui/badge'
+import { useState } from "react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { authClient } from "#/lib/auth-client";
+import { getEventAnalyticsFn } from "#/lib/analytics.functions";
+import { getSettingsFn } from "#/lib/settings.functions";
+import { BrandLockup } from "#/components/brand";
+import { Button } from "#/components/ui/button";
+import { Badge } from "#/components/ui/badge";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '#/components/ui/card'
+} from "#/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from '#/components/ui/chart'
+} from "#/components/ui/chart";
 import {
   LineChart,
   Line,
@@ -27,7 +27,7 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-} from 'recharts'
+} from "recharts";
 import {
   BarChart2,
   ChevronDown,
@@ -38,117 +38,117 @@ import {
   XCircle,
   TrendingDown,
   ArrowRight,
-} from 'lucide-react'
+} from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-type DayRange = 7 | 30 | 90 | 0
+type DayRange = 7 | 30 | 90 | 0;
 
 const DAY_OPTIONS: { label: string; value: DayRange }[] = [
-  { label: 'Last 7 days', value: 7 },
-  { label: 'Last 30 days', value: 30 },
-  { label: 'Last 90 days', value: 90 },
-  { label: 'All time', value: 0 },
-]
+  { label: "Last 7 days", value: 7 },
+  { label: "Last 30 days", value: 30 },
+  { label: "Last 90 days", value: 90 },
+  { label: "All time", value: 0 },
+];
 
 // ── Route ──────────────────────────────────────────────────────────────────
 
-export const Route = createFileRoute('/_dashboard/analytics')({
+export const Route = createFileRoute("/_dashboard/analytics")({
   loader: async () => {
-    const settings = await getSettingsFn()
+    const settings = await getSettingsFn();
     // Default to 30 days on initial load
-    const eventData = await getEventAnalyticsFn({ data: { days: 30 } })
-    return { settings, eventData, initialDays: 30 as DayRange }
+    const eventData = await getEventAnalyticsFn({ data: { days: 30 } });
+    return { settings, eventData, initialDays: 30 as DayRange };
   },
   component: AnalyticsPage,
-})
+});
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function pct(num: number, den: number) {
-  if (den === 0) return '—'
-  return `${Math.round((num / den) * 100)}%`
+  if (den === 0) return "—";
+  return `${Math.round((num / den) * 100)}%`;
 }
 
 function dropOff(from: number, to: number) {
-  if (from === 0) return null
-  const lost = from - to
-  return Math.round((lost / from) * 100)
+  if (from === 0) return null;
+  const lost = from - to;
+  return Math.round((lost / from) * 100);
 }
 
 function fmtDate(dateStr: string) {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 const REASON_LABELS: Record<string, string> = {
-  too_expensive: 'Too expensive',
-  just_browsing: 'Just browsing',
-  found_alternative: 'Found alternative',
-  trust: 'Trust concern',
-  other: 'Other',
-}
+  too_expensive: "Too expensive",
+  just_browsing: "Just browsing",
+  found_alternative: "Found alternative",
+  trust: "Trust concern",
+  other: "Other",
+};
 
 // ── Chart configs ──────────────────────────────────────────────────────────
 
 const trendConfig = {
   page_view: {
-    label: 'Page views',
-    color: 'var(--color-chart-1)',
+    label: "Page views",
+    color: "var(--color-chart-1)",
   },
   checkout_initiated: {
-    label: 'Checkout started',
-    color: 'var(--color-chart-3)',
+    label: "Checkout started",
+    color: "var(--color-chart-3)",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 const reasonConfig = {
   total: {
-    label: 'Responses',
-    color: 'var(--color-chart-1)',
+    label: "Responses",
+    color: "var(--color-chart-1)",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 // ── Main page component ────────────────────────────────────────────────────
 
 function AnalyticsPage() {
-  const { settings, eventData, initialDays } = Route.useLoaderData()
-  const { data: session } = authClient.useSession()
+  const { settings, eventData, initialDays } = Route.useLoaderData();
+  const { data: session } = authClient.useSession();
 
-  const [days, setDays] = useState<DayRange>(initialDays)
-  const [data, setData] = useState(eventData)
-  const [loading, setLoading] = useState(false)
-  const [rangeOpen, setRangeOpen] = useState(false)
+  const [days, setDays] = useState<DayRange>(initialDays);
+  const [data, setData] = useState(eventData);
+  const [loading, setLoading] = useState(false);
+  const [rangeOpen, setRangeOpen] = useState(false);
 
   async function handleRangeChange(value: DayRange) {
-    setRangeOpen(false)
-    if (value === days) return
-    setDays(value)
-    setLoading(true)
+    setRangeOpen(false);
+    if (value === days) return;
+    setDays(value);
+    setLoading(true);
     try {
-      const fresh = await getEventAnalyticsFn({ data: { days: value } })
-      setData(fresh)
+      const fresh = await getEventAnalyticsFn({ data: { days: value } });
+      setData(fresh);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
-  const { funnel, trendData, reasonBreakdown, productConversions } = data
-  const drop1 = dropOff(funnel.pageViews, funnel.initiated)
-  const drop2 = dropOff(funnel.initiated, funnel.completed)
+  const { funnel, trendData, reasonBreakdown, productConversions } = data;
+  const drop1 = dropOff(funnel.pageViews, funnel.initiated);
+  const drop2 = dropOff(funnel.initiated, funnel.completed);
 
   const trendChartData = trendData.map((d) => ({
     ...d,
     label: fmtDate(d.date),
-  }))
+  }));
 
   const reasonChartData = reasonBreakdown.map((r) => ({
     reason: REASON_LABELS[r.reason] ?? r.reason,
     total: r.total,
-  }))
+  }));
 
   const selectedLabel =
-    DAY_OPTIONS.find((o) => o.value === days)?.label ?? 'Last 30 days'
+    DAY_OPTIONS.find((o) => o.value === days)?.label ?? "Last 30 days";
 
   return (
     <div className="min-h-[100dvh] bg-background">
@@ -157,7 +157,10 @@ function AnalyticsPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
             <BrandLockup shopName={settings.shopName} />
-            <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+            <nav
+              className="hidden items-center gap-1 md:flex"
+              aria-label="Primary"
+            >
               <a
                 href="/dashboard"
                 className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -197,10 +200,10 @@ function AnalyticsPage() {
                 void authClient.signOut({
                   fetchOptions: {
                     onSuccess: () => {
-                      window.location.href = '/login'
+                      window.location.href = "/login";
                     },
                   },
-                })
+                });
               }}
             >
               <LogOut className="size-4" data-icon="inline-start" />
@@ -225,7 +228,8 @@ function AnalyticsPage() {
               Analytics
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Visitor funnel, event trends, cancellation feedback, and per-product conversion.
+              Visitor funnel, event trends, cancellation feedback, and
+              per-product conversion.
             </p>
           </div>
 
@@ -242,7 +246,7 @@ function AnalyticsPage() {
             >
               <span>{selectedLabel}</span>
               <ChevronDown
-                className={`size-4 shrink-0 text-muted-foreground transition-transform ${rangeOpen ? 'rotate-180' : ''}`}
+                className={`size-4 shrink-0 text-muted-foreground transition-transform ${rangeOpen ? "rotate-180" : ""}`}
               />
             </Button>
             {rangeOpen && (
@@ -263,11 +267,11 @@ function AnalyticsPage() {
                         role="option"
                         aria-selected={days === opt.value}
                         className={[
-                          'flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors',
+                          "flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors",
                           days === opt.value
-                            ? 'bg-accent font-medium text-foreground'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                        ].join(' ')}
+                            ? "bg-accent font-medium text-foreground"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        ].join(" ")}
                         onClick={() => handleRangeChange(opt.value)}
                       >
                         {opt.label}
@@ -324,9 +328,13 @@ function AnalyticsPage() {
                     <XCircle className="size-4" />
                   </span>
                   <div className="flex flex-1 items-center justify-between gap-4">
-                    <span className="text-sm font-medium">Cancelled at checkout</span>
+                    <span className="text-sm font-medium">
+                      Cancelled at checkout
+                    </span>
                     <div className="flex items-center gap-4">
-                      <span className="metric-number text-sm font-semibold">{funnel.cancelled}</span>
+                      <span className="metric-number text-sm font-semibold">
+                        {funnel.cancelled}
+                      </span>
                       <Badge variant="secondary" className="text-xs">
                         {pct(funnel.cancelled, funnel.initiated)} of started
                       </Badge>
@@ -342,7 +350,8 @@ function AnalyticsPage() {
                 <div>
                   <CardTitle className="text-lg">Event trend</CardTitle>
                   <CardDescription>
-                    Daily page views and checkouts started over the selected period.
+                    Daily page views and checkouts started over the selected
+                    period.
                   </CardDescription>
                 </div>
               </CardHeader>
@@ -407,7 +416,9 @@ function AnalyticsPage() {
               {/* Cancellation reasons */}
               <Card className="bg-card/95">
                 <CardHeader className="border-b border-border/80 pb-5">
-                  <CardTitle className="text-lg">Cancellation reasons</CardTitle>
+                  <CardTitle className="text-lg">
+                    Cancellation reasons
+                  </CardTitle>
                   <CardDescription>
                     Why customers stopped at the Stripe checkout.
                   </CardDescription>
@@ -416,7 +427,10 @@ function AnalyticsPage() {
                   {reasonChartData.length === 0 ? (
                     <EmptyChart message="No feedback collected yet." />
                   ) : (
-                    <ChartContainer config={reasonConfig} className="h-64 w-full">
+                    <ChartContainer
+                      config={reasonConfig}
+                      className="h-64 w-full"
+                    >
                       <BarChart
                         data={reasonChartData}
                         layout="vertical"
@@ -496,16 +510,24 @@ function AnalyticsPage() {
                           <span className="text-right">
                             {p.initiated > 0 ? (
                               <Badge
-                                variant={p.conversionRate >= 50 ? 'outline' : 'secondary'}
+                                variant={
+                                  p.conversionRate >= 50
+                                    ? "outline"
+                                    : "secondary"
+                                }
                                 className={[
-                                  'font-mono text-xs',
-                                  p.conversionRate >= 50 ? 'text-emerald-700' : '',
-                                ].join(' ')}
+                                  "font-mono text-xs",
+                                  p.conversionRate >= 50
+                                    ? "text-emerald-700"
+                                    : "",
+                                ].join(" ")}
                               >
                                 {p.conversionRate}%
                               </Badge>
                             ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
+                              <span className="text-xs text-muted-foreground">
+                                —
+                              </span>
                             )}
                           </span>
                         </div>
@@ -519,7 +541,7 @@ function AnalyticsPage() {
         )}
       </main>
     </div>
-  )
+  );
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────
@@ -531,32 +553,34 @@ function FunnelStep({
   rate,
   highlight = false,
 }: {
-  icon: React.ReactNode
-  label: string
-  count: number
-  rate: string | null
-  highlight?: boolean
+  icon: React.ReactNode;
+  label: string;
+  count: number;
+  rate: string | null;
+  highlight?: boolean;
 }) {
   return (
     <Card
       size="sm"
-      className={`bg-card/95 ${highlight ? 'border-emerald-200 dark:border-emerald-900' : ''}`}
+      className={`bg-card/95 ${highlight ? "border-emerald-200 dark:border-emerald-900" : ""}`}
     >
       <CardContent className="py-1">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
           <span
             className={[
-              'flex size-8 items-center justify-center rounded-lg',
+              "flex size-8 items-center justify-center rounded-lg",
               highlight
-                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
-                : 'bg-accent text-accent-foreground',
-            ].join(' ')}
+                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                : "bg-accent text-accent-foreground",
+            ].join(" ")}
           >
             {icon}
           </span>
         </div>
-        <p className="metric-number text-3xl font-semibold">{count.toLocaleString()}</p>
+        <p className="metric-number text-3xl font-semibold">
+          {count.toLocaleString()}
+        </p>
         {rate !== null && (
           <p className="mt-1 text-xs text-muted-foreground">
             {rate} conversion from previous step
@@ -564,14 +588,14 @@ function FunnelStep({
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function FunnelConnector({ drop }: { drop: number | null }) {
   return (
     <div className="hidden sm:flex items-center justify-center">
       <div className="flex flex-col items-center gap-1">
-        <ArrowRight className="size-5 text-border" />
+        <ArrowRight className="size-5" />
         {drop !== null && (
           <span className="flex items-center gap-1 rounded-full bg-destructive/8 px-2 py-0.5 text-xs font-medium text-destructive">
             <TrendingDown className="size-3" />
@@ -580,16 +604,19 @@ function FunnelConnector({ drop }: { drop: number | null }) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 function EmptyChart({ message }: { message: string }) {
   return (
     <div className="flex h-48 items-center justify-center">
       <div className="flex flex-col items-center gap-3 text-center">
-        <BarChart2 className="size-8 text-muted-foreground/40" strokeWidth={1.5} />
+        <BarChart2
+          className="size-8 text-muted-foreground/40"
+          strokeWidth={1.5}
+        />
         <p className="max-w-[260px] text-sm text-muted-foreground">{message}</p>
       </div>
     </div>
-  )
+  );
 }
