@@ -13,6 +13,19 @@ export default function Home() {
         }
       `}</style>
       <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        <img
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            objectFit: "cover",
+          }}
+          src="/public/hero.png"
+          alt="Payshelf Preview"
+        />
+
         <div
           style={{
             position: "absolute",
@@ -41,6 +54,21 @@ export default function Home() {
           >
             Payshelf
           </h1>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "'Geist', sans-serif",
+              fontWeight: 500,
+              fontSize: "1.5rem",
+              color: "oklch(0.12 0 0)",
+              letterSpacing: "-0.03em",
+              lineHeight: 1,
+              userSelect: "none",
+              pointerEvents: "none",
+            }}
+          >
+            The simplest way to sell your products online.
+          </p>
           <Link
             to="/setup"
             style={{
