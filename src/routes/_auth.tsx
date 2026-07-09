@@ -18,8 +18,8 @@ function AuthLayout() {
             alt="Payshelf Workspace"
             className="absolute inset-0 h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/30 pointer-events-none" />
-          <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.6)] pointer-events-none" />
+          <div className="absolute inset-0 bg-black/10 dark:bg-black/30 pointer-events-none" />
+          <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.2)] dark:shadow-[inset_0_0_100px_rgba(0,0,0,0.6)] pointer-events-none" />
         </section>
 
         <section className="flex items-center justify-center bg-background/80 p-5 sm:p-10">

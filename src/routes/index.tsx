@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { listProductsFn } from '#/lib/products.functions';
 import { getSettingsFn } from '#/lib/settings.functions';
 import { createCheckoutFn } from '#/lib/checkout.functions';
@@ -49,8 +49,8 @@ function Home() {
       <header className="border-b border-border/80 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <BrandLockup shopName={settings.shopName} />
-          <Button variant="outline" size="sm" onClick={() => (window.location.href = '/login')}>
-            Seller login
+          <Button variant="outline" size="sm">
+            <Link to="/login">Seller login</Link>
           </Button>
         </div>
       </header>
