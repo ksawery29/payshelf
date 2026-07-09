@@ -13,6 +13,7 @@ import {
   getChatMessagesFn,
   sendSupportMessageFn,
 } from '#/lib/support.functions';
+import { cn } from '#/lib/utils';
 
 export const Route = createFileRoute('/support')({
   loader: async () => {
@@ -175,141 +176,129 @@ function SupportPage() {
           </div>
         ) : (
           <div className="w-full max-w-2xl">
-            {/* Double-Bezel Nested Architecture */}
-            <div className="rounded-[2rem] border border-border/50 bg-muted/20 p-2 shadow-sm">
-              <div className="rounded-[calc(2rem-0.5rem)] border border-border/80 bg-card p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-                <div className="flex flex-col gap-6">
-                  {/* Header info */}
-                  <div className="flex items-start justify-between border-b border-border/60 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                        <MessageSquare className="size-5" />
-                      </div>
+            {/* Single border container */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex flex-col gap-6">
+                {/* Header info */}
+                <div className="flex items-start justify-between border-b border-border/60 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <h1 className="font-heading text-lg font-semibold tracking-tight">
+                        Customer Support
+                      </h1>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Optional Email Prompt */}
+                {!chat?.customerEmail && (
+                  <div
+                    className={cn(
+                      'rounded-xl border border-amber-500/25 bg-amber-500/5 p-4',
+                      '[box-shadow:0px_1px_8px_0px_color-mix(in_oklab,white_7%,transparent)_inset,0px_0px_4.3px_0px_color-mix(in_oklab,var(--color-amber-500)_11%,transparent)_inset,0px_-1px_0px_1px_color-mix(in_oklab,white_18%,transparent)_inset]',
+                      'dark:[box-shadow:0px_1px_8px_0px_color-mix(in_oklab,black_7%,transparent)_inset,0px_0px_4.3px_0px_color-mix(in_oklab,var(--color-amber-500)_11%,transparent)_inset,0px_-1px_0px_1px_color-mix(in_oklab,black_18%,transparent)_inset]'
+                    )}
+                  >
+                    <form onSubmit={handleUpdateEmail} className="flex flex-col gap-3">
                       <div>
-                        <h1 className="font-heading text-lg font-semibold tracking-tight">
-                          Customer Support
-                        </h1>
-                        <p className="text-xs text-muted-foreground">
-                          We typically reply in a few minutes
+                        <h4 className="text-sm font-medium text-foreground">Link your email</h4>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Provide your email so we can reach you if you close this page.
                         </p>
                       </div>
-                    </div>
-                    {chat?.status === 'closed' ? (
-                      <Badge variant="secondary">Resolved</Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      >
-                        Live chat
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Optional Email Prompt */}
-                  {!chat?.customerEmail && (
-                    <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4">
-                      <form onSubmit={handleUpdateEmail} className="flex flex-col gap-3">
-                        <div>
-                          <h4 className="text-sm font-medium text-foreground">Link your email</h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Provide your email so we can reach you if you close this page.
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Input
-                            type="email"
-                            placeholder="you@example.com"
-                            value={emailInput}
-                            onChange={(e) => setEmailInput(e.target.value)}
-                            required
-                            className="bg-background max-w-xs"
-                          />
-                          <Button type="submit" size="sm">
-                            Link Email
-                          </Button>
-                        </div>
-                      </form>
-                    </div>
-                  )}
-
-                  {/* Messages box */}
-                  <div className="flex flex-col gap-4 min-h-[300px] max-h-[400px] overflow-y-auto rounded-xl border border-border/60 bg-muted/30 p-4">
-                    {messages.length === 0 ? (
-                      <div className="flex flex-1 flex-col items-center justify-center text-center p-8 text-muted-foreground">
-                        <MessageSquare className="size-8 opacity-40 mb-2" strokeWidth={1.5} />
-                        <p className="text-sm font-medium">No messages yet</p>
-                        <p className="text-xs mt-1">
-                          Send a message below to start chatting with us.
-                        </p>
+                      <div className="flex gap-2">
+                        <Input
+                          type="email"
+                          placeholder="you@example.com"
+                          value={emailInput}
+                          onChange={(e) => setEmailInput(e.target.value)}
+                          required
+                          className="bg-background max-w-xs"
+                        />
+                        <Button type="submit" size="sm">
+                          Link Email
+                        </Button>
                       </div>
-                    ) : (
-                      <div className="flex flex-col gap-3">
-                        {messages.map((msg) => {
-                          const isCustomer = msg.sender === 'customer';
-                          return (
-                            <div
-                              key={msg.id}
-                              className={`flex flex-col max-w-[80%] gap-1 ${
-                                isCustomer ? 'self-end items-end' : 'self-start items-start'
-                              }`}
-                            >
-                              <div
-                                className={`rounded-2xl px-4 py-2 text-sm leading-relaxed ${
-                                  isCustomer
-                                    ? 'bg-primary text-primary-foreground rounded-tr-sm'
-                                    : 'bg-accent/80 text-foreground rounded-tl-sm'
-                                }`}
-                              >
-                                {msg.content}
-                              </div>
-                              <span className="text-[10px] text-muted-foreground px-1">
-                                {msg.createdAt.toLocaleTimeString('en-US', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </span>
-                            </div>
-                          );
-                        })}
-                        <div ref={messagesEndRef} />
-                      </div>
-                    )}
+                    </form>
                   </div>
+                )}
 
-                  {/* Send Input */}
-                  {chat?.status === 'closed' ? (
-                    <div className="text-center py-2 text-sm text-muted-foreground">
-                      This support session has been closed. If you need further help, please start a
-                      new session.
+                {/* Messages box */}
+                <div className="flex flex-col gap-4 min-h-[300px] max-h-[400px] overflow-y-auto rounded-xl border border-border/60 bg-muted/30 p-4">
+                  {messages.length === 0 ? (
+                    <div className="flex flex-1 flex-col items-center justify-center text-center p-8 text-muted-foreground">
+                      <MessageSquare className="size-8 opacity-40 mb-2" strokeWidth={1.5} />
+                      <p className="text-sm font-medium">No messages yet</p>
+                      <p className="text-xs mt-1">
+                        Send a message below to start chatting with us.
+                      </p>
                     </div>
                   ) : (
-                    <form onSubmit={handleSendMessage} className="flex gap-2">
-                      <Input
-                        placeholder="Type your message..."
-                        value={messageInput}
-                        onChange={(e) => setMessageInput(e.target.value)}
-                        required
-                        disabled={sending}
-                        className="flex-1 bg-background"
-                      />
-                      <Button
-                        type="submit"
-                        disabled={sending || !messageInput.trim()}
-                        className="rounded-full shrink-0"
-                      >
-                        {sending ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          <>
-                            Send
-                            <Send className="size-4 ml-1" />
-                          </>
-                        )}
-                      </Button>
-                    </form>
+                    <div className="flex flex-col gap-3">
+                      {messages.map((msg) => {
+                        const isCustomer = msg.sender === 'customer';
+                        return (
+                          <div
+                            key={msg.id}
+                            className={`flex flex-col max-w-[80%] gap-1 ${
+                              isCustomer ? 'self-end items-end' : 'self-start items-start'
+                            }`}
+                          >
+                            <div
+                              className={`rounded-2xl px-4 py-2 text-sm leading-relaxed ${
+                                isCustomer
+                                  ? 'bg-primary text-primary-foreground rounded-tr-sm'
+                                  : 'bg-accent/80 text-foreground rounded-tl-sm'
+                              }`}
+                            >
+                              {msg.content}
+                            </div>
+                            <span className="text-[10px] text-muted-foreground px-1">
+                              {msg.createdAt.toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      <div ref={messagesEndRef} />
+                    </div>
                   )}
                 </div>
+
+                {/* Send Input */}
+                {chat?.status === 'closed' ? (
+                  <div className="text-center py-2 text-sm text-muted-foreground">
+                    This support session has been closed. If you need further help, please start a
+                    new session.
+                  </div>
+                ) : (
+                  <form onSubmit={handleSendMessage} className="flex gap-2">
+                    <Input
+                      placeholder="Type your message..."
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      required
+                      disabled={sending}
+                      className="flex-1 bg-background"
+                    />
+                    <Button
+                      type="submit"
+                      disabled={sending || !messageInput.trim()}
+                      className="rounded-full shrink-0"
+                    >
+                      {sending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <>
+                          Send
+                          <Send className="size-4 ml-1" />
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                )}
               </div>
             </div>
           </div>
