@@ -1,9 +1,7 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router';
-import NProgress from 'nprogress';
-import 'nprogress/nprogress.css';
 import { routeTree } from './routeTree.gen';
 
-NProgress.configure({ showSpinner: false });
+const isBrowser = typeof document !== 'undefined';
 
 export function getRouter() {
   const router = createTanStackRouter({
@@ -13,13 +11,20 @@ export function getRouter() {
     defaultPreloadStaleTime: 0,
   });
 
-  router.subscribe('onBeforeNavigate', ({ pathChanged }) => {
-    if (pathChanged) NProgress.start();
-  });
+  if (isBrowser) {
+    import('nprogress').then(({ default: NProgress }) => {
+      import('nprogress/nprogress.css');
+      NProgress.configure({ showSpinner: false });
 
-  router.subscribe('onResolved', () => {
-    NProgress.done();
-  });
+      router.subscribe('onBeforeNavigate', ({ pathChanged }) => {
+        if (pathChanged) NProgress.start();
+      });
+
+      router.subscribe('onResolved', () => {
+        NProgress.done();
+      });
+    });
+  }
 
   return router;
 }
