@@ -22,7 +22,7 @@ export default function Home() {
             height: "100vh",
             objectFit: "cover",
           }}
-          src="/public/hero.png"
+          src="/hero.png"
           alt="Payshelf Preview"
         />
 
