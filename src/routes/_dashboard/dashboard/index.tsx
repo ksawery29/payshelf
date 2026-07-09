@@ -279,7 +279,7 @@ function StatCard({
       <CardContent className="py-1">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <span className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+          <span className="flex size-8 items-center justify-center rounded-lg text-accent-foreground">
             {icon}
           </span>
         </div>
