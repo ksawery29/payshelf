@@ -51,6 +51,7 @@ import {
   Trash2,
   TrendingUp,
 } from 'lucide-react';
+import { PrimaryGrowButton } from '#/components/ui/grow-button';
 
 export const Route = createFileRoute('/_dashboard/dashboard/')({
   loader: async () => {
@@ -584,7 +585,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
         if (!v) resetForm();
       }}
     >
-      <DialogTrigger render={<Button size="lg" />}>
+      <DialogTrigger render={<PrimaryGrowButton />}>
         <Plus className="size-4" data-icon="inline-start" />
         Add product
       </DialogTrigger>
