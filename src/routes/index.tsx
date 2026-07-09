@@ -10,6 +10,7 @@ import { Card, CardContent, CardFooter } from '#/components/ui/card';
 import { Badge } from '#/components/ui/badge';
 import { ArrowRight, PackageOpen } from 'lucide-react';
 import { Footer } from '#/components/footer';
+import { PrimaryGrowButton } from '#/components/ui/grow-button';
 
 export const Route = createFileRoute('/')({
   loader: async () => {
@@ -135,7 +136,7 @@ function ProductCard({ product }: { product: Product }) {
       </CardContent>
 
       <CardFooter className="border-t border-border/80 bg-muted/30 px-5 py-4">
-        <Button className="w-full" onClick={handleBuy} disabled={loading}>
+        <PrimaryGrowButton className="w-full" onClick={handleBuy} disabled={loading}>
           {loading ? (
             <span className="flex items-center gap-2">
               <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -147,7 +148,7 @@ function ProductCard({ product }: { product: Product }) {
               <ArrowRight className="size-4" data-icon="inline-end" />
             </>
           )}
-        </Button>
+        </PrimaryGrowButton>
       </CardFooter>
     </Card>
   );
