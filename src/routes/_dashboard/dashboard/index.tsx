@@ -112,72 +112,7 @@ function DashboardPage() {
   const downloadableProducts = products.filter((product) => product.filePath).length;
 
   return (
-    <div className="min-h-[100dvh] bg-background">
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-6">
-            <BrandLockup shopName={settings.shopName} />
-            <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
-              <a
-                href="/dashboard"
-                className="rounded-md bg-muted px-3 py-1.5 text-sm font-medium text-foreground"
-              >
-                Dashboard
-              </a>
-              <a
-                href="/analytics"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Analytics
-              </a>
-              <a
-                href="/dashboard/support"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Support
-              </a>
-              <a
-                href="/settings"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Settings
-              </a>
-              <a
-                href="/"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Storefront
-              </a>
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {session?.user && (
-              <div className="hidden max-w-[220px] truncate rounded-lg border border-border/80 bg-card px-3 py-1.5 text-sm text-muted-foreground sm:block">
-                {session.user.email}
-              </div>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                void authClient.signOut({
-                  fetchOptions: {
-                    onSuccess: () => {
-                      window.location.href = '/login';
-                    },
-                  },
-                });
-              }}
-            >
-              <LogOut className="size-4" data-icon="inline-start" />
-              Sign out
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main id="main-content" className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <main id="main-content" className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <section className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <Badge className="mb-3 bg-accent text-accent-foreground">Seller dashboard</Badge>
@@ -259,7 +194,6 @@ function DashboardPage() {
           )}
         </section>
       </main>
-    </div>
   );
 }
 

@@ -136,73 +136,7 @@ function AnalyticsPage() {
   const selectedLabel = DAY_OPTIONS.find((o) => o.value === days)?.label ?? 'Last 30 days';
 
   return (
-    <div className="min-h-[100dvh] bg-background">
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-6">
-            <BrandLockup shopName={settings.shopName} />
-            <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
-              <a
-                href="/dashboard"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Dashboard
-              </a>
-              <a
-                href="/analytics"
-                className="rounded-md bg-muted px-3 py-1.5 text-sm font-medium text-foreground"
-              >
-                Analytics
-              </a>
-              <a
-                href="/dashboard/support"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Support
-              </a>
-              <a
-                href="/settings"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Settings
-              </a>
-              <a
-                href="/"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Storefront
-              </a>
-            </nav>
-          </div>
-          <div className="flex items-center gap-2">
-            {session?.user && (
-              <div className="hidden max-w-[220px] truncate rounded-lg border border-border/80 bg-card px-3 py-1.5 text-sm text-muted-foreground sm:block">
-                {session.user.email}
-              </div>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                void authClient.signOut({
-                  fetchOptions: {
-                    onSuccess: () => {
-                      window.location.href = '/login';
-                    },
-                  },
-                });
-              }}
-            >
-              <LogOut className="size-4" data-icon="inline-start" />
-              Sign out
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* ── Main ── */}
-      <main id="main-content" className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <main id="main-content" className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Page header + date range picker */}
         <section className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -499,7 +433,6 @@ function AnalyticsPage() {
           </div>
         )}
       </main>
-    </div>
   );
 }
 
