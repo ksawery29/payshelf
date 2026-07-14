@@ -11,6 +11,16 @@ import { Badge } from '#/components/ui/badge';
 import { ArrowRight, PackageOpen } from 'lucide-react';
 import { Footer } from '#/components/footer';
 import { PrimaryGrowButton } from '#/components/ui/grow-button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '#/components/ui/dialog';
 
 export const Route = createFileRoute('/')({
   loader: async () => {
@@ -136,19 +146,42 @@ function ProductCard({ product }: { product: Product }) {
       </CardContent>
 
       <CardFooter className="border-t border-border/80 bg-muted/30 px-5 py-4">
-        <PrimaryGrowButton className="w-full" onClick={handleBuy} disabled={loading}>
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Starting checkout
-            </span>
-          ) : (
-            <>
+        <Dialog>
+          <DialogContent showCloseButton={false}>
+            <DialogHeader>
+              <DialogTitle>Confirm your purchase</DialogTitle>
+              <DialogDescription>
+                You will be asked to provide your email address at checkout. Please ensure that it
+                is correct, as this is where we will send your download link.
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter>
+              <DialogClose>
+                <Button>Cancel</Button>
+              </DialogClose>
+
+              <Button disabled={loading} onClick={handleBuy}>
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Starting checkout
+                  </span>
+                ) : (
+                  <>
+                    Continue
+                    <ArrowRight className="size-4" data-icon="inline-end" />
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+          <DialogTrigger className="w-full">
+            <PrimaryGrowButton className="w-full" disabled={loading}>
               Buy now
-              <ArrowRight className="size-4" data-icon="inline-end" />
-            </>
-          )}
-        </PrimaryGrowButton>
+            </PrimaryGrowButton>
+          </DialogTrigger>
+        </Dialog>
       </CardFooter>
     </Card>
   );
