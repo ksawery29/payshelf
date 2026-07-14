@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { createFileRoute, Outlet, redirect, useRouterState, Link } from '@tanstack/react-router';
 import { getSessionFn } from '#/lib/auth.functions';
 import { getSettingsFn } from '#/lib/settings.functions';
@@ -50,6 +51,27 @@ function DashboardLayout() {
   const { data: session } = authClient.useSession();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isOnboarding = pathname.startsWith('/onboarding');
+
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+
+  useEffect(() => {
+    async function checkVersion() {
+      try {
+        const [localRes, remoteRes] = await Promise.all([
+          fetch('/api/version').then((r) => r.json() as Promise<{ version: string }>),
+          fetch('https://raw.githubusercontent.com/ksawery29/payshelf/refs/heads/main/version.txt').then((r) => r.text()),
+        ]);
+        const localVer = localRes.version.trim();
+        const remoteVer = remoteRes.trim();
+        if (localVer && remoteVer && localVer !== remoteVer) {
+          setUpdateAvailable(true);
+        }
+      } catch (err) {
+        console.error('Failed to check version:', err);
+      }
+    }
+    void checkVersion();
+  }, []);
 
   if (isOnboarding) {
     return <Outlet />;
@@ -144,6 +166,11 @@ function DashboardLayout() {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="flex flex-col">
+        {updateAvailable && (
+          <div className="bg-red-600 text-white px-4 py-2 text-center text-sm font-semibold flex items-center justify-center gap-2 z-50">
+            <span>An update is available!</span>
+          </div>
+        )}
         <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 border-b border-border/80 bg-background/90 px-4 backdrop-blur-xl">
           <SidebarTrigger className="-ml-1" />
           <div className="flex-1 flex items-center justify-between">
