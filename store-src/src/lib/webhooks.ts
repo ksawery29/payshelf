@@ -56,7 +56,7 @@ export async function triggerWebhook(
       case 'support.message_created': {
         const msg = data.message;
         const senderLabel = msg?.sender === 'agent' ? 'Support Agent' : 'Customer';
-        text = `✉️ **New Support Message:** *${senderLabel}*: "${msg?.content}" in chat \`${msg?.chatId?.slice(0, 8)}\`.`;
+        text = `✉️ **New Support Message:** _${senderLabel}_: "${msg?.content}" in chat \`${msg?.chatId?.slice(0, 8)}\`.`;
         break;
       }
       case 'support.chat_closed': {
@@ -96,10 +96,11 @@ export async function triggerWebhook(
 
       if (!subEvents.includes(event)) continue;
 
-      // Prepare payload
+      // Prepare payload and format for Slack vs Discord
       let body: any = {};
       if (integration.id === 'slack') {
-        body = { text };
+        const slackText = text.replace(/\*\*/g, '*');
+        body = { text: slackText };
       } else if (integration.id === 'discord') {
         body = { content: text };
       }

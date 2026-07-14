@@ -95,7 +95,8 @@ export const sendTestNotificationFn = createServerFn({ method: 'POST' })
     const text = `🔔 **Test Notification:** This is a test message from your Payshelf integrations panel for **${data.id === 'slack' ? 'Slack' : 'Discord'}**!`;
     let body: any = {};
     if (data.id === 'slack') {
-      body = { text };
+      const slackText = text.replace(/\*\*/g, '*');
+      body = { text: slackText };
     } else {
       body = { content: text };
     }
