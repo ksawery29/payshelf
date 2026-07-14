@@ -27,6 +27,7 @@ import {
   Settings as SettingsIcon,
   ExternalLink,
   LogOut,
+  ShoppingBag,
 } from 'lucide-react';
 
 export const Route = createFileRoute('/_dashboard')({
@@ -59,7 +60,9 @@ function DashboardLayout() {
       try {
         const [localRes, remoteRes] = await Promise.all([
           fetch('/api/version').then((r) => r.json() as Promise<{ version: string }>),
-          fetch('https://raw.githubusercontent.com/ksawery29/payshelf/refs/heads/main/version.txt').then((r) => r.text()),
+          fetch(
+            'https://raw.githubusercontent.com/ksawery29/payshelf/refs/heads/main/version.txt'
+          ).then((r) => r.text()),
         ]);
         const localVer = localRes.version.trim();
         const remoteVer = remoteRes.trim();
@@ -82,6 +85,11 @@ function DashboardLayout() {
       title: 'Dashboard',
       url: '/dashboard',
       icon: LayoutDashboard,
+    },
+    {
+      title: 'Orders',
+      url: '/dashboard/orders',
+      icon: ShoppingBag,
     },
     {
       title: 'Analytics',

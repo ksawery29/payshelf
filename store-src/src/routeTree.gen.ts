@@ -29,6 +29,7 @@ import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as DashboardDashboardSupportRouteImport } from './routes/_dashboard/dashboard/support'
+import { Route as DashboardDashboardOrdersRouteImport } from './routes/_dashboard/dashboard/orders'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -129,6 +130,12 @@ const DashboardDashboardSupportRoute =
     path: '/dashboard/support',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardDashboardOrdersRoute =
+  DashboardDashboardOrdersRouteImport.update({
+    id: '/dashboard/orders',
+    path: '/dashboard/orders',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/api/version': typeof ApiVersionRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -165,6 +173,7 @@ export interface FileRoutesByTo {
   '/api/version': typeof ApiVersionRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -188,6 +197,7 @@ export interface FileRoutesById {
   '/api/version': typeof ApiVersionRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/_dashboard/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/_dashboard/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/api/version'
     | '/checkout/cancel'
     | '/checkout/success'
+    | '/dashboard/orders'
     | '/dashboard/support'
     | '/api/auth/$'
     | '/api/stripe/webhook'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/api/version'
     | '/checkout/cancel'
     | '/checkout/success'
+    | '/dashboard/orders'
     | '/dashboard/support'
     | '/api/auth/$'
     | '/api/stripe/webhook'
@@ -252,6 +264,7 @@ export interface FileRouteTypes {
     | '/api/version'
     | '/checkout/cancel'
     | '/checkout/success'
+    | '/_dashboard/dashboard/orders'
     | '/_dashboard/dashboard/support'
     | '/api/auth/$'
     | '/api/stripe/webhook'
@@ -416,6 +429,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardSupportRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/dashboard/orders': {
+      id: '/_dashboard/dashboard/orders'
+      path: '/dashboard/orders'
+      fullPath: '/dashboard/orders'
+      preLoaderRoute: typeof DashboardDashboardOrdersRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
@@ -435,6 +455,7 @@ interface DashboardRouteChildren {
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
   DashboardOnboardingRoute: typeof DashboardOnboardingRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
+  DashboardDashboardOrdersRoute: typeof DashboardDashboardOrdersRoute
   DashboardDashboardSupportRoute: typeof DashboardDashboardSupportRoute
   DashboardDashboardIndexRoute: typeof DashboardDashboardIndexRoute
 }
@@ -443,6 +464,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
   DashboardOnboardingRoute: DashboardOnboardingRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
+  DashboardDashboardOrdersRoute: DashboardDashboardOrdersRoute,
   DashboardDashboardSupportRoute: DashboardDashboardSupportRoute,
   DashboardDashboardIndexRoute: DashboardDashboardIndexRoute,
 }
