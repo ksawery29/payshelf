@@ -15,6 +15,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PIdRouteImport } from './routes/p/$id'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
 import { Route as CheckoutCancelRouteImport } from './routes/checkout/cancel'
 import { Route as ApiVersionRouteImport } from './routes/api/version'
@@ -57,6 +58,11 @@ const AuthRoute = AuthRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PIdRoute = PIdRouteImport.update({
+  id: '/p/$id',
+  path: '/p/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/api/version': typeof ApiVersionRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/p/$id': typeof PIdRoute
   '/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/api/version': typeof ApiVersionRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/p/$id': typeof PIdRoute
   '/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/api/version': typeof ApiVersionRoute
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/p/$id': typeof PIdRoute
   '/_dashboard/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/_dashboard/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/api/version'
     | '/checkout/cancel'
     | '/checkout/success'
+    | '/p/$id'
     | '/dashboard/orders'
     | '/dashboard/support'
     | '/api/auth/$'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/api/version'
     | '/checkout/cancel'
     | '/checkout/success'
+    | '/p/$id'
     | '/dashboard/orders'
     | '/dashboard/support'
     | '/api/auth/$'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/api/version'
     | '/checkout/cancel'
     | '/checkout/success'
+    | '/p/$id'
     | '/_dashboard/dashboard/orders'
     | '/_dashboard/dashboard/support'
     | '/api/auth/$'
@@ -283,6 +295,7 @@ export interface RootRouteChildren {
   ApiVersionRoute: typeof ApiVersionRoute
   CheckoutCancelRoute: typeof CheckoutCancelRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+  PIdRoute: typeof PIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
@@ -329,6 +342,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$id': {
+      id: '/p/$id'
+      path: '/p/$id'
+      fullPath: '/p/$id'
+      preLoaderRoute: typeof PIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout/success': {
@@ -485,6 +505,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiVersionRoute: ApiVersionRoute,
   CheckoutCancelRoute: CheckoutCancelRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
+  PIdRoute: PIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }

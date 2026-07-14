@@ -47,6 +47,8 @@ import {
   PackageOpen,
   Pencil,
   Plus,
+  Share,
+  Share2,
   ShoppingBag,
   Trash2,
   TrendingUp,
@@ -113,87 +115,87 @@ function DashboardPage() {
 
   return (
     <main id="main-content" className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <section className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <section className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <Badge className="mb-3 bg-accent text-accent-foreground">Seller dashboard</Badge>
+          <h1 className="font-heading text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
+            Sales overview
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Track your sales and grow your business.
+          </p>
+        </div>
+        <CreateProductDialog onCreated={() => router.invalidate()} />
+      </section>
+
+      <section
+        aria-label="Performance metrics"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        <StatCard
+          title="Total revenue"
+          value={formatPrice(analytics.totalRevenue)}
+          sub={`${analytics.totalSales} sale${analytics.totalSales === 1 ? '' : 's'} processed`}
+          icon={<TrendingUp className="size-4" />}
+        />
+        <StatCard
+          title="This month"
+          value={formatPrice(analytics.monthRevenue)}
+          sub={`${analytics.monthSales} sale${analytics.monthSales === 1 ? '' : 's'} this month`}
+          icon={<Calendar className="size-4" />}
+        />
+        <StatCard
+          title="This week"
+          value={formatPrice(analytics.weekRevenue)}
+          sub={`${analytics.weekSales} sale${analytics.weekSales === 1 ? '' : 's'} since Monday`}
+          icon={<CalendarDays className="size-4" />}
+        />
+        <StatCard
+          title="Products"
+          value={String(products.length)}
+          sub={`${linkedProducts} Stripe linked`}
+          icon={<ShoppingBag className="size-4" />}
+        />
+      </section>
+
+      <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.75fr)]">
+        <RevenueChartCard chartData={chartData} />
+        <ReadinessCard
+          products={products.length}
+          linkedProducts={linkedProducts}
+          downloadableProducts={downloadableProducts}
+        />
+      </section>
+
+      <section className="mt-10">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <Badge className="mb-3 bg-accent text-accent-foreground">Seller dashboard</Badge>
-            <h1 className="font-heading text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
-              Sales overview
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Track your sales and grow your business.
+            <h2 className="font-heading text-2xl font-semibold tracking-tight">Product shelf</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              The products customers can buy from your public storefront.
             </p>
           </div>
-          <CreateProductDialog onCreated={() => router.invalidate()} />
-        </section>
+          <span className="text-sm text-muted-foreground">
+            {products.length} item{products.length === 1 ? '' : 's'}
+          </span>
+        </div>
 
-        <section
-          aria-label="Performance metrics"
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
-        >
-          <StatCard
-            title="Total revenue"
-            value={formatPrice(analytics.totalRevenue)}
-            sub={`${analytics.totalSales} sale${analytics.totalSales === 1 ? '' : 's'} processed`}
-            icon={<TrendingUp className="size-4" />}
-          />
-          <StatCard
-            title="This month"
-            value={formatPrice(analytics.monthRevenue)}
-            sub={`${analytics.monthSales} sale${analytics.monthSales === 1 ? '' : 's'} this month`}
-            icon={<Calendar className="size-4" />}
-          />
-          <StatCard
-            title="This week"
-            value={formatPrice(analytics.weekRevenue)}
-            sub={`${analytics.weekSales} sale${analytics.weekSales === 1 ? '' : 's'} since Monday`}
-            icon={<CalendarDays className="size-4" />}
-          />
-          <StatCard
-            title="Products"
-            value={String(products.length)}
-            sub={`${linkedProducts} Stripe linked`}
-            icon={<ShoppingBag className="size-4" />}
-          />
-        </section>
-
-        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.75fr)]">
-          <RevenueChartCard chartData={chartData} />
-          <ReadinessCard
-            products={products.length}
-            linkedProducts={linkedProducts}
-            downloadableProducts={downloadableProducts}
-          />
-        </section>
-
-        <section className="mt-10">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="font-heading text-2xl font-semibold tracking-tight">Product shelf</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                The products customers can buy from your public storefront.
-              </p>
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {products.length} item{products.length === 1 ? '' : 's'}
-            </span>
+        {products.length === 0 ? (
+          <EmptyProducts onCreate={() => router.invalidate()} />
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {products.map((product) => (
+              <ProductManagementCard
+                key={product.id}
+                product={product}
+                onUpdated={() => router.invalidate()}
+                onDeleted={() => router.invalidate()}
+              />
+            ))}
           </div>
-
-          {products.length === 0 ? (
-            <EmptyProducts onCreate={() => router.invalidate()} />
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {products.map((product) => (
-                <ProductManagementCard
-                  key={product.id}
-                  product={product}
-                  onUpdated={() => router.invalidate()}
-                  onDeleted={() => router.invalidate()}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
+        )}
+      </section>
+    </main>
   );
 }
 
@@ -392,6 +394,7 @@ function ProductManagementCard({
             )}
           </div>
           <div className="flex shrink-0 gap-1">
+            <ShareProductDialog product={product} />
             <EditProductDialog product={product} onUpdated={onUpdated} />
             <DeleteProductButton product={product} onDeleted={onDeleted} />
           </div>
@@ -560,6 +563,44 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
             </Button>
           </DialogFooter>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ShareProductDialog({ product }: { product: ProductType }) {
+  return (
+    <Dialog>
+      <DialogTrigger
+        render={
+          <Button variant="ghost" size="icon-xs" title="Share product" aria-label="Share product" />
+        }
+      >
+        <Share className="size-3.5" />
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Share product</DialogTitle>
+          <DialogDescription>Share the direct checkout link with your customers.</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-2">
+            <Input
+              value={`${window.location.origin}/p/${product.id}`}
+              readOnly
+              className="flex-1"
+            />
+            <Button
+              variant="outline"
+              onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/p/${product.id}`);
+              }}
+            >
+              Copy
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
