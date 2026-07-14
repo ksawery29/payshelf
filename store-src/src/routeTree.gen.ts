@@ -31,6 +31,7 @@ import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhoo
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as DashboardDashboardSupportRouteImport } from './routes/_dashboard/dashboard/support'
 import { Route as DashboardDashboardOrdersRouteImport } from './routes/_dashboard/dashboard/orders'
+import { Route as DashboardDashboardIntegrationsRouteImport } from './routes/_dashboard/dashboard/integrations'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -142,6 +143,12 @@ const DashboardDashboardOrdersRoute =
     path: '/dashboard/orders',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardDashboardIntegrationsRoute =
+  DashboardDashboardIntegrationsRouteImport.update({
+    id: '/dashboard/integrations',
+    path: '/dashboard/integrations',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/p/$id': typeof PIdRoute
+  '/dashboard/integrations': typeof DashboardDashboardIntegrationsRoute
   '/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -181,6 +189,7 @@ export interface FileRoutesByTo {
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/p/$id': typeof PIdRoute
+  '/dashboard/integrations': typeof DashboardDashboardIntegrationsRoute
   '/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -206,6 +215,7 @@ export interface FileRoutesById {
   '/checkout/cancel': typeof CheckoutCancelRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/p/$id': typeof PIdRoute
+  '/_dashboard/dashboard/integrations': typeof DashboardDashboardIntegrationsRoute
   '/_dashboard/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/_dashboard/dashboard/support': typeof DashboardDashboardSupportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/checkout/cancel'
     | '/checkout/success'
     | '/p/$id'
+    | '/dashboard/integrations'
     | '/dashboard/orders'
     | '/dashboard/support'
     | '/api/auth/$'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/checkout/cancel'
     | '/checkout/success'
     | '/p/$id'
+    | '/dashboard/integrations'
     | '/dashboard/orders'
     | '/dashboard/support'
     | '/api/auth/$'
@@ -276,6 +288,7 @@ export interface FileRouteTypes {
     | '/checkout/cancel'
     | '/checkout/success'
     | '/p/$id'
+    | '/_dashboard/dashboard/integrations'
     | '/_dashboard/dashboard/orders'
     | '/_dashboard/dashboard/support'
     | '/api/auth/$'
@@ -456,6 +469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardOrdersRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/dashboard/integrations': {
+      id: '/_dashboard/dashboard/integrations'
+      path: '/dashboard/integrations'
+      fullPath: '/dashboard/integrations'
+      preLoaderRoute: typeof DashboardDashboardIntegrationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
@@ -475,6 +495,7 @@ interface DashboardRouteChildren {
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
   DashboardOnboardingRoute: typeof DashboardOnboardingRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
+  DashboardDashboardIntegrationsRoute: typeof DashboardDashboardIntegrationsRoute
   DashboardDashboardOrdersRoute: typeof DashboardDashboardOrdersRoute
   DashboardDashboardSupportRoute: typeof DashboardDashboardSupportRoute
   DashboardDashboardIndexRoute: typeof DashboardDashboardIndexRoute
@@ -484,6 +505,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
   DashboardOnboardingRoute: DashboardOnboardingRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
+  DashboardDashboardIntegrationsRoute: DashboardDashboardIntegrationsRoute,
   DashboardDashboardOrdersRoute: DashboardDashboardOrdersRoute,
   DashboardDashboardSupportRoute: DashboardDashboardSupportRoute,
   DashboardDashboardIndexRoute: DashboardDashboardIndexRoute,

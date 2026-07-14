@@ -17,6 +17,7 @@ import {
   SidebarFooter,
   SidebarInset,
   SidebarTrigger,
+  SidebarGroupLabel,
 } from '#/components/ui/sidebar';
 import { Separator } from '#/components/ui/separator';
 import { Button } from '#/components/ui/button';
@@ -28,6 +29,7 @@ import {
   ExternalLink,
   LogOut,
   ShoppingBag,
+  PuzzleIcon,
 } from 'lucide-react';
 
 export const Route = createFileRoute('/_dashboard')({
@@ -80,31 +82,57 @@ function DashboardLayout() {
     return <Outlet />;
   }
 
-  const navItems = [
+  const sections = [
     {
-      title: 'Dashboard',
-      url: '/dashboard',
-      icon: LayoutDashboard,
+      title: 'Store Overview',
+      items: [
+        {
+          title: 'Dashboard',
+          url: '/dashboard',
+          icon: LayoutDashboard,
+        },
+        {
+          title: 'Orders',
+          url: '/dashboard/orders',
+          icon: ShoppingBag,
+        },
+        {
+          title: 'Analytics',
+          url: '/analytics',
+          icon: TrendingUp,
+        },
+      ],
     },
     {
-      title: 'Orders',
-      url: '/dashboard/orders',
-      icon: ShoppingBag,
+      title: 'Management & Support',
+      items: [
+        {
+          title: 'Integrations',
+          url: '/dashboard/integrations',
+          icon: PuzzleIcon,
+        },
+        {
+          title: 'Support Chats',
+          url: '/dashboard/support',
+          icon: LifeBuoy,
+        },
+      ],
     },
     {
-      title: 'Analytics',
-      url: '/analytics',
-      icon: TrendingUp,
-    },
-    {
-      title: 'Support',
-      url: '/dashboard/support',
-      icon: LifeBuoy,
-    },
-    {
-      title: 'Settings',
-      url: '/settings',
-      icon: SettingsIcon,
+      title: 'Settings & Preview',
+      items: [
+        {
+          title: 'Store Settings',
+          url: '/settings',
+          icon: SettingsIcon,
+        },
+        {
+          title: 'View Storefront',
+          url: '/',
+          icon: ExternalLink,
+          external: true,
+        },
+      ],
     },
   ];
 
@@ -114,36 +142,41 @@ function DashboardLayout() {
         <SidebarHeader className="border-b border-border/50 px-6 py-4">
           <BrandLockup shopName={settings.shopName} />
         </SidebarHeader>
-        <SidebarContent className="px-3 py-4">
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navItems.map((item) => {
-                  const isActive =
-                    pathname === item.url ||
-                    (item.url !== '/dashboard' && pathname.startsWith(item.url));
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={isActive}>
-                        <Link to={item.url} className="flex items-center gap-3">
-                          <item.icon className="size-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <a href="/" className="flex items-center gap-3">
-                      <ExternalLink className="size-4" />
-                      <span>Storefront</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+        <SidebarContent className="px-3 py-4 gap-4">
+          {sections.map((section, idx) => (
+            <SidebarGroup key={section.title} className="p-0">
+              <SidebarGroupLabel className="text-xs font-semibold tracking-wider text-muted-foreground/80 px-3 mb-1 uppercase">
+                {section.title}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {section.items.map((item) => {
+                    const isActive =
+                      pathname === item.url ||
+                      (item.url !== '/dashboard' && item.url !== '/' && pathname.startsWith(item.url));
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild isActive={isActive}>
+                          {item.external ? (
+                            <a href={item.url} className="flex items-center gap-3">
+                              <item.icon className="size-4" />
+                              <span>{item.title}</span>
+                            </a>
+                          ) : (
+                            <Link to={item.url} className="flex items-center gap-3">
+                              <item.icon className="size-4" />
+                              <span>{item.title}</span>
+                            </Link>
+                          )}
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+              {idx < sections.length - 1 && <Separator className="mt-4 opacity-50" />}
+            </SidebarGroup>
+          ))}
         </SidebarContent>
         <SidebarFooter className="border-t border-border/50 p-4">
           <div className="flex flex-col gap-2">

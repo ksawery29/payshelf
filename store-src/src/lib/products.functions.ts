@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { db } from '../db';
 import { product } from '../db/schema';
 import { desc } from 'drizzle-orm';
+import { triggerWebhook } from './webhooks';
 
 /**
  * List all products, newest first.
@@ -39,5 +40,9 @@ export const createProductFn = createServerFn({ method: 'POST' })
       })
       .returning();
 
+    // Trigger webhook notification
+    await triggerWebhook('product.created', { product: created });
+
     return created;
   });
+

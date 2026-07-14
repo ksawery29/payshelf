@@ -4,6 +4,8 @@ import { db } from '#/db';
 import { purchase, product, analyticsEvent } from '#/db/schema';
 import { eq } from 'drizzle-orm';
 import { sendPurchaseEmail } from '#/lib/email';
+import { triggerWebhook } from '#/lib/webhooks';
+
 
 export const Route = createFileRoute('/api/stripe/webhook')({
   server: {
@@ -99,6 +101,7 @@ export const Route = createFileRoute('/api/stripe/webhook')({
               }
 
               console.log('[Payshelf] Purchase created:', newPurchase.id);
+              await triggerWebhook('purchase.created', { purchase: newPurchase, product: prod });
               break;
             }
 
@@ -110,10 +113,20 @@ export const Route = createFileRoute('/api/stripe/webhook')({
                   : charge.payment_intent?.id;
 
               if (paymentIntentId) {
-                await db
+                const [updatedPurchase] = await db
                   .update(purchase)
                   .set({ status: 'refunded' })
-                  .where(eq(purchase.stripePaymentIntentId, paymentIntentId));
+                  .where(eq(purchase.stripePaymentIntentId, paymentIntentId))
+                  .returning();
+
+                if (updatedPurchase) {
+                  const [prod] = await db
+                    .select()
+                    .from(product)
+                    .where(eq(product.id, updatedPurchase.productId))
+                    .limit(1);
+                  await triggerWebhook('purchase.refunded', { purchase: updatedPurchase, product: prod });
+                }
 
                 console.log('[Payshelf] Purchase refunded for PI:', paymentIntentId);
               }
@@ -128,10 +141,20 @@ export const Route = createFileRoute('/api/stripe/webhook')({
                   : dispute.payment_intent?.id;
 
               if (paymentIntentId) {
-                await db
+                const [updatedPurchase] = await db
                   .update(purchase)
                   .set({ status: 'disputed' })
-                  .where(eq(purchase.stripePaymentIntentId, paymentIntentId));
+                  .where(eq(purchase.stripePaymentIntentId, paymentIntentId))
+                  .returning();
+
+                if (updatedPurchase) {
+                  const [prod] = await db
+                    .select()
+                    .from(product)
+                    .where(eq(product.id, updatedPurchase.productId))
+                    .limit(1);
+                  await triggerWebhook('purchase.disputed', { purchase: updatedPurchase, product: prod });
+                }
 
                 console.log('[Payshelf] Purchase disputed for PI:', paymentIntentId);
               }

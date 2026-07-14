@@ -4,6 +4,8 @@ import { db } from '../db';
 import { supportChat, supportMessage } from '../db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { auth } from './auth';
+import { triggerWebhook } from './webhooks';
+
 
 /**
  * Helper to assert admin session.
@@ -54,6 +56,9 @@ export const getOrCreateSupportChatFn = createServerFn({ method: 'POST' })
       })
       .returning();
 
+    // Trigger webhook notification
+    await triggerWebhook('support.chat_opened', { chat: created });
+
     return created;
   });
 
@@ -98,6 +103,9 @@ export const sendSupportMessageFn = createServerFn({ method: 'POST' })
       .set({ updatedAt: new Date() })
       .where(eq(supportChat.id, data.chatId));
 
+    // Trigger webhook notification
+    await triggerWebhook('support.message_created', { message: msg });
+
     return msg;
   });
 
@@ -125,6 +133,9 @@ export const closeSupportChatFn = createServerFn({ method: 'POST' })
       .set({ status: 'closed', updatedAt: new Date() })
       .where(eq(supportChat.id, data.chatId))
       .returning();
+
+    // Trigger webhook notification
+    await triggerWebhook('support.chat_closed', { chat: updated });
 
     return updated;
   });

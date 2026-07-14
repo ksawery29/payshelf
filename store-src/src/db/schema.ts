@@ -297,3 +297,20 @@ export const supportMessageRelations = relations(supportMessage, ({ one }) => ({
     references: [supportChat.id],
   }),
 }));
+
+// ── Webhook Integrations ──────────────────────────────────────────────────
+
+export const webhookIntegration = sqliteTable('webhook_integration', {
+  id: text('id').primaryKey(), // 'slack' or 'discord'
+  url: text('url').notNull().default(''),
+  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(false),
+  events: text('events').notNull().default('[]'), // JSON array of subscribed event strings
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+

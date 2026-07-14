@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { db } from '../db';
 import { product } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import { triggerWebhook } from './webhooks';
 
 /**
  * Edit/Update an existing product.
@@ -32,6 +33,9 @@ export const updateProductFn = createServerFn({ method: 'POST' })
       .where(eq(product.id, data.id))
       .returning();
 
+    // Trigger webhook notification
+    await triggerWebhook('product.updated', { product: updated });
+
     return updated;
   });
 
@@ -43,5 +47,9 @@ export const deleteProductFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const [deleted] = await db.delete(product).where(eq(product.id, data.id)).returning();
 
+    // Trigger webhook notification
+    await triggerWebhook('product.deleted', { product: deleted });
+
     return deleted;
   });
+
