@@ -119,28 +119,112 @@ function IntegrationsPage() {
         </div>
       </section>
 
-      <section aria-label="Platform Integrations" className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Slack Card */}
-        <IntegrationCard
-          provider="slack"
-          name="Slack"
-          description="Send event notifications directly to a Slack channel."
-          logoUrl="/icons/slack.webp"
-          config={integrations.slack}
-          onSave={() => router.invalidate()}
-        />
+      <div className="flex flex-col gap-10">
+        {/* Event Notifications Category */}
+        <section aria-labelledby="category-event-notifications" className="flex flex-col gap-4">
+          <div>
+            <h2 id="category-event-notifications" className="text-lg font-semibold tracking-tight text-foreground">
+              Event Notifications
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Get notified immediately in your channel workspaces when store events occur.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Slack Card */}
+            <IntegrationCard
+              provider="slack"
+              name="Slack"
+              description="Send event notifications directly to a Slack channel."
+              logoUrl="/icons/slack.webp"
+              config={integrations.slack}
+              onSave={() => router.invalidate()}
+            />
 
-        {/* Discord Card */}
-        <IntegrationCard
-          provider="discord"
-          name="Discord"
-          description="Post real-time event updates to a Discord server webhook."
-          logoUrl="/icons/discord.png"
-          config={integrations.discord}
-          onSave={() => router.invalidate()}
-        />
-      </section>
+            {/* Discord Card */}
+            <IntegrationCard
+              provider="discord"
+              name="Discord"
+              description="Post real-time event updates to a Discord server webhook."
+              logoUrl="/icons/discord.png"
+              config={integrations.discord}
+              onSave={() => router.invalidate()}
+            />
+          </div>
+        </section>
+
+        {/* Marketing & Advertising Category */}
+        <section aria-labelledby="category-marketing-ads" className="flex flex-col gap-4 pt-6 border-t border-border/50">
+          <div>
+            <h2 id="category-marketing-ads" className="text-lg font-semibold tracking-tight text-foreground">
+              Marketing & Advertising
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Sync conversion events directly to advertising networks to optimize attribution.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Meta Ads Card */}
+            <UpcomingIntegrationCard
+              name="Meta Ads"
+              description="Sync customer purchase events with Meta Pixel to optimize Facebook ad campaigns."
+              logoUrl="/icons/meta.png"
+            />
+
+            {/* TikTok Ads Card */}
+            <UpcomingIntegrationCard
+              name="TikTok Ads"
+              description="Send checkout completion and sales events directly to TikTok Event API."
+              logoUrl="/icons/tiktok.webp"
+            />
+          </div>
+        </section>
+      </div>
     </main>
+  );
+}
+
+function UpcomingIntegrationCard({
+  name,
+  description,
+  logoUrl,
+}: {
+  name: string;
+  description: string;
+  logoUrl: string;
+}) {
+  return (
+    <Card className="bg-card/40 opacity-70 border-dashed border-border/80 select-none">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex size-14 items-center justify-center rounded-xl bg-muted/30 p-2">
+              <img
+                src={logoUrl}
+                alt={`${name} Logo`}
+                className="size-10 object-contain grayscale"
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-lg text-muted-foreground">{name}</CardTitle>
+                <Badge variant="outline" className="bg-muted text-muted-foreground border-border/50 uppercase text-[10px] tracking-wider font-semibold">
+                  Soon
+                </Badge>
+              </div>
+              <CardDescription className="mt-1 text-xs">{description}</CardDescription>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 border-t border-border/30 pt-4 flex justify-between items-center">
+          <span className="text-xs text-muted-foreground/80 italic">Integration coming soon...</span>
+          <Button variant="outline" size="sm" disabled className="gap-2 text-muted-foreground/50 border-border/30">
+            Configure
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

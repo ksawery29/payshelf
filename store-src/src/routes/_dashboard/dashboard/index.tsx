@@ -526,7 +526,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
         <Plus className="size-4" data-icon="inline-start" />
         Add product
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>New product</DialogTitle>
           <DialogDescription>
@@ -663,7 +663,7 @@ function EditProductDialog({
       >
         <Pencil className="size-3.5" />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit product</DialogTitle>
           <DialogDescription>
