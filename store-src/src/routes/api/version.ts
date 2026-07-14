@@ -7,7 +7,7 @@ export const Route = createFileRoute('/api/version')({
     handlers: {
       GET: async () => {
         try {
-          const versionPath = path.resolve(process.cwd(), '../versison.txt');
+          const versionPath = path.resolve(process.cwd(), '../version.txt');
           const version = fs.readFileSync(versionPath, 'utf-8').trim();
           return new Response(JSON.stringify({ version }), {
             status: 200,
