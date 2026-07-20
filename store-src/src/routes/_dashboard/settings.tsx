@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { getSettingsFn, saveSettingsFn } from '#/lib/settings.functions';
+import { getSettingsFn, saveSettingsFn, sendTestWaitlistEmailFn } from '#/lib/settings.functions';
 import { authClient } from '#/lib/auth-client';
 import { BrandLockup } from '#/components/brand';
 import { Button } from '#/components/ui/button';
@@ -8,7 +8,16 @@ import { Input } from '#/components/ui/input';
 import { Label } from '#/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
 import { Badge } from '#/components/ui/badge';
-import { LogOut, Check } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '#/components/ui/dialog';
+import { LogOut, Check, Send } from 'lucide-react';
 
 export const Route = createFileRoute('/_dashboard/settings')({
   loader: () => getSettingsFn(),
@@ -29,6 +38,32 @@ function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+
+  // Test email dialog
+  const [testDialogOpen, setTestDialogOpen] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
+  const [testSending, setTestSending] = useState(false);
+  const [testSent, setTestSent] = useState(false);
+  const [testError, setTestError] = useState('');
+
+  async function handleSendTest(e: React.FormEvent) {
+    e.preventDefault();
+    setTestError('');
+    setTestSending(true);
+    try {
+      await sendTestWaitlistEmailFn({ data: { to: testEmail.trim() } });
+      setTestSent(true);
+      setTimeout(() => {
+        setTestSent(false);
+        setTestDialogOpen(false);
+        setTestEmail('');
+      }, 2000);
+    } catch (err: any) {
+      setTestError(err?.message || 'Failed to send test email.');
+    } finally {
+      setTestSending(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -207,6 +242,58 @@ function SettingsPage() {
                   <code className="rounded bg-muted px-1 py-0.5">{`{{email}}`}</code> as dynamic placeholders.
                   This HTML is sent directly via Resend.
                 </p>
+
+                <Dialog open={testDialogOpen} onOpenChange={(o) => { setTestDialogOpen(o); setTestSent(false); setTestError(''); }}>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline" size="sm" className="mt-1 w-fit gap-1.5">
+                      <Send className="size-3.5" />
+                      Send test email
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Send test waitlist email</DialogTitle>
+                      <DialogDescription>
+                        Sends your current HTML template (with placeholder values) to the address below.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form id="test-email-form" onSubmit={handleSendTest} className="space-y-4">
+                      {testError && (
+                        <div className="rounded-lg border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive">
+                          {testError}
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        <Label htmlFor="test-email-input">Recipient email</Label>
+                        <Input
+                          id="test-email-input"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={testEmail}
+                          onChange={(e) => setTestEmail(e.target.value)}
+                          required
+                          autoFocus
+                        />
+                      </div>
+                    </form>
+                    <DialogFooter showCloseButton>
+                      <Button
+                        type="submit"
+                        form="test-email-form"
+                        disabled={testSending || testSent}
+                        className="gap-1.5"
+                      >
+                        {testSending ? (
+                          <><span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" /> Sending…</>
+                        ) : testSent ? (
+                          <><Check className="size-3.5" /> Sent!</>
+                        ) : (
+                          <><Send className="size-3.5" /> Send test</>
+                        )}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>

@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { db } from '../db';
 import { shopSettings } from '../db/schema';
+import { resend } from './resend';
 
 const SINGLETON_ID = 'singleton';
 
@@ -58,4 +59,47 @@ export const saveSettingsFn = createServerFn({ method: 'POST' })
       .returning();
 
     return row;
+  });
+
+/**
+ * Send a test waitlist confirmation email using the current HTML template.
+ */
+export const sendTestWaitlistEmailFn = createServerFn({ method: 'POST' })
+  .validator((data: { to: string }) => data)
+  .handler(async ({ data }) => {
+    const rows = await db.select().from(shopSettings).limit(1);
+    const settings = rows[0] ?? { shopName: 'My Shop', fromEmail: null, waitlistEmailHtml: null };
+
+    const fromEmail =
+      settings.fromEmail ||
+      process.env.RESEND_FROM_EMAIL ||
+      `${settings.shopName} <onboarding@resend.dev>`;
+
+    const defaultHtml = `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
+        <h1 style="font-size:22px;font-weight:600;color:#171717;">You're on the list!</h1>
+        <p style="color:#404040;line-height:1.6;">
+          Thanks for joining the waitlist for <strong>Example Product</strong>.
+          We'll email you at <strong>${data.to}</strong> as soon as it's ready.
+        </p>
+      </div>`;
+
+    const rawHtml = settings.waitlistEmailHtml || defaultHtml;
+
+    const html = rawHtml
+      .replace(/\{\{productName\}\}/g, 'Example Product')
+      .replace(/\{\{email\}\}/g, data.to);
+
+    const { error } = await resend.emails.send({
+      from: fromEmail,
+      to: [data.to],
+      subject: `[Test] Waitlist confirmation from ${settings.shopName}`,
+      html,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { ok: true };
   });
