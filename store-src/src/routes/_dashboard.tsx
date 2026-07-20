@@ -30,6 +30,7 @@ import {
   LogOut,
   ShoppingBag,
   PuzzleIcon,
+  Mail,
 } from 'lucide-react';
 
 export const Route = createFileRoute('/_dashboard')({
@@ -100,6 +101,11 @@ function DashboardLayout() {
           title: 'Analytics',
           url: '/analytics',
           icon: TrendingUp,
+        },
+        {
+          title: 'Waitlist',
+          url: '/dashboard/waitlist',
+          icon: Mail,
         },
       ],
     },

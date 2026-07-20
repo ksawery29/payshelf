@@ -73,3 +73,67 @@ export async function sendPurchaseEmail(to: string, productName: string, accessT
     console.error(`[${shopName}] Failed to send purchase email:`, error);
   }
 }
+
+/**
+ * Send a notification email to waitlisted users when the product becomes available.
+ */
+export async function sendWaitlistReadyEmail(to: string, productName: string, productId: string) {
+  const settings = await getShopSettings();
+  const productUrl = `${appUrl}/p/${productId}`;
+
+  const fromEmail =
+    settings.fromEmail ||
+    process.env.RESEND_FROM_EMAIL ||
+    `${settings.shopName} <onboarding@resend.dev>`;
+
+  const shopName = settings.shopName;
+
+  const { error } = await resend.emails.send({
+    from: fromEmail,
+    to: [to],
+    subject: `Good news! ${productName} is ready for purchase`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <body style="margin:0;padding:0;background-color:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+          <div style="max-width:480px;margin:40px auto;background:#ffffff;border-radius:12px;border:1px solid #e5e5e5;overflow:hidden;">
+            <div style="padding:32px 32px 24px;">
+              <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#737373;">
+                ${shopName}
+              </p>
+              <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#171717;">
+                It's ready!
+              </h1>
+              <p style="margin:0 0 8px;font-size:15px;color:#404040;line-height:1.6;">
+                Great news! <strong>${productName}</strong> is now available for purchase.
+              </p>
+              <p style="margin:0 0 28px;font-size:15px;color:#404040;line-height:1.6;">
+                You are receiving this because you joined the waitlist. Click the button below to buy it now.
+              </p>
+              <a href="${productUrl}"
+                 style="display:inline-block;padding:12px 28px;background-color:#171717;color:#ffffff;font-size:14px;font-weight:500;text-decoration:none;border-radius:9999px;">
+                Buy ${productName}
+              </a>
+            </div>
+            <div style="padding:20px 32px;background:#fafafa;border-top:1px solid #e5e5e5;">
+              <p style="margin:0;font-size:12px;color:#a3a3a3;line-height:1.5;">
+                You can also copy this link: <a href="${productUrl}" style="color:#737373;">${productUrl}</a>
+              </p>
+              <p style="margin:8px 0 0;font-size:12px;color:#a3a3a3;">
+                Sent by ${shopName}
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  });
+
+  if (error) {
+    console.error(`[${shopName}] Failed to send waitlist email:`, error);
+  }
+}

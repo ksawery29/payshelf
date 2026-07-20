@@ -29,6 +29,7 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard/dashboard/index'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as DashboardDashboardWaitlistRouteImport } from './routes/_dashboard/dashboard/waitlist'
 import { Route as DashboardDashboardSupportRouteImport } from './routes/_dashboard/dashboard/support'
 import { Route as DashboardDashboardOrdersRouteImport } from './routes/_dashboard/dashboard/orders'
 import { Route as DashboardDashboardIntegrationsRouteImport } from './routes/_dashboard/dashboard/integrations'
@@ -131,6 +132,12 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardDashboardWaitlistRoute =
+  DashboardDashboardWaitlistRouteImport.update({
+    id: '/dashboard/waitlist',
+    path: '/dashboard/waitlist',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardDashboardSupportRoute =
   DashboardDashboardSupportRouteImport.update({
     id: '/dashboard/support',
@@ -169,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/integrations': typeof DashboardDashboardIntegrationsRoute
   '/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/dashboard/support': typeof DashboardDashboardSupportRoute
+  '/dashboard/waitlist': typeof DashboardDashboardWaitlistRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/dashboard/': typeof DashboardDashboardIndexRoute
@@ -192,6 +200,7 @@ export interface FileRoutesByTo {
   '/dashboard/integrations': typeof DashboardDashboardIntegrationsRoute
   '/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/dashboard/support': typeof DashboardDashboardSupportRoute
+  '/dashboard/waitlist': typeof DashboardDashboardWaitlistRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
@@ -218,6 +227,7 @@ export interface FileRoutesById {
   '/_dashboard/dashboard/integrations': typeof DashboardDashboardIntegrationsRoute
   '/_dashboard/dashboard/orders': typeof DashboardDashboardOrdersRoute
   '/_dashboard/dashboard/support': typeof DashboardDashboardSupportRoute
+  '/_dashboard/dashboard/waitlist': typeof DashboardDashboardWaitlistRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/dashboard/integrations'
     | '/dashboard/orders'
     | '/dashboard/support'
+    | '/dashboard/waitlist'
     | '/api/auth/$'
     | '/api/stripe/webhook'
     | '/dashboard/'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/dashboard/integrations'
     | '/dashboard/orders'
     | '/dashboard/support'
+    | '/dashboard/waitlist'
     | '/api/auth/$'
     | '/api/stripe/webhook'
     | '/dashboard'
@@ -291,6 +303,7 @@ export interface FileRouteTypes {
     | '/_dashboard/dashboard/integrations'
     | '/_dashboard/dashboard/orders'
     | '/_dashboard/dashboard/support'
+    | '/_dashboard/dashboard/waitlist'
     | '/api/auth/$'
     | '/api/stripe/webhook'
     | '/_dashboard/dashboard/'
@@ -455,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_dashboard/dashboard/waitlist': {
+      id: '/_dashboard/dashboard/waitlist'
+      path: '/dashboard/waitlist'
+      fullPath: '/dashboard/waitlist'
+      preLoaderRoute: typeof DashboardDashboardWaitlistRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/dashboard/support': {
       id: '/_dashboard/dashboard/support'
       path: '/dashboard/support'
@@ -498,6 +518,7 @@ interface DashboardRouteChildren {
   DashboardDashboardIntegrationsRoute: typeof DashboardDashboardIntegrationsRoute
   DashboardDashboardOrdersRoute: typeof DashboardDashboardOrdersRoute
   DashboardDashboardSupportRoute: typeof DashboardDashboardSupportRoute
+  DashboardDashboardWaitlistRoute: typeof DashboardDashboardWaitlistRoute
   DashboardDashboardIndexRoute: typeof DashboardDashboardIndexRoute
 }
 
@@ -508,6 +529,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardDashboardIntegrationsRoute: DashboardDashboardIntegrationsRoute,
   DashboardDashboardOrdersRoute: DashboardDashboardOrdersRoute,
   DashboardDashboardSupportRoute: DashboardDashboardSupportRoute,
+  DashboardDashboardWaitlistRoute: DashboardDashboardWaitlistRoute,
   DashboardDashboardIndexRoute: DashboardDashboardIndexRoute,
 }
 
@@ -534,12 +556,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

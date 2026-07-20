@@ -8,9 +8,11 @@ import { BrandLockup } from '#/components/brand';
 import { Button } from '#/components/ui/button';
 import { Card, CardContent, CardFooter } from '#/components/ui/card';
 import { Badge } from '#/components/ui/badge';
-import { ArrowRight, PackageOpen } from 'lucide-react';
+import { ArrowRight, PackageOpen, CheckCircle2 } from 'lucide-react';
 import { Footer } from '#/components/footer';
 import { PrimaryGrowButton } from '#/components/ui/grow-button';
+import { Input } from '#/components/ui/input';
+import { joinWaitlistFn } from '#/lib/waitlist.functions';
 import {
   Dialog,
   DialogClose,
@@ -43,6 +45,7 @@ type Product = {
   description: string;
   priceCents: number;
   imageUrl: string | null;
+  isWaitlist: boolean;
 };
 
 function Home() {
@@ -91,6 +94,8 @@ function Home() {
 function ProductCard({ product }: { product: Product }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
+  const [waitlistSuccess, setWaitlistSuccess] = useState(false);
 
   async function handleBuy() {
     setError('');
@@ -106,6 +111,26 @@ function ProductCard({ product }: { product: Product }) {
     } catch (err) {
       console.error('Failed to create checkout session:', err);
       setError('Checkout could not be started. Please try again.');
+      setLoading(false);
+    }
+  }
+
+  async function handleJoinWaitlist(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setError('');
+    setLoading(true);
+    try {
+      const res = await joinWaitlistFn({
+        data: { productId: product.id, email },
+      });
+      if (res.success) {
+        setWaitlistSuccess(true);
+      }
+    } catch (err) {
+      console.error('Failed to join waitlist:', err);
+      setError('Could not join waitlist. Please try again.');
+    } finally {
       setLoading(false);
     }
   }
@@ -146,42 +171,68 @@ function ProductCard({ product }: { product: Product }) {
       </CardContent>
 
       <CardFooter className="border-t border-border/80 bg-muted/30 px-5 py-4">
-        <Dialog>
-          <DialogContent showCloseButton={false}>
-            <DialogHeader>
-              <DialogTitle>Confirm your purchase</DialogTitle>
-              <DialogDescription>
-                You will be asked to provide your email address at checkout. Please ensure that it
-                is correct, as this is where we will send your download link.
-              </DialogDescription>
-            </DialogHeader>
+        {product.isWaitlist ? (
+          <div className="w-full">
+            {waitlistSuccess ? (
+              <div className="flex items-center justify-center gap-2 py-1 text-sm font-medium text-green-600">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>You're on the waitlist!</span>
+              </div>
+            ) : (
+              <form onSubmit={handleJoinWaitlist} className="flex w-full items-center gap-2">
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="h-9 text-xs"
+                />
+                <Button type="submit" size="sm" disabled={loading}>
+                  {loading ? '...' : 'Join'}
+                </Button>
+              </form>
+            )}
+          </div>
+        ) : (
+          <Dialog>
+            <DialogContent showCloseButton={false}>
+              <DialogHeader>
+                <DialogTitle>Confirm your purchase</DialogTitle>
+                <DialogDescription>
+                  You will be asked to provide your email address at checkout. Please ensure that it
+                  is correct, as this is where we will send your download link.
+                </DialogDescription>
+              </DialogHeader>
 
-            <DialogFooter>
-              <DialogClose className={'w-full'}>
-                <Button>Cancel</Button>
-              </DialogClose>
+              <DialogFooter>
+                <DialogClose className={'w-full'}>
+                  <Button>Cancel</Button>
+                </DialogClose>
 
-              <Button disabled={loading} onClick={handleBuy}>
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    Starting checkout
-                  </span>
-                ) : (
-                  <>
-                    Continue
-                    <ArrowRight className="size-4" data-icon="inline-end" />
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-          <DialogTrigger className="w-full">
-            <PrimaryGrowButton className="w-full" disabled={loading}>
-              Buy now
-            </PrimaryGrowButton>
-          </DialogTrigger>
-        </Dialog>
+                <Button disabled={loading} onClick={handleBuy}>
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Starting checkout
+                    </span>
+                  ) : (
+                    <>
+                      Continue
+                      <ArrowRight className="size-4" data-icon="inline-end" />
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+            <DialogTrigger className="w-full">
+              <PrimaryGrowButton className="w-full" disabled={loading}>
+                Buy now
+              </PrimaryGrowButton>
+            </DialogTrigger>
+          </Dialog>
+        )}
       </CardFooter>
     </Card>
   );

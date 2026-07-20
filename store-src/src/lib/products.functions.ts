@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { db } from '../db';
 import { product } from '../db/schema';
-import { desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { triggerWebhook } from './webhooks';
 
 /**
@@ -25,6 +25,7 @@ export const createProductFn = createServerFn({ method: 'POST' })
       imageUrl?: string;
       filePath?: string;
       stripePriceId?: string;
+      isWaitlist?: boolean;
     }) => data
   )
   .handler(async ({ data }) => {
@@ -37,6 +38,7 @@ export const createProductFn = createServerFn({ method: 'POST' })
         imageUrl: data.imageUrl || null,
         filePath: data.filePath || null,
         stripePriceId: data.stripePriceId || null,
+        isWaitlist: data.isWaitlist ?? false,
       })
       .returning();
 
@@ -44,5 +46,15 @@ export const createProductFn = createServerFn({ method: 'POST' })
     await triggerWebhook('product.created', { product: created });
 
     return created;
+  });
+
+/**
+ * Retrieve a product by ID.
+ */
+export const getProductFn = createServerFn({ method: 'GET' })
+  .validator((id: string) => id)
+  .handler(async ({ data: id }) => {
+    const [prod] = await db.select().from(product).where(eq(product.id, id)).limit(1);
+    return prod ?? null;
   });
 

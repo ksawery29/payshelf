@@ -116,6 +116,7 @@ export const product = sqliteTable('product', {
   priceCents: integer('price_cents').notNull(),
   imageUrl: text('image_url'),
   filePath: text('file_path'),
+  isWaitlist: integer('is_waitlist', { mode: 'boolean' }).notNull().default(false),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
@@ -168,6 +169,33 @@ export const productRelations = relations(product, ({ many }) => ({
   purchases: many(purchase),
   analyticsEvents: many(analyticsEvent),
   cancelFeedbacks: many(cancelFeedback),
+  waitlistSignups: many(waitlist),
+}));
+
+// ── Waitlist ──────────────────────────────────────────────────────────────
+
+export const waitlist = sqliteTable(
+  'waitlist',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    productId: text('product_id')
+      .notNull()
+      .references(() => product.id, { onDelete: 'cascade' }),
+    email: text('email').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
+  (table) => [index('waitlist_productId_idx').on(table.productId)]
+);
+
+export const waitlistRelations = relations(waitlist, ({ one }) => ({
+  product: one(product, {
+    fields: [waitlist.productId],
+    references: [product.id],
+  }),
 }));
 
 // ── Shop Settings ──────────────────────────────────────────────────────────

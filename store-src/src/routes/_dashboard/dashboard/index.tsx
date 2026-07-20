@@ -97,6 +97,7 @@ interface ProductType {
   imageUrl: string | null;
   filePath: string | null;
   stripePriceId: string | null;
+  isWaitlist: boolean;
 }
 
 function DashboardPage() {
@@ -473,6 +474,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
   const [imageUrl, setImageUrl] = useState('');
   const [filePath, setFilePath] = useState('');
   const [stripePriceId, setStripePriceId] = useState('');
+  const [isWaitlist, setIsWaitlist] = useState(false);
 
   function resetForm() {
     setName('');
@@ -481,6 +483,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
     setImageUrl('');
     setFilePath('');
     setStripePriceId('');
+    setIsWaitlist(false);
     setError('');
   }
 
@@ -502,6 +505,7 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
           imageUrl: imageUrl || undefined,
           filePath: filePath || undefined,
           stripePriceId: stripePriceId || undefined,
+          isWaitlist,
         },
       });
       resetForm();
@@ -548,7 +552,9 @@ function CreateProductDialog({ onCreated }: { onCreated: () => void }) {
             setFilePath={setFilePath}
             stripePriceId={stripePriceId}
             setStripePriceId={setStripePriceId}
-            prefix="product"
+            isWaitlist={isWaitlist}
+            setIsWaitlist={setIsWaitlist}
+            prefix="create"
           />
           <DialogFooter className="pt-6">
             <Button type="submit" disabled={loading}>
@@ -623,6 +629,7 @@ function EditProductDialog({
   const [imageUrl, setImageUrl] = useState(product.imageUrl || '');
   const [filePath, setFilePath] = useState(product.filePath || '');
   const [stripePriceId, setStripePriceId] = useState(product.stripePriceId || '');
+  const [isWaitlist, setIsWaitlist] = useState(product.isWaitlist);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -643,6 +650,7 @@ function EditProductDialog({
           imageUrl: imageUrl || undefined,
           filePath: filePath || undefined,
           stripePriceId: stripePriceId || undefined,
+          isWaitlist,
         },
       });
       setOpen(false);
@@ -685,6 +693,9 @@ function EditProductDialog({
             setFilePath={setFilePath}
             stripePriceId={stripePriceId}
             setStripePriceId={setStripePriceId}
+            isWaitlist={isWaitlist}
+            setIsWaitlist={setIsWaitlist}
+            product={product}
             prefix="edit"
           />
           <DialogFooter className="pt-6">
@@ -712,6 +723,9 @@ function ProductFormFields({
   setFilePath,
   stripePriceId,
   setStripePriceId,
+  isWaitlist,
+  setIsWaitlist,
+  product,
   prefix,
 }: {
   error: string;
@@ -727,6 +741,9 @@ function ProductFormFields({
   setFilePath: (url: string) => void;
   stripePriceId: string;
   setStripePriceId: (value: string) => void;
+  isWaitlist: boolean;
+  setIsWaitlist: (value: boolean) => void;
+  product?: ProductType;
   prefix: string;
 }) {
   return (
@@ -800,6 +817,36 @@ function ProductFormFields({
             onChange={setFilePath}
             hint="ZIP, PDF, or any file type"
           />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="flex items-start gap-3 rounded-lg border border-border/80 bg-card p-3.5 hover:bg-muted/10 cursor-pointer transition select-none">
+            <input
+              type="checkbox"
+              id={`${prefix}-waitlist`}
+              checked={isWaitlist}
+              onChange={(e) => {
+                if (prefix === 'edit' && product?.isWaitlist && !e.target.checked) {
+                  const ok = window.confirm(
+                    'Are you sure you want to disable Waitlist Mode? This will immediately email all waitlisted users notifying them the product is ready.'
+                  );
+                  if (ok) {
+                    setIsWaitlist(false);
+                  }
+                } else {
+                  setIsWaitlist(e.target.checked);
+                }
+              }}
+              className="mt-1 h-4 w-4 rounded border-border bg-background text-primary focus:ring-ring"
+            />
+            <div className="flex flex-col gap-0.5">
+              <span className="font-medium text-foreground text-sm">
+                Waitlist Mode
+              </span>
+              <span className="text-xs text-muted-foreground leading-normal">
+                Collect customer emails instead of offering checkout. Disabling the waitlist will email waitlisted users.
+              </span>
+            </div>
+          </label>
         </div>
       </div>
     </div>
