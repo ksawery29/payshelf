@@ -24,6 +24,7 @@ function SettingsPage() {
   const [fromEmail, setFromEmail] = useState(settings.fromEmail ?? '');
   const [termsOfService, setTermsOfService] = useState(settings.termsOfService ?? '');
   const [privacyPolicy, setPrivacyPolicy] = useState(settings.privacyPolicy ?? '');
+  const [waitlistEmailHtml, setWaitlistEmailHtml] = useState(settings.waitlistEmailHtml ?? '');
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -48,6 +49,7 @@ function SettingsPage() {
           fromEmail: fromEmail.trim() || undefined,
           termsOfService: termsOfService.trim() || undefined,
           privacyPolicy: privacyPolicy.trim() || undefined,
+          waitlistEmailHtml: waitlistEmailHtml.trim() || undefined,
         },
       });
       setSaved(true);
@@ -175,6 +177,36 @@ function SettingsPage() {
                   onChange={(e) => setPrivacyPolicy(e.target.value)}
                   className="w-full min-h-[140px] rounded-lg border border-border/90 bg-background px-3 py-2 text-sm transition-[color,box-shadow,background-color,border-color] duration-200 outline-none placeholder:text-muted-foreground/75 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/95">
+            <CardHeader>
+              <CardTitle className="text-base">Waitlist Email</CardTitle>
+              <CardDescription>
+                Customize the HTML email sent to customers when they join a product waitlist.
+                Leave blank to use the default template.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="waitlist-email-html">
+                  Email HTML{' '}
+                  <span className="font-normal text-muted-foreground">(optional)</span>
+                </Label>
+                <textarea
+                  id="waitlist-email-html"
+                  placeholder={`<h1>You're on the list!</h1>\n<p>Thanks for joining the waitlist. We'll let you know as soon as {{productName}} is ready.</p>`}
+                  value={waitlistEmailHtml}
+                  onChange={(e) => setWaitlistEmailHtml(e.target.value)}
+                  className="w-full min-h-[200px] rounded-lg border border-border/90 bg-background px-3 py-2 font-mono text-sm transition-[color,box-shadow,background-color,border-color] duration-200 outline-none placeholder:text-muted-foreground/75 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use <code className="rounded bg-muted px-1 py-0.5">{`{{productName}}`}</code> and{' '}
+                  <code className="rounded bg-muted px-1 py-0.5">{`{{email}}`}</code> as dynamic placeholders.
+                  This HTML is sent directly via Resend.
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -29,6 +29,7 @@ export const saveSettingsFn = createServerFn({ method: 'POST' })
       fromEmail?: string;
       termsOfService?: string;
       privacyPolicy?: string;
+      waitlistEmailHtml?: string;
     }) => data
   )
   .handler(async ({ data }) => {
@@ -41,6 +42,7 @@ export const saveSettingsFn = createServerFn({ method: 'POST' })
         fromEmail: data.fromEmail || null,
         termsOfService: data.termsOfService || null,
         privacyPolicy: data.privacyPolicy || null,
+        waitlistEmailHtml: data.waitlistEmailHtml || null,
       })
       .onConflictDoUpdate({
         target: shopSettings.id,
@@ -50,6 +52,7 @@ export const saveSettingsFn = createServerFn({ method: 'POST' })
           fromEmail: data.fromEmail || null,
           termsOfService: data.termsOfService || null,
           privacyPolicy: data.privacyPolicy || null,
+          waitlistEmailHtml: data.waitlistEmailHtml || null,
         },
       })
       .returning();
