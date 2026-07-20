@@ -88,11 +88,15 @@ export async function sendWaitlistReadyEmail(to: string, productName: string, pr
 
   const shopName = settings.shopName;
 
-  const { error } = await resend.emails.send({
-    from: fromEmail,
-    to: [to],
-    subject: `Good news! ${productName} is ready for purchase`,
-    html: `
+  // Use custom HTML template if configured, otherwise fall back to default
+  const customHtml = (settings as any).waitlistEmailHtml as string | null | undefined;
+  const html = customHtml
+    ? customHtml
+        .replace(/\{\{productName\}\}/g, productName)
+        .replace(/\{\{productUrl\}\}/g, productUrl)
+        .replace(/\{\{email\}\}/g, to)
+        .replace(/\{\{shopName\}\}/g, shopName)
+    : `
       <!DOCTYPE html>
       <html>
         <head>
@@ -130,10 +134,17 @@ export async function sendWaitlistReadyEmail(to: string, productName: string, pr
           </div>
         </body>
       </html>
-    `,
+    `;
+
+  const { error } = await resend.emails.send({
+    from: fromEmail,
+    to: [to],
+    subject: `Good news! ${productName} is ready for purchase`,
+    html,
   });
 
   if (error) {
     console.error(`[${shopName}] Failed to send waitlist email:`, error);
   }
 }
+

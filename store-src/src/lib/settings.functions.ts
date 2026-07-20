@@ -88,7 +88,9 @@ export const sendTestWaitlistEmailFn = createServerFn({ method: 'POST' })
 
     const html = rawHtml
       .replace(/\{\{productName\}\}/g, 'Example Product')
-      .replace(/\{\{email\}\}/g, data.to);
+      .replace(/\{\{productUrl\}\}/g, 'https://example.com/p/demo')
+      .replace(/\{\{email\}\}/g, data.to)
+      .replace(/\{\{shopName\}\}/g, settings.shopName);
 
     const { error } = await resend.emails.send({
       from: fromEmail,

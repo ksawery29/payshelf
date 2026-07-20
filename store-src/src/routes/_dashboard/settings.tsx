@@ -238,8 +238,13 @@ function SettingsPage() {
                   className="w-full min-h-[200px] rounded-lg border border-border/90 bg-background px-3 py-2 font-mono text-sm transition-[color,box-shadow,background-color,border-color] duration-200 outline-none placeholder:text-muted-foreground/75 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/20 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Use <code className="rounded bg-muted px-1 py-0.5">{`{{productName}}`}</code> and{' '}
-                  <code className="rounded bg-muted px-1 py-0.5">{`{{email}}`}</code> as dynamic placeholders.
+                  Available placeholders:{' '}
+                  <code className="rounded bg-muted px-1 py-0.5">{`{{productName}}`}</code>{', '}
+                  <code className="rounded bg-muted px-1 py-0.5">{`{{productUrl}}`}</code>{', '}
+                  <code className="rounded bg-muted px-1 py-0.5">{`{{email}}`}</code>{', '}
+                  <code className="rounded bg-muted px-1 py-0.5">{`{{shopName}}`}</code>.
+                  {' '}For a button, use{' '}
+                  <code className="rounded bg-muted px-1 py-0.5">{`<a href="{{productUrl}}" style="display:inline-block;padding:12px 28px;background:#171717;color:#fff;text-decoration:none;border-radius:9999px;">Buy now</a>`}</code>.
                   This HTML is sent directly via Resend.
                 </p>
 
