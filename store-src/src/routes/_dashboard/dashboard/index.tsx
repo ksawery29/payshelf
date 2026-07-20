@@ -593,14 +593,14 @@ function ShareProductDialog({ product }: { product: ProductType }) {
         <div className="flex flex-col gap-4">
           <div className="flex gap-2">
             <Input
-              value={`${window.location.origin}/p/${product.id}`}
+              value={`${typeof window !== 'undefined' ? window.location.origin : ''}/p/${product.id}`}
               readOnly
               className="flex-1"
             />
             <Button
               variant="outline"
               onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/p/${product.id}`);
+                navigator.clipboard.writeText(`${typeof window !== 'undefined' ? window.location.origin : ''}/p/${product.id}`);
               }}
             >
               Copy
