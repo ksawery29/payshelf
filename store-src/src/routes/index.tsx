@@ -157,7 +157,7 @@ function ProductCard({ product }: { product: Product }) {
             </DialogHeader>
 
             <DialogFooter>
-              <DialogClose>
+              <DialogClose className={'w-full'}>
                 <Button>Cancel</Button>
               </DialogClose>
 
