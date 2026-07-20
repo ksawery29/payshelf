@@ -26,6 +26,7 @@ export const createCheckoutFn = createServerFn({ method: 'POST' })
 
     // Create checkout session with static price
     const session = await stripe.checkout.sessions.create({
+      allow_promotion_codes: true,
       mode: 'payment',
       line_items: [
         {
